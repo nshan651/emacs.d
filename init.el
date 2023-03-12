@@ -35,6 +35,16 @@
   ;; (load-theme 'doom-one t))
   (load-theme 'doom-Iosvkem t))
 
+;;; Vertico completion
+(use-package vertico
+  :init
+  (vertico-mode))
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init
+  (savehist-mode))
+
 ;;; Undo 
 ;; Vim style undo not needed for emacs 28
 (use-package undo-fu)
@@ -64,7 +74,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(doom-themes evil-collection evil undo-fu use-package)))
+ '(package-selected-packages
+   '(vertico doom-themes evil-collection evil undo-fu use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
