@@ -58,7 +58,35 @@
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
-;;; === Basic UI Configuration ===
+;;; === Color Theme ===
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; (load-theme 'doom-one t))
+  (load-theme 'doom-Iosvkem t))
+
+;;; === Better Modeline ===
+(use-package all-the-icons)
+
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
+
+;;; === Which Key ===
+;; Press C-c to use
+(use-package which-key
+  :defer 0
+  :diminish which-key-mode
+  :config
+  (which-key-mode)
+  (setq which-key-idle-delay 1))
+
+;;; === Ivy and Counsel ===
+
+;;; === UI Configuration ===
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -94,25 +122,48 @@
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
 
+;;; === Keybinding Configuration ===
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-;;; === Packages ===
-
-;;; Color theme
-(use-package doom-themes
-  :ensure t
+(use-package general
+  :after evil
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-one t))
-  (load-theme 'doom-Iosvkem t))
+  (general-create-definer efs/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
 
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  (efs/leader-keys
+    "t"  '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose theme")
+    ;;"fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))))
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+;;; === Packages ===
 
 ;;; Vertico completion
 (use-package vertico
@@ -128,33 +179,13 @@
 ;; Vim style undo not needed for emacs 28
 (use-package undo-fu)
 
-;;; Vim bindings
-(use-package evil
-  :demand t
-  :bind (("<escape>" . keyboard-escape-quit))
-  :init
-  ;; allows for using cgn
-  ;; (setq evil-search-module 'evil-search)
-  (setq evil-want-keybinding nil)
-  ;; no vim insert bindings
-  (setq evil-undo-system 'undo-fu)
-  :config
-  (evil-mode 1))
-
-;;; Vim bindings everywhere else
-(use-package evil-collection
-  :after evil
-  :config
-  (setq evil-want-integration t)
-  (evil-collection-init))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
+   '(which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
