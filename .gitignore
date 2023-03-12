@@ -2,6 +2,8 @@
 auto-save-list/
 elpa/
 transient/
+etc/
+var/
 
 # Compiled
 *.elc
