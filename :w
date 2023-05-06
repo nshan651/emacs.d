@@ -21,8 +21,7 @@
 
 (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
-;;; === Package system setup ===
-
+;;; === package system setup ===
 ;; initialize package sources
 (require 'package)
 
@@ -357,15 +356,8 @@
   (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
   (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 
+
 ;;; === Development ===
-
-;; Sly
-;; Load the sly package
-(require 'sly)
-(setq inferior-lisp-program "sbcl")
-
-;; Add sly to the mode-hook for lisp-mode
-(add-hook 'lisp-mode-hook 'sly-mode)
 
 ;;; === LSP ===
 ;; lsp-mode
@@ -606,10 +598,8 @@
 
 ;;; === Keybinding Configuration ===
 
-
 ;; Bind C-x C-b to ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -637,14 +627,6 @@
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-  ;; Define key bindings for SPC followed by a single key
-  (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-  (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-  (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-  (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-  ;; (define-key evil-normal-state-map (kbd "SPC w") 'ace-window)
-  (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -687,7 +669,7 @@
  '(org-agenda-files
    '("~/dox/org/test.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
  '(package-selected-packages
-   '(org-roam-ui org-roam sly dired-hide-dotfiles dired-open all-the-icons-dired dired-single eshell-git-prompt vterm eterm-256color rainbow-delimiters evil-nerd-commenter forge magit counsel-projectile projectile company-box company python-mode dap-mode lsp-ivy lsp-treemacs lsp-ui lsp-mode visual-fill-column org-bullets helpful ivy-prescient counsel ivy-rich ivy which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
+   '(dired-hide-dotfiles dired-open all-the-icons-dired dired-single eshell-git-prompt vterm eterm-256color rainbow-delimiters evil-nerd-commenter forge magit counsel-projectile projectile company-box company python-mode dap-mode lsp-ivy lsp-treemacs lsp-ui lsp-mode visual-fill-column org-bullets helpful ivy-prescient counsel ivy-rich ivy which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
