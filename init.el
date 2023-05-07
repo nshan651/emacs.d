@@ -1,14 +1,3 @@
-;;; The Emacs Config
-
-;;; === define vars ===
-;; base font size 
-(defvar efs/default-font-size 150)
-(defvar efs/default-variable-font-size 150)
-
-;; make frame transparency overridable
-(defvar efs/frame-transparency '(100 . 100))
-
-;;; === startup performance ===
 ;; the default is 800 kilobytes.  measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
@@ -21,9 +10,14 @@
 
 (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
-;;; === Package system setup ===
+;; Set base font sizes
+(defvar efs/default-font-size 150)
+(defvar efs/default-variable-font-size 150)
 
-;; initialize package sources
+;; make frame transparency overridable
+(defvar efs/frame-transparency '(100 . 100))
+
+;; Initialize package sources
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -41,7 +35,6 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;;; === automatic package updates ===
 (use-package auto-package-update
   :custom
   (auto-package-update-interval 7)
@@ -51,34 +44,111 @@
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
 
-;;; === keep folders clean ===
 (use-package no-littering)
 
 ;; no-littering doesn't set this by default so we must place
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
-      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+      =((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
-;;; === color theme ===
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-badger t))
-  )
+(setq inhibit-startup-message t)
+
+(scroll-bar-mode -1)        ; Disable visible scrollbar
+(tool-bar-mode -1)          ; Disable the toolbar
+(tooltip-mode -1)           ; Disable tooltips
+(set-fringe-mode 10)        ; Give some breathing room
+
+(menu-bar-mode -1)            ; Disable the menu bar
+
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+;; Set frame transparency
+(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+(add-to-list 'default-frame-alist =(alpha . ,efs/frame-transparency))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Disable line numbers for some modes
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                treemacs-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
 (load-theme 'modus-vivendi t)
 
-;;; === Better Modeline ===
-;; (use-package all-the-icons)
+(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
 
-;; (use-package doom-modeline
-;;   :init (doom-modeline-mode 1)
-;;   :custom ((doom-mode-height 15)))
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
 
-;;; === Which Key ===
-;; Press C-c to use
+;; Set the variable pitch face
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+
+;; Bind C-x C-b to ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+;; Make ESC quit prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(use-package general
+:after evil
+:config
+(general-create-definer efs/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+(efs/leader-keys
+    "t"  '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose theme")))
+
+(use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+    ;; Define key bindings for SPC followed by a single key
+    (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+    (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+    (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+    (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+    (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+
+    ;; Manage buffers
+    (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+    (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+
+    ;; Manage windows
+    (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
+    (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
+    (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
+    ;; Windmove keys for window nav
+    (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
+    (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
+    (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
+    (evil-global-set-key 'normal (kbd "SPC j")  'windmove-down)
+
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+
+  
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
 (use-package which-key
   :defer 0
   :diminish which-key-mode
@@ -86,7 +156,6 @@
   (which-key-mode)
   (setq which-key-idle-delay 1))
 
-;;; === Ivy and Counsel ===
 (use-package ivy
   :diminish
   :bind (("C-s" . swiper)
@@ -105,6 +174,7 @@
   :config
   (ivy-mode 1))
 
+;; ivy-rich adds extra columns and a few new counsel commands.
 (use-package ivy-rich
   :after ivy
   :init
@@ -119,17 +189,13 @@
   :config
   (counsel-mode 1))
 
-;;; === Improved Candidate Sorting with prescient.el ===
 (use-package ivy-prescient
   :after counsel
   :custom
   (ivy-prescient-enable-filtering nil)
   :config
-  ;; Uncomment the following line to have sorting remembered across sessions!
-  ;(prescient-persist-mode 1)
   (ivy-prescient-mode 1))
 
-;;; === Helpful Help Commands ===
 (use-package helpful
   :commands (helpful-callable helpful-variable helpful-command helpful-key)
   :custom
@@ -141,7 +207,38 @@
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
 
-;;; === Org Mode ===
+(defun efs/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+  ;; Set faces for heading levels
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+;;Merriweather
+;;Cantarell
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+
 (defun efs/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1)
@@ -271,13 +368,11 @@
 
   (efs/org-font-setup))
 
-;;; === Nicer Heading Bullets ===
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
-;;; === Center Org Buffers ===
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 100
         visual-fill-column-center-text t)
@@ -286,35 +381,29 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
-;;; === Latex ===
 (require 'preview-latex)
 
-;;; === Configure Babel Languages ===
 (with-eval-after-load 'org
   (org-babel-do-load-languages
       'org-babel-load-languages
       '((emacs-lisp . t)
-	(python . t)
-	;; (common-lisp . t)
-	(latex . t)
-	(org . t)))
+      (python . t)
+      ;; (common-lisp . t)
+      (latex . t)
+      (org . t)))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
 ;; Disable execution confirmations 
 (setq org-confirm-babel-evaluate nil)
 
-;;; === Structure Templates ===
 (with-eval-after-load 'org
-  ;; This is needed as of Org 9.2
   (require 'org-tempo)
 
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python")))
 
-;;; === Auto-tangle Configuration Files ===
-;; Automatically tangle our Emacs.org config file when we save it
 (defun efs/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))
                       (expand-file-name user-emacs-directory))
@@ -323,52 +412,7 @@
       (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
-;;; === Better Font Faces ===
 
-(defun efs/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-  ;; Set faces for heading levels
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-;;Merriweather
-;;Cantarell
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
-
-;;; === Development ===
-
-;; Sly
-;; Load the sly package
-(require 'sly)
-(setq inferior-lisp-program "sbcl")
-
-;; Add sly to the mode-hook for lisp-mode
-(add-hook 'lisp-mode-hook 'sly-mode)
-
-;;; === LSP ===
-;; lsp-mode
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
@@ -381,21 +425,17 @@
   :config
   (lsp-enable-which-key-integration t))
 
-;; lsp-ui
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'bottom))
 
-;; lsp-treemacs
 (use-package lsp-treemacs
   :after lsp)
 
-;; lsp-ivy
 (use-package lsp-ivy
   :after lsp)
 
-;;; === Debugging with dap-mode ===
 (use-package dap-mode
   ;; Uncomment the config below if you want all UI panes to be hidden by default!
   ;; :custom
@@ -414,22 +454,14 @@
     :prefix lsp-keymap-prefix
     "d" '(dap-hydra t :wk "debugger")))
 
-;;; === Language Servers ===
-(setq inferior-lisp-program "/usr/local/bin/sbcl --noinform")
-
-;; Python (pyls)
 (use-package python-mode
   :ensure t
   :hook (python-mode . lsp-deferred)
   :custom
-  ;; NOTE: Set these if Python 3 is called "python3" on your system!
-  ;; (python-shell-interpreter "python3")
-  ;; (dap-python-executable "python3")
   (dap-python-debugger 'debugpy)
   :config
   (require 'dap-python))
 
-;;; === Company Mode ===
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
@@ -444,8 +476,6 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-;;; === Projectile ===
-;; Project management library
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -462,9 +492,6 @@
   :after projectile
   :config (counsel-projectile-mode))
 
-;;; === Magit ===
-;; Git interface
-
 (use-package magit
   :commands magit-status
   :custom
@@ -476,221 +503,5 @@
 ;;(use-package forge
 ;;  :after magit)
 
-
-;;; === Rainbow Delimiters ===
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-;;; === Terminals ===
-
-;; term-mode
-(use-package term
-  :commands term
-  :config
-  (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
-  ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
-
-  ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
-
-;; Better term-mode colors
-(use-package eterm-256color
-  :hook (term-mode . eterm-256color-mode))
-
-;; vterm
-(use-package vterm
-  :commands vterm
-  :config
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-  ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-  (setq vterm-max-scrollback 10000))
-
-;; Eshell
-(defun efs/configure-eshell ()
-  ;; Save command history when commands are entered
-  (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
-
-  ;; Truncate buffer for performance
-  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-  ;; Bind some useful keys for evil-mode
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-  (evil-normalize-keymaps)
-
-  (setq eshell-history-size         10000
-        eshell-buffer-maximum-lines 10000
-        eshell-hist-ignoredups t
-        eshell-scroll-to-bottom-on-input t))
-
-(use-package eshell-git-prompt
-  :after eshell)
-
-(use-package eshell
-  :hook (eshell-first-time-mode . efs/configure-eshell)
-  :config
-
-  (with-eval-after-load 'esh-opt
-    (setq eshell-destroy-buffer-when-process-dies t)
-    (setq eshell-visual-commands '("htop" "zsh" "vim")))
-
-  (eshell-git-prompt-use-theme 'powerline))
-
-;;; === Dired ===
-(use-package dired
-  :ensure nil
-  :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
-  :custom ((dired-listing-switches "-agho --group-directories-first"))
-  ;;:config
-  ;;(evil-collection-define-key 'normal 'dired-mode-map
-  ;;"h" 'dired-single-up-directory
-  ;;  "l" 'dired-single-buffer))
-)
-
-(use-package dired-single
-  :commands (dired dired-jump))
-
-(use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package dired-open
-  :commands (dired dired-jump)
-  :config
-  ;; Doesn't work as expected!
-  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-  (setq dired-open-extensions '(("png" . "feh")
-                                ("mkv" . "mpv"))))
-
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
-
-;;; === UI Configuration ===
-(setq inhibit-startup-message t)
-
-(scroll-bar-mode -1)        ; Disable visible scrollbar
-(tool-bar-mode -1)          ; Disable the toolbar
-(tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
-
-(menu-bar-mode -1)            ; Disable the menu bar
-
-(column-number-mode)
-(global-display-line-numbers-mode t)
-
-;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-;; Disable line numbers for some modes
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-                shell-mode-hook
-                treemacs-mode-hook
-                eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-;;; === Font Config ===
-(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
-
-;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
-
-;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
-
-;;; === Keybinding Configuration ===
-
-
-;; Bind C-x C-b to ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-;; Make ESC quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-(use-package general
-  :after evil
-  :config
-  (general-create-definer efs/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (efs/leader-keys
-    "t"  '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose theme")
-    ;;"fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
-    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))))
-
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-  ;; Define key bindings for SPC followed by a single key
-  (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-  (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-  (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-  (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-  ;; (define-key evil-normal-state-map (kbd "SPC w") 'ace-window)
-  (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
-
-  ;; Use visual line motions even outside of visual-line-mode buffers
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-
-;; === Commenting ===
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
-  ;;:bind ("g c c" . evilnc-comment-or-uncomment-lines))
-
-;;; === Packages ===
-
-;;; Vertico completion
-;;(use-package vertico
-;;  :init
-;;  (vertico-mode))
-
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init
-  (savehist-mode))
-
-;;; Undo 
-;; Vim style undo not needed for emacs 28
-(use-package undo-fu)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-agenda-files
-   '("~/dox/org/test.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
- '(package-selected-packages
-   '(org-roam-ui org-roam sly dired-hide-dotfiles dired-open all-the-icons-dired dired-single eshell-git-prompt vterm eterm-256color rainbow-delimiters evil-nerd-commenter forge magit counsel-projectile projectile company-box company python-mode dap-mode lsp-ivy lsp-treemacs lsp-ui lsp-mode visual-fill-column org-bullets helpful ivy-prescient counsel ivy-rich ivy which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

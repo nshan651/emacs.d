@@ -21,7 +21,8 @@
 
 (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
-;;; === package system setup ===
+;;; === Package system setup ===
+
 ;; initialize package sources
 (require 'package)
 
@@ -356,8 +357,15 @@
   (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
   (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 
-
 ;;; === Development ===
+
+;; Sly
+;; Load the sly package
+(require 'sly)
+(setq inferior-lisp-program "sbcl")
+
+;; Add sly to the mode-hook for lisp-mode
+(add-hook 'lisp-mode-hook 'sly-mode)
 
 ;;; === LSP ===
 ;; lsp-mode
@@ -429,6 +437,9 @@
          ("<tab>" . company-complete-selection))
         (:map lsp-mode-map
          ("<tab>" . company-indent-or-complete-common))
+  :config
+  ;; Change the key binding used by Company
+  (define-key company-active-map (kbd "TAB") 'company-complete-selection))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
@@ -598,8 +609,10 @@
 
 ;;; === Keybinding Configuration ===
 
+
 ;; Bind C-x C-b to ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
+
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -610,7 +623,7 @@
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
     :global-prefix "C-SPC")
-
+  ;; (general-def 'insert "SPC"dd 'self-insert-command)
   (efs/leader-keys
     "t"  '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose theme")
@@ -623,6 +636,9 @@
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
+  (setq evil-want-space-as-evil-state-toggle nil)
+  ;(setq evil-undo-system 'undo-tree)
+
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
@@ -631,6 +647,8 @@
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  ;;Vim-like
+  ;(evil-define-key 'normal global-map (kbd "C-r") 'undo-tree-redo)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
@@ -645,6 +663,18 @@
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
   ;;:bind ("g c c" . evilnc-comment-or-uncomment-lines))
 
+;;; Undo
+;(use-package undo-tree
+;  :ensure t
+;  :after evil
+;  :diminish
+;  :config
+;  (evil-set-undo-system 'undo-tree)
+;  (global-undo-tree-mode 1)
+  ;; set up redo key binding
+;  (define-key evil-normal-state-map (kbd "C-r") 'undo-tree-redo))
+ 
+
 ;;; === Packages ===
 
 ;;; Vertico completion
@@ -657,9 +687,6 @@
   :init
   (savehist-mode))
 
-;;; Undo 
-;; Vim style undo not needed for emacs 28
-(use-package undo-fu)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -669,7 +696,7 @@
  '(org-agenda-files
    '("~/dox/org/test.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org" "/home/nick/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
  '(package-selected-packages
-   '(dired-hide-dotfiles dired-open all-the-icons-dired dired-single eshell-git-prompt vterm eterm-256color rainbow-delimiters evil-nerd-commenter forge magit counsel-projectile projectile company-box company python-mode dap-mode lsp-ivy lsp-treemacs lsp-ui lsp-mode visual-fill-column org-bullets helpful ivy-prescient counsel ivy-rich ivy which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
+   '(org-roam-ui org-roam sly dired-hide-dotfiles dired-open all-the-icons-dired dired-single eshell-git-prompt vterm eterm-256color rainbow-delimiters evil-nerd-commenter forge magit counsel-projectile projectile company-box company python-mode dap-mode lsp-ivy lsp-treemacs lsp-ui lsp-mode visual-fill-column org-bullets helpful ivy-prescient counsel ivy-rich ivy which-key all-the-icons general no-littering auto-package-update doom-modeline vertico doom-themes evil-collection evil undo-fu use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
