@@ -2,6 +2,10 @@
 #+author: nshan651
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
+* Introduction
+
+My config was heavily inspired by David Wilson's [[https://github.com/daviwil/emacs-from-scratch/blob/master/Emacs.org][emacs-from-scratch]] series. Check it out! To update this, just run =C-c C-v t= or =org-babel-tangle=.
+
 * Startup Performance
 
 Include this for improved start-times.
@@ -704,6 +708,7 @@ We use lsp-mode and dap-mode to provide a more complete development environment 
     :config (counsel-projectile-mode))
 #+end_src
 
+
 ** Magit
 
 [[https://magit.vc/][Magit]] is a git interface. Common Git operations are easy to execute quickly using Magit’s command panel system.
@@ -723,9 +728,211 @@ We use lsp-mode and dap-mode to provide a more complete development environment 
 
 ** Commenting
 
-Emacs’ built in commenting functionality doesn’t always comment things in the way you might expect so we use evil-nerd-commenter to provide a more familiar behavior.
+Emacs’ built in commenting functionality doesn’t always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.
 
 #+begin_src emacs-lisp
   (use-package evil-nerd-commenter
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+#+end_src
+
+** Rainbow Delimiters
+
+[[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is a useful programming mode because it colorizes nested parentheses and brackets according to their nesting depth.
+
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+* Terminals
+
+** term-mode
+
+=term-mode= is a built-in terminal emulator in Emacs. Because it is written in Emacs Lisp, you can start using it immediately with very little configuration. If you are on Linux or macOS, term-mode is a great choice to get started because it supports fairly complex terminal applications (htop, vim, etc) and works pretty reliably. However, because it is written in Emacs Lisp, it can be slower than other options like vterm. The speed will only be an issue if you regularly run console apps with a lot of output.
+
+One important thing to understand is line-mode versus char-mode. line-mode enables you to use normal Emacs keybindings while moving around in the terminal buffer while char-mode sends most of your keypresses to the underlying terminal. While using term-mode, you will want to be in char-mode for any terminal applications that have their own keybindings. If you’re just in your usual shell, line-mode is sufficient and feels more integrated with Emacs.
+
+With evil-collection installed, you will automatically switch to char-mode when you enter Evil’s insert mode (press i). You will automatically be switched back to line-mode when you enter Evil’s normal mode (press ESC).
+
+*Useful key bindings:*
+
+- =C-c C-p= / =C-c C-n= - go back and forward in the buffer’s prompts (also brackets with evil-mode)
+- =C-c C-k= - Enter char-mode
+- =C-c C-j= - Return to line-mode
+- If you have evil-collection installed, term-mode will enter char mode when you use Evil’s Insert mode
+
+  #+begin_src emacs-lisp
+    (use-package term
+      :commands term
+      :config
+      (setq explicit-shell-file-name "zsh")
+      ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+
+      ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
+      (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
+  #+end_src
+
+*** Better term-mode colors
+
+The =eterm-256color= package enhances the output of term-mode to enable handling of a wider range of color codes so that many popular terminal applications look as you would expect them to. 
+
+#+begin_src emacs-lisp
+  (use-package eterm-256color
+    :hook (term-mode . eterm-256color-mode))
+#+end_src
+
+** vterm
+
+vterm is an improved terminal emulator package which uses a compiled native module to interact with the underlying terminal applications. This enables it to be much faster than =term-mode= and to also provide a more complete terminal emulation experience.
+
+#+begin_src emacs-lisp
+  (use-package vterm
+    :commands vterm
+    :config
+    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+    ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+    (setq vterm-max-scrollback 10000))
+#+end_src
+
+** shell-mode
+
+shell-mode is a middle ground between =term-mode= and Eshell. It is not a terminal emulator so more complex terminal programs will not run inside of it. It does have much better integration with Emacs because all command input in this mode is handled by Emacs and then sent to the underlying shell once you press Enter. This means that you can use =evil-mode's= editing motions on the command line, unlike in the terminal emulator modes above.
+
+** Eshell
+
+Eshell is Emacs’ own shell implementation written in Emacs Lisp. It provides you with a cross-platform implementation (even on Windows!) of the common GNU utilities you would find on Linux and macOS (ls, rm, mv, grep, etc). It also allows you to call Emacs Lisp functions directly from the shell and you can even set up aliases (like aliasing vim to find-file). Eshell is also an Emacs Lisp REPL which allows you to evaluate full expressions at the shell.
+
+The downsides to Eshell are that it can be harder to configure than other packages due to the particularity of where you need to set some options for them to go into effect, the lack of shell completions (by default) for some useful things like Git commands, and that REPL programs sometimes don’t work as well.
+
+#+begin_src emacs-lisp
+  (defun efs/configure-eshell ()
+    ;; Save command history when commands are entered
+    (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
+
+    ;; Truncate buffer for performance
+    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+    ;; Bind some useful keys for evil-mode
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+    (evil-normalize-keymaps)
+
+    (setq eshell-history-size         10000
+          eshell-buffer-maximum-lines 10000
+          eshell-hist-ignoredups t
+          eshell-scroll-to-bottom-on-input t))
+
+  (use-package eshell-git-prompt
+    :after eshell)
+
+  (use-package eshell
+    :hook (eshell-first-time-mode . efs/configure-eshell)
+    :config
+
+    (with-eval-after-load 'esh-opt
+      (setq eshell-destroy-buffer-when-process-dies t)
+      (setq eshell-visual-commands '("htop" "zsh" "vim")))
+
+    (eshell-git-prompt-use-theme 'powerline))
+#+end_src
+
+* File Management
+
+** Dired
+
+Dired is a built-in file manager for Emacs. 
+
+*** Navigation
+
+Here are some useful keybindings:
+
+**** Emacs /Evil
+
+- =n= / =j= - next line
+- =p= / =k= - previous line
+- =j= / =J= - jump to file in buffer
+- =RET= - select file or directory
+- =^= - go to parent directory
+- =S-RET= / =g O= - Open file in "other" window
+- =M-RET= - Show file in other window without focusing (previewing files)
+- =g o= (=dired-view-file=) - Open file but in a "preview" mode, close with =q=
+- =g= / =g r= Refresh the buffer with =revert-buffer= after changing configuration (and after filesystem changes!)
+
+**** Marking files
+
+- =m= - Marks a file
+- =u= - Unmarks a file
+- =U= - Unmarks all files in buffer
+- =* t= / =t= - Inverts marked files in buffer
+- =% m= - Mark files in buffer using regular expression
+- =*= - Lots of other auto-marking functions
+- =k= / =K= - "Kill" marked items (refresh buffer with =g= / =g r= to get them back)
+- Many operations can be done on a single file if there are no active marks!
+
+**** Copying and Renaming files
+
+- =C= - Copy marked files (or if no files are marked, the current file)
+- Copying single and multiple files
+- =U= - Unmark all files in buffer
+- =R= - Rename marked files, renaming multiple is a move!
+- =% R= - Rename based on regular expression: =^test= , =old-\&=
+
+*Power command*: =C-x C-q= (=dired-toggle-read-only=) - Makes all file names in the buffer editable directly to rename them!  Press =Z Z= to confirm renaming or =Z Q= to abort.
+
+**** Deleting files
+
+- =D= - Delete marked file
+- =d= - Mark file for deletion
+- =x= - Execute deletion for marks
+- =delete-by-moving-to-trash= - Move to trash instead of deleting permanently
+
+**** Creating and extracting archives
+
+- =Z= - Compress or uncompress a file or folder to (=.tar.gz=)
+- =c= - Compress selection to a specific file
+- =dired-compress-files-alist= - Bind compression commands to file extension
+
+**** Other common operations
+
+- =T= - Touch (change timestamp)
+- =M= - Change file mode
+- =O= - Change file owner
+- =G= - Change file group
+- =S= - Create a symbolic link to this file
+- =L= - Load an Emacs Lisp file into Emacs
+
+
+*** Configuration
+
+#+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first"))
+    ;;:config
+    ;;(evil-collection-define-key 'normal 'dired-mode-map
+    ;;"h" 'dired-single-up-directory
+    ;;  "l" 'dired-single-buffer))
+  )
+
+  (use-package dired-single
+    :commands (dired dired-jump))
+
+  (use-package all-the-icons-dired
+    :hook (dired-mode . all-the-icons-dired-mode))
+
+  (use-package dired-open
+    :commands (dired dired-jump)
+    :config
+    ;; Doesn't work as expected!
+    ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+    (setq dired-open-extensions '(("png" . "feh")
+                                  ("mkv" . "mpv"))))
+
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "H" 'dired-hide-dotfiles-mode))
 #+end_src
