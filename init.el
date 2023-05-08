@@ -64,9 +64,6 @@
 
 (menu-bar-mode -1)            ; Disable the menu bar
 
-;; Set up the visible bell
-(setq visible-bell t)
-
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
@@ -83,6 +80,13 @@
                 treemacs-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+;; Reload the theme when switching to Emacs.org
+(add-hook 'org-mode-hook
+        (lambda ()
+          (load-theme 'modus-vivendi t)))
+
+(load-theme 'modus-vivendi t)
 
 (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
 
@@ -147,26 +151,11 @@
 
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
-
   
 (use-package evil-collection
   :after evil
   :config
   (evil-collection-init))
-
-(use-package command-log-mode
-  :commands command-log-mode)
-
-(load-theme 'modus-vivendi t)
-
-;;(use-package doom-themes
-;;  :init (load-theme 'doom-palenight t))
-
-(use-package all-the-icons)
-
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
 
 (use-package which-key
   :defer 0
@@ -193,6 +182,7 @@
   :config
   (ivy-mode 1))
 
+;; ivy-rich adds extra columns and a few new counsel commands.
 (use-package ivy-rich
   :after ivy
   :init
@@ -212,8 +202,6 @@
   :custom
   (ivy-prescient-enable-filtering nil)
   :config
-  ;; Uncomment the following line to have sorting remembered across sessions!
-  ;(prescient-persist-mode 1)
   (ivy-prescient-mode 1))
 
 (use-package helpful
@@ -411,6 +399,8 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
+(require 'preview-latex)
+
 (with-eval-after-load 'org
   (org-babel-do-load-languages
       'org-babel-load-languages
@@ -418,6 +408,9 @@
       (python . t)))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
+
+;; Disable execution confirmations 
+(setq org-confirm-babel-evaluate nil)
 
 (with-eval-after-load 'org
   ;; This is needed as of Org 9.2
