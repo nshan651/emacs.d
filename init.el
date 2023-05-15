@@ -1,6 +1,6 @@
 ;; Set base font sizes
-(defvar efs/default-font-size 150)
-(defvar efs/default-variable-font-size 150)
+(defvar efs/default-font-size 155)
+(defvar efs/default-variable-font-size 155)
 
 ;; make frame transparency overridable
 (defvar efs/frame-transparency '(100 . 100))
@@ -44,10 +44,6 @@
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
 
-;; NOTE: If you want to move everything out of the ~/.emacs.d folder
-;; reliably, set `user-emacs-directory` before loading no-littering!
-;(setq user-emacs-directory "~/.cache/emacs")
-
 (use-package no-littering)
 
 ;; no-littering doesn't set this by default so we must place
@@ -66,6 +62,8 @@
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
+(setq initial-scratch-message nil)
+
 
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
@@ -131,6 +129,11 @@
     (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
     (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
+    ;; Org Roam
+    (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+    (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+    (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+
     ;; Manage buffers
     (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
     (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
@@ -139,7 +142,7 @@
     (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
     (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
     (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
-    ;; Windmove keys for window nav
+    ;; Windmove keys for additional window navigation
     (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
     (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
     (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
@@ -151,7 +154,7 @@
 
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
-  
+
 (use-package evil-collection
   :after evil
   :config
@@ -400,6 +403,21 @@
   :hook (org-mode . efs/org-mode-visual-fill))
 
 (require 'preview-latex)
+
+(use-package org-roam
+:ensure t
+:init
+(setq org-roam-v2-ack t)
+:custom
+(org-roam-directory "~/org")
+(org-roam-completion-everywhere t)
+:bind (("C-c n l" . org-roam-buffer-toggle)
+       ("C-c n f" . org-roam-node-find)
+       ("C-c n i" . org-roam-node-insert)
+       :map org-mode-map
+       ("C-M-i" . completion-at-point))
+:config
+(org-roam-setup))
 
 (with-eval-after-load 'org
   (org-babel-do-load-languages

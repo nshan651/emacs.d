@@ -11,8 +11,8 @@ Add some global variable settings.
 
 #+begin_src emacs-lisp
   ;; Set base font sizes
-  (defvar efs/default-font-size 150)
-  (defvar efs/default-variable-font-size 150)
+  (defvar efs/default-font-size 155)
+  (defvar efs/default-variable-font-size 155)
 
   ;; make frame transparency overridable
   (defvar efs/frame-transparency '(100 . 100))
@@ -82,18 +82,12 @@ You can also use =M-x auto-package-update-now= to update right now!
 Use the [[https://github.com/emacscollective/no-littering/blob/master/no-littering.el][no-littering]] package to keep folders clean.
 
 #+begin_src emacs-lisp
-
-  ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
-  ;; reliably, set `user-emacs-directory` before loading no-littering!
-  ;(setq user-emacs-directory "~/.cache/emacs")
-
   (use-package no-littering)
 
   ;; no-littering doesn't set this by default so we must place
   ;; auto save files in the same path as it uses for sessions
   (setq auto-save-file-name-transforms
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-
 #+end_src
 
 * Basic UI Configuration
@@ -112,6 +106,8 @@ This section configures basic UI settings that remove unneeded elements to make 
 
   (column-number-mode)
   (global-display-line-numbers-mode t)
+  (setq initial-scratch-message nil)
+
 
   ;; Set frame transparency
   (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
@@ -131,7 +127,6 @@ This section configures basic UI settings that remove unneeded elements to make 
   (add-hook 'org-mode-hook
           (lambda ()
             (load-theme 'modus-vivendi t)))
-
 #+end_src
 
 ** Color Theme
@@ -182,50 +177,58 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 ** Evil Mode
 
 #+begin_src emacs-lisp
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
+    (use-package evil
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump nil)
+      :config
+      (evil-mode 1)
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+      ;; Define key bindings for SPC followed by a single key
+      (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+      (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+      (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+      (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+      (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+
+      ;; Org Roam
+      (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+      (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+      (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+
+      ;; Manage buffers
+      (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+      (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+
+      ;; Manage windows
+      (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
+      (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
+      (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
+      ;; Windmove keys for additional window navigation
+      (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
+      (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
+      (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
+      (evil-global-set-key 'normal (kbd "SPC j")  'windmove-down)
+
+      ;; Use visual line motions even outside of visual-line-mode buffers
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal))
+
+  (use-package evil-collection
+    :after evil
     :config
-    (evil-mode 1)
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-    ;; Define key bindings for SPC followed by a single key
-    (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-    (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-    (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-    (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-    (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
-
-    ;; Manage buffers
-    (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-    (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
-
-    ;; Manage windows
-    (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
-    (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
-    (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
-    ;; Windmove keys for window nav
-    (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
-    (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
-    (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
-    (evil-global-set-key 'normal (kbd "SPC j")  'windmove-down)
-
-    ;; Use visual line motions even outside of visual-line-mode buffers
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal))
-  
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+    (evil-collection-init))
 #+end_src
+
+#+RESULTS:
+: t
 
 * Advanced UI Configuration
 
@@ -543,6 +546,27 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 
 #+begin_src emacs-lisp
   (require 'preview-latex)
+#+end_src
+
+** Org Roam
+
+A plain-text, graph-based personal knowledge management system.
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/org")
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point))
+  :config
+  (org-roam-setup))
 #+end_src
 
 ** Configure Babel Languages
