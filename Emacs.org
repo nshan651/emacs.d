@@ -509,7 +509,10 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
         ("m" "Metrics Capture")
         ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-         "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+         "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)
+
+        ("s" "Slipbox" entry  (file "~/org/inbox.org")
+       "* %?\n")))
 
     (define-key global-map (kbd "C-c j")
       (lambda () (interactive) (org-capture nil "jj")))
@@ -550,7 +553,7 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 
 ** Org Roam
 
-A plain-text, graph-based personal knowledge management system.
+[[https://github.com/org-roam/org-roam][Org Roam]] is a plain-text, graph-based personal knowledge management system.
 
 #+begin_src emacs-lisp
   (use-package org-roam
@@ -567,6 +570,77 @@ A plain-text, graph-based personal knowledge management system.
          ("C-M-i" . completion-at-point))
   :config
   (org-roam-setup))
+#+end_src
+
+*** Org Roam Capture Templates
+
+Org roam allows you to create various capture templates.
+
+#+begin_src emacs-lisp
+  (setq org-roam-capture-templates
+    '(("m" "main" plain
+        "%?"
+        :if-new (file+head "main/${slug}.org"
+                            "#+title: ${title}\n")
+        :immediate-finish t
+        :unnarrowed t)
+        ("r" "reference" plain "%?"
+        :if-new
+        (file+head "reference/${title}.org" "#+title: ${title}\n")
+        :immediate-finish t
+        :unnarrowed t)
+        ("a" "article" plain "%?"
+        :if-new
+        (file+head "articles/${title}.org" "#+title: ${title}\n#+filetags: :article:\n")
+        :immediate-finish t
+        :unnarrowed t)))
+#+end_src
+
+#+RESULTS:
+
+**** Define the Type of a Node
+
+It can be useful to differentiate the different types of zettels at completion time.
+
+#+begin_src emacs-lisp
+(cl-defmethod org-roam-node-type ((node org-roam-node))
+  "Return the TYPE of NODE."
+  (condition-case nil
+      (file-name-nondirectory
+       (directory-file-name
+        (file-name-directory
+         (file-relative-name (org-roam-node-file node) org-roam-directory))))
+    (error "")))
+#+end_src
+
+#+RESULTS:
+: org-roam-node-type
+
+**** Modifying Display Template to Show Node Type
+
+#+begin_src emacs-lisp
+  (setq org-roam-node-display-template
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+#+end_src
+
+#+RESULTS:
+: ${type:15} ${title:*} ${tags:10}
+
+*** Org Roam UI Frontend
+
+[[https://github.com/org-roam/org-roam-ui][org-roam-ui]] is a graphical frontend for displaying org roam nodes in a graph-like interface.
+
+#+begin_src emacs-lisp
+  (use-package org-roam-ui
+    :straight
+      (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+      :after org-roam
+      :config
+      (setq org-roam-ui-sync-theme t
+            org-roam-ui-default-view '2d
+            org-roam-ui-follow t
+            org-roam-ui-update-on-save t
+            org-roam-ui-open-on-start t))
 #+end_src
 
 ** Configure Babel Languages
