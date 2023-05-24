@@ -404,9 +404,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (setq org-log-into-drawer t)
 
     (setq org-agenda-files
-          '("~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org"
-            "~/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org"
-            "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+          '("~/org/agenda.org"))
 
     (require 'org-habit)
     (add-to-list 'org-modules 'org-habit)
@@ -519,6 +517,9 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (efs/org-font-setup))
 #+end_src
+
+#+RESULTS:
+| #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | efs/org-mode-visual-fill | org-bullets-mode | efs/org-mode-setup | (lambda nil (load-theme 'modus-vivendi t)) | (lambda nil (display-line-numbers-mode 0)) |
 
 *** Nicer Heading Bullets
 
