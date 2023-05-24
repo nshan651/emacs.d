@@ -127,7 +127,17 @@
     (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
     (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
     (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+
+    ;; Org Agenda
     (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+
+    (defun open-custom-agenda ()
+      "Open the custom agenda view."
+      (interactive)
+      (org-agenda nil "A"))
+
+    (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+
 
     ;; Org Roam
     (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
@@ -277,7 +287,8 @@
   (setq org-log-into-drawer t)
 
   (setq org-agenda-files
-        '("~/org/agenda.org"))
+        '("~/org/agenda/todo.org"
+          "~/org/agenda/birthdays.org"))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
@@ -308,53 +319,49 @@
        ("note" . ?n)
        ("idea" . ?i)))
 
+  ;; Open the agenda file as the only window
+  (setq org-agenda-window-setup 'only-window)
+
   ;; Configure custom agenda views
   (setq org-agenda-custom-commands
-   '(("d" "Dashboard"
-     ((agenda "" ((org-deadline-warning-days 7)))
-      (todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))
-      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
-
-    ("n" "Next Tasks"
-     ((todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))))
-
-    ("W" "Work Tasks" tags-todo "+work-email")
-
-    ;; Low-effort next actions
-    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-     ((org-agenda-overriding-header "Low Effort Tasks")
-      (org-agenda-max-todos 20)
-      (org-agenda-files org-agenda-files)))
-
-    ("w" "Workflow Status"
-     ((todo "WAIT"
-            ((org-agenda-overriding-header "Waiting on External")
-             (org-agenda-files org-agenda-files)))
-      (todo "REVIEW"
-            ((org-agenda-overriding-header "In Review")
-             (org-agenda-files org-agenda-files)))
-      (todo "PLAN"
-            ((org-agenda-overriding-header "In Planning")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "BACKLOG"
-            ((org-agenda-overriding-header "Project Backlog")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "READY"
-            ((org-agenda-overriding-header "Ready for Work")
-             (org-agenda-files org-agenda-files)))
-      (todo "ACTIVE"
-            ((org-agenda-overriding-header "Active Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "COMPLETED"
-            ((org-agenda-overriding-header "Completed Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "CANC"
-            ((org-agenda-overriding-header "Cancelled Projects")
-             (org-agenda-files org-agenda-files)))))))
+          `(("A" "Daily agenda and top priority tasks"
+          ((tags-todo "*"
+                      ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+                          (org-agenda-skip-function
+                          `(org-agenda-skip-entry-if
+                          'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
+                          (org-agenda-block-separator nil)
+                          (org-agenda-overriding-header "Important Tasks Without a Date\n")))
+              (agenda "" ((org-agenda-span 1)
+                          (org-deadline-warning-days 0)
+                          (org-agenda-block-separator nil)
+                          (org-scheduled-past-days 0)
+                          ;; We don't need the `org-agenda-date-today'
+                          ;; highlight because that only has a practical
+                          ;; utility in multi-day views.
+                          (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                          (org-agenda-format-date "%A %-e %B %Y")
+                          (org-agenda-overriding-header "\nToday's Agenda\n")))
+              (agenda "" ((org-agenda-start-on-weekday nil)
+                          (org-agenda-start-day "+1d")
+                          (org-agenda-span 3)
+                          (org-deadline-warning-days 0)
+                          (org-agenda-block-separator nil)
+                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                          (org-agenda-overriding-header "\nNext Three Days\n")))
+              (agenda "" ((org-agenda-time-grid nil)
+                          (org-agenda-start-on-weekday nil)
+                          ;; We don't want to replicate the previous section's
+                          ;; three days, so we start counting from the day after.
+                          (org-agenda-start-day "+4d")
+                          (org-agenda-span 14)
+                          (org-agenda-show-all-dates nil)
+                          (org-deadline-warning-days 0)
+                          (org-agenda-block-separator nil)
+                          (org-agenda-entry-types '(:deadline))
+                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                          (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))))
+          ))
 
   (setq org-capture-templates
     `(("t" "Tasks / Projects")
