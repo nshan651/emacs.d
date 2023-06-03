@@ -94,6 +94,13 @@
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
 
+(defun toggle-transparency ()
+  "Toggle transparency of the Emacs frame."
+  (interactive)
+  (if (equal (frame-parameter nil 'alpha) '(100 100))
+      (set-frame-parameter nil 'alpha '(75 75))
+    (set-frame-parameter nil 'alpha '(100 100))))
+
 ;; Bind C-x C-b to ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 ;; Make ESC quit prompts
@@ -128,6 +135,9 @@
     (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
     (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
 
+    ;; Background transparency
+    (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
+
     ;; Org Agenda
     (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
@@ -137,7 +147,6 @@
       (org-agenda nil "A"))
 
     (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-
 
     ;; Org Roam
     (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
@@ -288,7 +297,8 @@
 
   (setq org-agenda-files
         '("~/org/agenda/todo.org"
-          "~/org/agenda/birthdays.org"))
+          "~/org/agenda/birthdays.org"
+          "~/org/agenda/projects.org"))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
@@ -296,11 +306,11 @@
 
   (setq org-todo-keywords
     '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
 
   (setq org-refile-targets
-    '(("Archive.org" :maxlevel . 1)
-      ("Tasks.org" :maxlevel . 1)))
+    '(("archive.org" :maxlevel . 1)
+      ("todo.org" :maxlevel . 1)))
 
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -336,9 +346,6 @@
                           (org-deadline-warning-days 0)
                           (org-agenda-block-separator nil)
                           (org-scheduled-past-days 0)
-                          ;; We don't need the `org-agenda-date-today'
-                          ;; highlight because that only has a practical
-                          ;; utility in multi-day views.
                           (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
                           (org-agenda-format-date "%A %-e %B %Y")
                           (org-agenda-overriding-header "\nToday's Agenda\n")))
@@ -360,13 +367,20 @@
                           (org-agenda-block-separator nil)
                           (org-agenda-entry-types '(:deadline))
                           (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                          (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))))
+                          (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
+              (todo "PROJECT"
+                        ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+                        (org-agenda-block-separator nil)
+                        (org-agenda-overriding-header "\nProjects\n")))
+              ))
           ))
 
   (setq org-capture-templates
-    `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+    `(("t" "todo" entry (file org-default-notes-file)
+        "* TODO %?\n%u\n%a\n" :clock-in t :clock-resume t)
+      ;("t" "Tasks / Projects")
+      ;("tt" "Task" entry (file+olp ;"~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
+      ;     "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
       ("j" "Journal Entries")
       ("jj" "Journal" entry
@@ -471,8 +485,11 @@
 (with-eval-after-load 'org
   (org-babel-do-load-languages
       'org-babel-load-languages
-      '((emacs-lisp . t)
-      (python . t)))
+      '(
+        (emacs-lisp . t)
+        (python . t)
+        (shell . t)
+       ))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
