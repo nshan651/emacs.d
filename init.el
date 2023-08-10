@@ -79,12 +79,12 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(load-theme 'modus-vivendi t)
+
 ;; Reload the theme when switching to Emacs.org
 (add-hook 'org-mode-hook
         (lambda ()
           (load-theme 'modus-vivendi t)))
-
-(load-theme 'modus-vivendi t)
 
 (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
 
@@ -141,6 +141,15 @@
     ;; Org Agenda
     (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
+    ;; Open TODO agenda file as a pop-up buffer
+    (define-key evil-normal-state-map (kbd "SPC r")
+      (lambda () 
+        (interactive)
+        (let ((file "~/org/agenda/todo.org")
+                (pop-up-buffer "*TODO*"))
+            (pop-to-buffer pop-up-buffer)
+            (find-file file))))
+
     (defun open-custom-agenda ()
       "Open the custom agenda view."
       (interactive)
@@ -158,14 +167,14 @@
     (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
     ;; Manage windows
-    (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
-    (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
-    (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
+    (evil-global-set-key 'normal (kbd "C-SPC <backspace>") 'delete-window)
+    (evil-global-set-key 'normal (kbd "C-SPC \\") 'split-window-right)
+    (evil-global-set-key 'normal (kbd "C-SPC -") 'split-window-below)
     ;; Windmove keys for additional window navigation
-    (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
-    (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
-    (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
-    (evil-global-set-key 'normal (kbd "SPC j")  'windmove-down)
+    (evil-global-set-key 'normal (kbd "C-SPC h")  'windmove-left)
+    (evil-global-set-key 'normal (kbd "C-SPC l")  'windmove-right)
+    (evil-global-set-key 'normal (kbd "C-SPC k")  'windmove-up)
+    (evil-global-set-key 'normal (kbd "C-SPC j")  'windmove-down)
 
     ;; Use visual line motions even outside of visual-line-mode buffers
     (evil-global-set-key 'motion "j" 'evil-next-visual-line)

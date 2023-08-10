@@ -12,7 +12,7 @@ Add some global variable settings.
 
 #+begin_src emacs-lisp
   ;; Set base font sizes
-  (defvar efs/default-font-size 155)
+  (defvar efs/default-font-size 155)	
   (defvar efs/default-variable-font-size 155)
 
   ;; make frame transparency overridable
@@ -123,11 +123,6 @@ This section configures basic UI settings that remove unneeded elements to make 
                   treemacs-mode-hook
                   eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-  ;; Reload the theme when switching to Emacs.org
-  (add-hook 'org-mode-hook
-          (lambda ()
-            (load-theme 'modus-vivendi t)))
 #+end_src
 
 ** Color Theme
@@ -136,6 +131,11 @@ I use ==modue-vivendi== as my main theme.
 
 #+begin_src emacs-lisp
   (load-theme 'modus-vivendi t)
+
+  ;; Reload the theme when switching to Emacs.org
+  (add-hook 'org-mode-hook
+          (lambda ()
+            (load-theme 'modus-vivendi t)))
 #+end_src
 
 ** Font Configuration
@@ -189,66 +189,75 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 ** Evil Mode
 
 #+begin_src emacs-lisp
-    (use-package evil
-      :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
-      (setq evil-want-C-i-jump nil)
-      :config
-      (evil-mode 1)
-      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+          (use-package evil
+            :init
+            (setq evil-want-integration t)
+            (setq evil-want-keybinding nil)
+            (setq evil-want-C-u-scroll t)
+            (setq evil-want-C-i-jump nil)
+            :config
+            (evil-mode 1)
+            (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+            (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-      ;; Define key bindings for SPC followed by a single key
-      (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-      (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-      (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-      (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+            ;; Define key bindings for SPC followed by a single key
+            (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+            (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+            (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+            (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
 
-      ;; Background transparency
-      (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
+            ;; Background transparency
+            (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
 
-      ;; Org Agenda
-      (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+            ;; Org Agenda
+            (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
-      (defun open-custom-agenda ()
-        "Open the custom agenda view."
-        (interactive)
-        (org-agenda nil "A"))
+            ;; Open TODO agenda file as a pop-up buffer
+            (define-key evil-normal-state-map (kbd "SPC r")
+              (lambda () 
+                (interactive)
+                (let ((file "~/org/agenda/todo.org")
+                        (pop-up-buffer "*TODO*"))
+                    (pop-to-buffer pop-up-buffer)
+                    (find-file file))))
 
-      (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+            (defun open-custom-agenda ()
+              "Open the custom agenda view."
+              (interactive)
+              (org-agenda nil "A"))
 
-      ;; Org Roam
-      (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-      (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-      (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+            (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
 
-      ;; Manage buffers
-      (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-      (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+            ;; Org Roam
+            (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+            (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+            (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
 
-      ;; Manage windows
-      (evil-global-set-key 'normal (kbd "SPC <backspace>") 'delete-window)
-      (evil-global-set-key 'normal (kbd "SPC \\") 'split-window-right)
-      (evil-global-set-key 'normal (kbd "SPC -") 'split-window-below)
-      ;; Windmove keys for additional window navigation
-      (evil-global-set-key 'normal (kbd "SPC h")  'windmove-left)
-      (evil-global-set-key 'normal (kbd "SPC l")  'windmove-right)
-      (evil-global-set-key 'normal (kbd "SPC k")  'windmove-up)
-      (evil-global-set-key 'normal (kbd "SPC j")  'windmove-down)
+            ;; Manage buffers
+            (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+            (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
-      ;; Use visual line motions even outside of visual-line-mode buffers
-      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+            ;; Manage windows
+            (evil-global-set-key 'normal (kbd "C-SPC <backspace>") 'delete-window)
+            (evil-global-set-key 'normal (kbd "C-SPC \\") 'split-window-right)
+            (evil-global-set-key 'normal (kbd "C-SPC -") 'split-window-below)
+            ;; Windmove keys for additional window navigation
+            (evil-global-set-key 'normal (kbd "C-SPC h")  'windmove-left)
+            (evil-global-set-key 'normal (kbd "C-SPC l")  'windmove-right)
+            (evil-global-set-key 'normal (kbd "C-SPC k")  'windmove-up)
+            (evil-global-set-key 'normal (kbd "C-SPC j")  'windmove-down)
 
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal))
+            ;; Use visual line motions even outside of visual-line-mode buffers
+            (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+            (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
+            (evil-set-initial-state 'messages-buffer-mode 'normal)
+            (evil-set-initial-state 'dashboard-mode 'normal))
+
+        (use-package evil-collection
+          :after evil
+          :config
+          (evil-collection-init))
 #+end_src
 
 #+RESULTS:
@@ -694,7 +703,7 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
 
 ** Structure Templates
 
-Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing =<= followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =<el= and press =TAB= to expand into such a block.
+Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
 
 You can add more =src= block templates below by copying one of the lines and changing the two strings at the end, the first to be the template name and the second to contain the name of the language [[https://orgmode.org/worg/org-contrib/babel/languages.html][as it is known by Org Babel]].
 
@@ -969,11 +978,12 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
 #+begin_src emacs-lisp
-
-  (use-package evil-nerd-commenter
+  (use-package evil-nerd-commenterr
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
-
 #+end_src
+
+#+RESULTS:
+: evilnc-comment-or-uncomment-lines
 
 ** Rainbow Delimiters
 
