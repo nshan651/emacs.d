@@ -428,14 +428,13 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (use-package org
       :pin org
       :commands (org-capture org-agenda)
-      :hook (org-mode . efs/org-mode-setup)
+      :hook
+      (org-mode . efs/org-mode-setup)
       :config
       (setq org-ellipsis " ▾")
-
       (setq org-agenda-start-with-log-mode t)
       (setq org-log-done 'time)
       (setq org-log-into-drawer t)
-
       (setq org-agenda-files
             '("~/org/agenda/todo.org"
               "~/org/agenda/birthdays.org"
@@ -554,7 +553,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 #+end_src
 
 #+RESULTS:
-| #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | efs/org-mode-visual-fill | org-bullets-mode | efs/org-mode-setup | (lambda nil (load-theme 'modus-vivendi t)) | (lambda nil (display-line-numbers-mode 0)) |
+| rainbow-delimiters-mode | (lambda nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | org-tempo-setup | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | efs/org-mode-visual-fill | org-bullets-mode | efs/org-mode-setup | (lambda nil (load-theme 'modus-vivendi t)) | (lambda nil (display-line-numbers-mode 0)) |
 
 *** Nicer Heading Bullets
 
@@ -649,9 +648,6 @@ It can be useful to differentiate the different types of zettels at completion t
     (error "")))
 #+end_src
 
-#+RESULTS:
-: org-roam-node-type
-
 **** Modifying Display Template to Show Node Type
 
 #+begin_src emacs-lisp
@@ -659,24 +655,23 @@ It can be useful to differentiate the different types of zettels at completion t
         (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 #+end_src
 
-#+RESULTS:
-: ${type:15} ${title:*} ${tags:10}
-
 *** Org Roam UI Frontend
 
 [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] is a graphical frontend for displaying org roam nodes in a graph-like interface.
 
 #+begin_src emacs-lisp
+  (use-package websocket
+    :after org-roam)
+
   (use-package org-roam-ui
-    :straight
-      (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-      :after org-roam
-      :config
-      (setq org-roam-ui-sync-theme t
-            org-roam-ui-default-view '2d
-            org-roam-ui-follow t
-            org-roam-ui-update-on-save t
-            org-roam-ui-open-on-start t))
+    :ensure t
+    :after org-roam
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-default-view '2d
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 #+end_src
 
 ** Configure Babel Languages
@@ -692,9 +687,7 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
           (python . t)
           (shell . t)
          ))
-
     (push '("conf-unix" . conf-unix) org-src-lang-modes))
-
   ;; Disable execution confirmations 
   (setq org-confirm-babel-evaluate nil)
 #+end_src
@@ -711,15 +704,10 @@ You can add more =src= block templates below by copying one of the lines and cha
   (with-eval-after-load 'org
     ;; This is needed as of Org 9.2
     (require 'org-tempo)
-
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     (add-to-list 'org-structure-template-alist '("py" . "src python")))
 #+end_src
-
-#+RESULTS:
-: ((py . src python) (el . src emacs-lisp) (sh . src shell) (a . export ascii) (c . center) (C . comment) (e . example) (E . export) (h . export html) (l . export latex) (q . quote) (s . src) (v . verse))
-
 
 ** Auto-tangle Configuration Files
 
@@ -906,6 +894,18 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 
 #+end_src
 
+*** Common Lisp
+
+#+begin_src emacs-lisp
+  ;; Load SLY
+  (require 'sly)
+
+  ;; Set the Common Lisp implementation to SBCL
+  (setq inferior-lisp-program "sbcl")
+
+  (add-to-list 'sly-contribs 'sly-asdf 'append)
+#+end_src
+
 ** Company Mode
 
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
@@ -978,20 +978,23 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
 #+begin_src emacs-lisp
-  (use-package evil-nerd-commenterr
+  (use-package evil-nerd-commenter
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 
-#+RESULTS:
-: evilnc-comment-or-uncomment-lines
+
 
 ** Rainbow Delimiters
 
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
 
 #+begin_src emacs-lisp
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
+    (use-package rainbow-delimiters
+      :ensure t
+      :hook
+      (prog-mode . rainbow-delimiters-mode)
+      (org-mode . rainbow-delimiters-mode)
+      (lisp-mode . rainbow-delimiters-mode))
 #+end_src
 
 * Terminals

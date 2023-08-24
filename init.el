@@ -1,5 +1,5 @@
 ;; Set base font sizes
-(defvar efs/default-font-size 155)
+(defvar efs/default-font-size 155)	
 (defvar efs/default-variable-font-size 155)
 
 ;; make frame transparency overridable
@@ -296,14 +296,13 @@
 (use-package org
   :pin org
   :commands (org-capture org-agenda)
-  :hook (org-mode . efs/org-mode-setup)
+  :hook
+  (org-mode . efs/org-mode-setup)
   :config
   (setq org-ellipsis " ▾")
-
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
-
   (setq org-agenda-files
         '("~/org/agenda/todo.org"
           "~/org/agenda/birthdays.org"
@@ -480,16 +479,18 @@
 (setq org-roam-node-display-template
       (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 
+(use-package websocket
+  :after org-roam)
+
 (use-package org-roam-ui
-  :straight
-    (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-    :after org-roam
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-default-view '2d
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  :ensure t
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-default-view '2d
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 (with-eval-after-load 'org
   (org-babel-do-load-languages
@@ -499,7 +500,6 @@
         (python . t)
         (shell . t)
        ))
-
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
 ;; Disable execution confirmations 
@@ -508,7 +508,6 @@
 (with-eval-after-load 'org
   ;; This is needed as of Org 9.2
   (require 'org-tempo)
-
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python")))
@@ -586,6 +585,14 @@
   :config
   (pyvenv-mode 1))
 
+;; Load SLY
+(require 'sly)
+
+;; Set the Common Lisp implementation to SBCL
+(setq inferior-lisp-program "sbcl")
+
+(add-to-list 'sly-contribs 'sly-asdf 'append)
+
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
@@ -631,7 +638,11 @@
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :ensure t
+  :hook
+  (prog-mode . rainbow-delimiters-mode)
+  (org-mode . rainbow-delimiters-mode)
+  (lisp-mode . rainbow-delimiters-mode))
 
 (use-package term
   :commands term
