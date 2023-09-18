@@ -1,9 +1,12 @@
 ;; Set base font sizes
-(defvar efs/default-font-size 155)	
-(defvar efs/default-variable-font-size 155)
+ (defvar efs/default-font-size 155)	
+ (defvar efs/default-variable-font-size 155)
 
-;; make frame transparency overridable
-(defvar efs/frame-transparency '(100 . 100))
+ ;; Make frame transparency overridable
+ (defvar efs/frame-transparency '(100 . 100))
+
+;; Enable relative line numbers
+(setq display-line-numbers-type 'relative)
 
 ;; The default is 800 kilobytes.  Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
@@ -63,7 +66,6 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (setq initial-scratch-message nil)
-
 
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
@@ -167,14 +169,14 @@
     (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
     ;; Manage windows
-    (evil-global-set-key 'normal (kbd "C-SPC <backspace>") 'delete-window)
-    (evil-global-set-key 'normal (kbd "C-SPC \\") 'split-window-right)
-    (evil-global-set-key 'normal (kbd "C-SPC -") 'split-window-below)
+    (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
+    (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
+    (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
     ;; Windmove keys for additional window navigation
-    (evil-global-set-key 'normal (kbd "C-SPC h")  'windmove-left)
-    (evil-global-set-key 'normal (kbd "C-SPC l")  'windmove-right)
-    (evil-global-set-key 'normal (kbd "C-SPC k")  'windmove-up)
-    (evil-global-set-key 'normal (kbd "C-SPC j")  'windmove-down)
+    (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
+    (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
+    (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
+    (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
 
     ;; Use visual line motions even outside of visual-line-mode buffers
     (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -436,18 +438,36 @@
 
 (use-package org-roam
 :ensure t
-:init
-(setq org-roam-v2-ack t)
 :custom
-(org-roam-directory "~/org")
-(org-roam-completion-everywhere t)
+(org-roam-directory (file-truename "~/org"))
 :bind (("C-c n l" . org-roam-buffer-toggle)
        ("C-c n f" . org-roam-node-find)
+       ("C-c n g" . org-roam-graph)
        ("C-c n i" . org-roam-node-insert)
-       :map org-mode-map
-       ("C-M-i" . completion-at-point))
+       ("C-c n c" . org-roam-capture)
+       ;; Dailies
+       ("C-c n j" . org-roam-dailies-capture-today))
 :config
-(org-roam-setup))
+;; If you're using a vertical completion framework, you might want a more informative completion interface
+;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+(org-roam-db-autosync-mode)
+;; If using org-roam-protocol
+(require 'org-roam-protocol))
+
+;; (use-package org-roam
+;; :ensure t
+;; :init
+;; (setq org-roam-v2-ack t)
+;; :custom
+;; (org-roam-directory "~/org")
+;; (org-roam-completion-everywhere t)
+;; :bind (("C-c n l" . org-roam-buffer-toggle)
+;;        ("C-c n f" . org-roam-node-find)
+;;        ("C-c n i" . org-roam-node-insert)
+;;        :map org-mode-map
+;;        ("C-M-i" . completion-at-point))
+;; :config
+;; (org-roam-setup))
 
 (setq org-roam-capture-templates
   '(("m" "main" plain
@@ -467,14 +487,18 @@
       :immediate-finish t
       :unnarrowed t)))
 
-(cl-defmethod org-roam-node-type ((node org-roam-node))
-  "Return the TYPE of NODE."
-  (condition-case nil
-      (file-name-nondirectory
-       (directory-file-name
-        (file-name-directory
-         (file-relative-name (org-roam-node-file node) org-roam-directory))))
-    (error "")))
+(with-eval-after-load 'org-roam
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name
+            (org-roam-node-file node)
+            org-roam-directory))))
+      (error "")))
+)
 
 (setq org-roam-node-display-template
       (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
@@ -501,7 +525,6 @@
         (shell . t)
        ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
-
 ;; Disable execution confirmations 
 (setq org-confirm-babel-evaluate nil)
 
@@ -633,6 +656,10 @@
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 (use-package forge
   :after magit)
+
+;;(require 'evil-nerd-commenter)
+
+;;(global-set-key (kbd "M-/") 'evilnc-comment-or-uncomment-lines)
 
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))

@@ -15,9 +15,15 @@ Add some global variable settings.
   (defvar efs/default-font-size 155)	
   (defvar efs/default-variable-font-size 155)
 
-  ;; make frame transparency overridable
+  ;; Make frame transparency overridable
   (defvar efs/frame-transparency '(100 . 100))
+
+ ;; Enable relative line numbers
+ (setq display-line-numbers-type 'relative)
 #+end_src
+
+#+RESULTS:
+: relative
 
 * Startup Performance
 
@@ -108,7 +114,6 @@ This section configures basic UI settings that remove unneeded elements to make 
   (column-number-mode)
   (global-display-line-numbers-mode t)
   (setq initial-scratch-message nil)
-
 
   ;; Set frame transparency
   (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
@@ -238,14 +243,14 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
             (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
             ;; Manage windows
-            (evil-global-set-key 'normal (kbd "C-SPC <backspace>") 'delete-window)
-            (evil-global-set-key 'normal (kbd "C-SPC \\") 'split-window-right)
-            (evil-global-set-key 'normal (kbd "C-SPC -") 'split-window-below)
+            (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
+            (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
+            (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
             ;; Windmove keys for additional window navigation
-            (evil-global-set-key 'normal (kbd "C-SPC h")  'windmove-left)
-            (evil-global-set-key 'normal (kbd "C-SPC l")  'windmove-right)
-            (evil-global-set-key 'normal (kbd "C-SPC k")  'windmove-up)
-            (evil-global-set-key 'normal (kbd "C-SPC j")  'windmove-down)
+            (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
+            (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
+            (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
+            (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
 
             ;; Use visual line motions even outside of visual-line-mode buffers
             (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -552,9 +557,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
       (efs/org-font-setup))
 #+end_src
 
-#+RESULTS:
-| rainbow-delimiters-mode | (lambda nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | org-tempo-setup | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | efs/org-mode-visual-fill | org-bullets-mode | efs/org-mode-setup | (lambda nil (load-theme 'modus-vivendi t)) | (lambda nil (display-line-numbers-mode 0)) |
-
 *** Nicer Heading Bullets
 
 [[https://github.com/sabof/org-bullets][org-bullets]] replaces the heading stars in =org-mode= buffers with nicer looking characters that you can control.
@@ -593,18 +595,42 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 #+begin_src emacs-lisp
   (use-package org-roam
   :ensure t
-  :init
-  (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory "~/org")
-  (org-roam-completion-everywhere t)
+  (org-roam-directory (file-truename "~/org"))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
          ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point))
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
   :config
-  (org-roam-setup))
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+#+end_src
+
+#+RESULTS:
+: org-roam-dailies-capture-today
+
+- Here is my old org-roam setup:
+#+begin_src emacs-lisp
+  ;; (use-package org-roam
+  ;; :ensure t
+  ;; :init
+  ;; (setq org-roam-v2-ack t)
+  ;; :custom
+  ;; (org-roam-directory "~/org")
+  ;; (org-roam-completion-everywhere t)
+  ;; :bind (("C-c n l" . org-roam-buffer-toggle)
+  ;;        ("C-c n f" . org-roam-node-find)
+  ;;        ("C-c n i" . org-roam-node-insert)
+  ;;        :map org-mode-map
+  ;;        ("C-M-i" . completion-at-point))
+  ;; :config
+  ;; (org-roam-setup))
 #+end_src
 
 *** Org Roam Capture Templates
@@ -638,15 +664,21 @@ Org roam allows you to create various capture templates.
 It can be useful to differentiate the different types of zettels at completion time.
 
 #+begin_src emacs-lisp
-(cl-defmethod org-roam-node-type ((node org-roam-node))
-  "Return the TYPE of NODE."
-  (condition-case nil
-      (file-name-nondirectory
-       (directory-file-name
-        (file-name-directory
-         (file-relative-name (org-roam-node-file node) org-roam-directory))))
-    (error "")))
+  (with-eval-after-load 'org-roam
+    (cl-defmethod org-roam-node-type ((node org-roam-node))
+      "Return the TYPE of NODE."
+      (condition-case nil
+          (file-name-nondirectory
+           (directory-file-name
+            (file-name-directory
+             (file-relative-name
+              (org-roam-node-file node)
+              org-roam-directory))))
+        (error "")))
+  )
 #+end_src
+
+#+RESULTS:
 
 **** Modifying Display Template to Show Node Type
 
@@ -673,6 +705,9 @@ It can be useful to differentiate the different types of zettels at completion t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Configure Babel Languages
 
@@ -978,11 +1013,16 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
 #+begin_src emacs-lisp
+  ;;(require 'evil-nerd-commenter)
+
+  ;;(global-set-key (kbd "M-/") 'evilnc-comment-or-uncomment-lines)
+
   (use-package evil-nerd-commenter
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 
-
+#+RESULTS:
+: evilnc-comment-or-uncomment-lines
 
 ** Rainbow Delimiters
 
@@ -996,6 +1036,9 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
       (org-mode . rainbow-delimiters-mode)
       (lisp-mode . rainbow-delimiters-mode))
 #+end_src
+
+#+RESULTS:
+| rainbow-delimiters-mode | sly-editing-mode |
 
 * Terminals
 
