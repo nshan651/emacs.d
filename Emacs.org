@@ -11,19 +11,17 @@ My config was heavily inspired by David Wilson's [[https://github.com/daviwil/em
 Add some global variable settings.
 
 #+begin_src emacs-lisp
-  ;; Set base font sizes
-  (defvar efs/default-font-size 155)	
-  (defvar efs/default-variable-font-size 155)
+   ;; Set base font sizes
+   (defvar efs/default-font-size 145)	
+   (defvar efs/default-variable-font-size 145)
 
-  ;; Make frame transparency overridable
-  (defvar efs/frame-transparency '(100 . 100))
+   ;; Make frame transparency overridable
+   (defvar efs/frame-transparency '(100 . 100))
 
- ;; Enable relative line numbers
- (setq display-line-numbers-type 'relative)
+  ;; Enable relative line numbers
+  (setq display-line-numbers-type 'relative)
 #+end_src
 
-#+RESULTS:
-: relative
 
 * Startup Performance
 
@@ -63,7 +61,6 @@ Emacs has a built in package manager but it doesn't make it easy to automaticall
 
   (require 'use-package)
   (setq use-package-always-ensure t)
-
 #+end_src
 
 ** Automatic Package Updates
@@ -89,6 +86,10 @@ You can also use =M-x auto-package-update-now= to update right now!
 Use the [[https://github.com/emacscollective/no-littering/blob/master/no-littering.el][no-littering]] package to keep folders clean.
 
 #+begin_src emacs-lisp
+  ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
+  (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
+        url-history-file (expand-file-name "url/history" user-emacs-directory))
+  ;; Use no-littering to automatically set common paths to the new user-emacs-directory
   (use-package no-littering)
 
   ;; no-littering doesn't set this by default so we must place
@@ -102,46 +103,73 @@ Use the [[https://github.com/emacscollective/no-littering/blob/master/no-litteri
 This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern.  If you're just getting started in Emacs, the menu bar might be helpful so you can remove the =(menu-bar-mode -1)= line if you'd like to still see that.
 
 #+begin_src emacs-lisp
-  (setq inhibit-startup-message t)
+    (setq inhibit-startup-message t)
+    (setq initial-scratch-message nil)
 
-  (scroll-bar-mode -1)        ; Disable visible scrollbar
-  (tool-bar-mode -1)          ; Disable the toolbar
-  (tooltip-mode -1)           ; Disable tooltips
-  (set-fringe-mode 10)        ; Give some breathing room
+    (scroll-bar-mode -1)        ; Disable visible scrollbar
+    (tool-bar-mode -1)          ; Disable the toolbar
+    (tooltip-mode -1)           ; Disable tooltips
+    (set-fringe-mode 10)        ; Give some breathing room
 
-  (menu-bar-mode -1)            ; Disable the menu bar
+    (menu-bar-mode -1)            ; Disable the menu bar
 
-  (column-number-mode)
-  (global-display-line-numbers-mode t)
-  (setq initial-scratch-message nil)
+    ;; Improve scrolling
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+    (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+    (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+    (setq scroll-step 1) ;; keyboard scroll one line at a time
 
-  ;; Set frame transparency
-  (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-  (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+    ;; Set frame transparency
+    (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
+    (add-to-list 'default-frame-alist `(alpha . (100 . 100)))
+    (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+    (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-  ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  shell-mode-hook
-                  treemacs-mode-hook
-                  eshell-mode-hook))
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+    ;; Relative line numbers
+    (column-number-mode)
+    (global-display-line-numbers-mode t)
+
+    ;; Disable line numbers for some modes
+    (dolist (mode '(org-mode-hook
+                    term-mode-hook
+                    shell-mode-hook
+                    treemacs-mode-hook
+                    eshell-mode-hook))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+  ;; Revert Dired and other buffers
+  (setq global-auto-revert-non-file-buffers t)
+
+  ;; Revert buffers when the underlying file has changed
+  (global-auto-revert-mode 1)
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Color Theme
 
 I use ==modue-vivendi== as my main theme.
 
 #+begin_src emacs-lisp
-  (load-theme 'modus-vivendi t)
+  ;; (load-theme 'modus-vivendi t)
+  (load-theme 'modus-operandi t)
 
-  ;; Reload the theme when switching to Emacs.org
-  (add-hook 'org-mode-hook
-          (lambda ()
-            (load-theme 'modus-vivendi t)))
+  ;; Customize the background color
+  (custom-set-faces
+   '(default ((t (:background "#f0f0ca"))))
+   '(vertical-border ((t (:background "#f0f0ca"))))
+   '(fringe ((t (:background "#f0f0ca"))))
+   '(mode-line ((t (:background "#f0f0ca" :box nil)))))
+
+
+      ;;Reload the theme when switching to Emacs.org
+      ;;(add-hook 'org-mode-hook
+      ;;	(lambda ()
+      ;;	  (load-theme 'modus-vivendi t)))
 #+end_src
+
+#+RESULTS:
 
 ** Font Configuration
 
@@ -160,12 +188,23 @@ Set font details here.
 ** Toggle Transparency
 
 #+begin_src emacs-lisp
-  (defun toggle-transparency ()
-    "Toggle transparency of the Emacs frame."
-    (interactive)
-    (if (equal (frame-parameter nil 'alpha) '(100 100))
-        (set-frame-parameter nil 'alpha '(75 75))
-      (set-frame-parameter nil 'alpha '(100 100))))
+  ;; (defun toggle-transparency ()
+  ;;   "Toggle transparency of the Emacs frame."
+  ;;   (interactive)
+  ;;   (if (equal (frame-parameter nil 'alpha) '(100 100))
+  ;;       (set-frame-parameter nil 'alpha '(75 75))
+  ;;     (set-frame-parameter nil 'alpha '(100 100))))
+#+end_src
+
+#+RESULTS:
+
+** Cleanup Whitespaces
+Automatically trim extraneous whitespaces.
+#+begin_src emacs-lisp
+  (use-package ws-butler
+    :ensure t
+    :config
+    (ws-butler-global-mode 1))
 #+end_src
 
 * Keybindings
@@ -194,75 +233,77 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 ** Evil Mode
 
 #+begin_src emacs-lisp
-          (use-package evil
-            :init
-            (setq evil-want-integration t)
-            (setq evil-want-keybinding nil)
-            (setq evil-want-C-u-scroll t)
-            (setq evil-want-C-i-jump nil)
-            :config
-            (evil-mode 1)
-            (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-            (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (use-package evil
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump nil)
+      (setq evil-respect-visual-line-mode t)
+      ;; (setq evil-undo-system 'undo-tree)
+      :config
+      (evil-mode 1)
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-            ;; Define key bindings for SPC followed by a single key
-            (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-            (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-            (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-            (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+      ;; Define key bindings for SPC followed by a single key
+      (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+      (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+      (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+      (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
 
-            ;; Background transparency
-            (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
+      ;; Background transparency
+      (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
 
-            ;; Org Agenda
-            (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+      ;; Org Agenda
+      (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
-            ;; Open TODO agenda file as a pop-up buffer
-            (define-key evil-normal-state-map (kbd "SPC r")
-              (lambda () 
-                (interactive)
-                (let ((file "~/org/agenda/todo.org")
-                        (pop-up-buffer "*TODO*"))
-                    (pop-to-buffer pop-up-buffer)
-                    (find-file file))))
+      ;; Open TODO agenda file as a pop-up buffer
+      (define-key evil-normal-state-map (kbd "SPC r")
+        (lambda () 
+          (interactive)
+          (let ((file "~/org/agenda/todo.org")
+                  (pop-up-buffer "*TODO*"))
+              (pop-to-buffer pop-up-buffer)
+              (find-file file))))
 
-            (defun open-custom-agenda ()
-              "Open the custom agenda view."
-              (interactive)
-              (org-agenda nil "A"))
+      (defun open-custom-agenda ()
+        "Open the custom agenda view."
+        (interactive)
+        (org-agenda nil "A"))
 
-            (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+      (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
 
-            ;; Org Roam
-            (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-            (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-            (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+      ;; Org Roam
+      (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+      (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+      (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
 
-            ;; Manage buffers
-            (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-            (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+      ;; Manage buffers
+      (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+      (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
-            ;; Manage windows
-            (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
-            (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
-            (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
-            ;; Windmove keys for additional window navigation
-            (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
-            (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
-            (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
-            (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
+      ;; Manage windows
+      (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
+      (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
+      (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
+      ;; Windmove keys for additional window navigation
+      (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
+      (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
+      (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
+      (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
 
-            ;; Use visual line motions even outside of visual-line-mode buffers
-            (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-            (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+      ;; Use visual line motions even outside of visual-line-mode buffers
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-            (evil-set-initial-state 'messages-buffer-mode 'normal)
-            (evil-set-initial-state 'dashboard-mode 'normal))
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal))
 
-        (use-package evil-collection
-          :after evil
-          :config
-          (evil-collection-init))
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
 #+end_src
 
 #+RESULTS:
@@ -273,7 +314,6 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs' UI capabilities.
 
 ** Which Key
-
 [[https://github.com/justbur/emacs-which-key][which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
 
 #+begin_src emacs-lisp
@@ -287,60 +327,310 @@ I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs
 
 #+end_src
 
-** Ivy and Counsel
+** Vertico
+[[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI based on the default completion system. 
 
+#+begin_src emacs-lisp
+      (defun ns/minibuffer-backward-kill (arg)
+      "When minibuffer is completing a file name delete up to parent
+    folder, otherwise delete a character backward"
+      (interactive "p")
+      (if minibuffer-completing-file-name
+          ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
+          (if (string-match-p "/." (minibuffer-contents))
+              (zap-up-to-char (- arg) ?/)
+            (delete-minibuffer-contents))
+          (delete-backward-char arg)))
+
+      ;; Enable vertico
+      (use-package vertico
+        :init
+        (vertico-mode)
+        :bind (:map minibuffer-local-map
+                    ("<backspace>" . ns/minibuffer-backward-kill)))
+
+      ;; Persist history over Emacs restarts. Vertico sorts by history position.
+      (use-package savehist
+        :init
+        (savehist-mode))
+
+      ;; A few more useful configurations...
+      (use-package emacs
+        :init
+        ;; Add prompt indicator to `completing-read-multiple'.
+        ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+        (defun crm-indicator (args)
+          (cons (format "[CRM%s] %s"
+                        (replace-regexp-in-string
+                         "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                         crm-separator)
+                        (car args))
+                (cdr args)))
+        (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+        ;; Do not allow the cursor in the minibuffer prompt
+        (setq minibuffer-prompt-properties
+              '(read-only t cursor-intangible t face minibuffer-prompt))
+        (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+        ;; Enable recursive minibuffers
+        (setq enable-recursive-minibuffers t))
+#+end_src
+
+#+RESULTS:
+
+** Consult
+
+#+begin_src emacs-lisp
+;; Example configuration for Consult
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s D" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+)
+#+end_src
+
+** Orderless
+
+#+begin_src emacs-lisp
+  (use-package orderless
+    :ensure t
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+#+RESULTS:
+
+** Embark
+
+#+begin_src emacs-lisp
+  ;; (use-package marginalia
+  ;;   :ensure t
+  ;;   :config
+  ;;   (marginalia-mode))
+
+  (use-package embark
+    :ensure t
+    :bind
+    (("C-." . embark-act)         ;; pick some comfortable binding
+     ("C-;" . embark-dwim)        ;; good alternative: M-.
+     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+    :init
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+    ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
+    ;; strategy, if you want to see the documentation from multiple providers.
+    (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+
+  ;; Consult users will also want the embark-consult package.
+  (use-package embark-consult
+    :ensure t ; only need to install it, embark loads it after consult if found
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
+
+#+RESULTS:
+| embark-consult--upgrade-markers | consult-preview-at-point-mode |
+
+** Marginalia
+The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia annotations to the minibuffer completions.
+
+#+begin_src emacs-lisp
+  ;; Enable rich annotations using the Marginalia package
+  (use-package marginalia
+    ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+    ;; available in the *Completions* buffer, add it to the
+    ;; `completion-list-mode-map'.
+    :bind (:map minibuffer-local-map
+           ("M-A" . marginalia-cycle))
+    :init
+    ;; Marginalia must be activated in the :init section of use-package such that
+    ;; the mode gets enabled right away. Note that this forces loading the
+    ;; package.
+    (marginalia-mode))
+#+end_src
+
+** Corfu
+[[https://github.com/minad/corfu][Corfu]] enhances in-buffer completion with a small completion popup.
+
+#+begin_src emacs-lisp
+  (use-package corfu
+    ;; Optional customizations
+    :custom
+    (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+    ;; (corfu-auto t)                 ;; Enable auto completion
+    (corfu-separator ?\s)          ;; Orderless field separator
+    ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+    ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+    ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+    ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+    ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+    ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+    :init
+    (global-corfu-mode))
+#+end_src
+
+#+RESULTS:
+
+** Ivy and Counsel
 [[https://oremacs.com/swiper/][Ivy]] is an excellent completion framework for Emacs.  It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.  Counsel is a customized set of commands to replace `find-file` with `counsel-find-file`, etc which provide useful commands for each of the default completion commands. [[https://github.com/Yevgnen/ivy-rich][ivy-rich]] adds extra columns to a few of the Counsel commands to provide more information about each item.
 
 #+begin_src emacs-lisp
-  (use-package ivy
-    :diminish
-    :bind (("C-s" . swiper)
-           :map ivy-minibuffer-map
-           ("TAB" . ivy-alt-done)
-           ("C-l" . ivy-alt-done)
-           ("C-j" . ivy-next-line)
-           ("C-k" . ivy-previous-line)
-           :map ivy-switch-buffer-map
-           ("C-k" . ivy-previous-line)
-           ("C-l" . ivy-done)
-           ("C-d" . ivy-switch-buffer-kill)
-           :map ivy-reverse-i-search-map
-           ("C-k" . ivy-previous-line)
-           ("C-d" . ivy-reverse-i-search-kill))
-    :config
-    (ivy-mode 1))
+  ;; (use-package ivy
+  ;;   :diminish
+  ;;   :bind (("C-s" . swiper)
+  ;;          :map ivy-minibuffer-map
+  ;;          ("TAB" . ivy-alt-done)
+  ;;          ("C-l" . ivy-alt-done)
+  ;;          ("C-j" . ivy-next-line)
+  ;;          ("C-k" . ivy-previous-line)
+  ;;          :map ivy-switch-buffer-map
+  ;;          ("C-k" . ivy-previous-line)
+  ;;          ("C-l" . ivy-done)
+  ;;          ("C-d" . ivy-switch-buffer-kill)
+  ;;          :map ivy-reverse-i-search-map
+  ;;          ("C-k" . ivy-previous-line)
+  ;;          ("C-d" . ivy-reverse-i-search-kill))
+  ;;   :config
+  ;;   (ivy-mode 1))
 
-  ;; ivy-rich adds extra columns and a few new counsel commands.
-  (use-package ivy-rich
-    :after ivy
-    :init
-    (ivy-rich-mode 1))
+  ;; ;; ivy-rich adds extra columns and a few new counsel commands.
+  ;; (use-package ivy-rich
+  ;;   :after ivy
+  ;;   :init
+  ;;   (ivy-rich-mode 1))
 #+end_src
+
+#+RESULTS:
 
 ** Counsel
 
 #+begin_src emacs-lisp
-  (use-package counsel
-    :bind (("C-M-j" . 'counsel-switch-buffer)
-           :map minibuffer-local-map
-           ("C-r" . 'counsel-minibuffer-history))
-    :custom
-    (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-    :config
-    (counsel-mode 1))
+  ;; (use-package counsel
+  ;;   :bind (("C-M-j" . 'counsel-switch-buffer)
+  ;;          :map minibuffer-local-map
+  ;;          ("C-r" . 'counsel-minibuffer-history))
+  ;;   :custom
+  ;;   (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+  ;;   :config
+  ;;   (counsel-mode 1))
 #+end_src
+
+#+RESULTS:
 
 *** Ivy Prescient
 
 Prescient provides some helpful behavior for sorting Ivy completion candidates based on how recently or frequently you select them.
 
 #+begin_src emacs-lisp
-  (use-package ivy-prescient
-    :after counsel
-    :custom
-    (ivy-prescient-enable-filtering nil)
-    :config
-    (ivy-prescient-mode 1))
+  ;; (use-package ivy-prescient
+  ;;   :after counsel
+  ;;   :custom
+  ;;   (ivy-prescient-enable-filtering nil)
+  ;;   :config
+  ;;   (ivy-prescient-mode 1))
 #+end_src
 
 ** Helpful Help Commands
@@ -839,57 +1129,18 @@ Try these commands with =M-x=:
 #+end_src
 
 *** Debugging with dap-mode
-
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]].  You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
 
 #+begin_src emacs-lisp
-
   (use-package dap-mode
-    ;; Uncomment the config below if you want all UI panes to be hidden by default!
-    ;; :custom
-    ;; (lsp-enable-dap-auto-configure nil)
-    ;; :config
-    ;; (dap-ui-mode 1)
     :commands dap-debug
+    :init
     :config
-    ;; Set up Node debugging
-    (require 'dap-node)
-    (dap-node-setup) ;; Automatically installs Node debug adapter if needed
-
-    ;; Bind `C-c l d` to `dap-hydra` for easy access
-    (general-define-key
-      :keymaps 'lsp-mode-map
-      :prefix lsp-keymap-prefix
-      "d" '(dap-hydra t :wk "debugger")))
-
+    (dap-ui-mode 1)
+    (dap-mode 1))
 #+end_src
-
-*** TypeScript
-
-This is a basic configuration for the TypeScript language so that =.ts= files activate =typescript-mode= when opened.  We're also adding a hook to =typescript-mode-hook= to call =lsp-deferred= so that we activate =lsp-mode= to get LSP features every time we edit TypeScript code.
-
-#+begin_src emacs-lisp
-
-  (use-package typescript-mode
-    :mode "\\.ts\\'"
-    :hook (typescript-mode . lsp-deferred)
-    :config
-    (setq typescript-indent-level 2))
-
-#+end_src
-
-*Important note!*  For =lsp-mode= to work with TypeScript (and JavaScript) you will need to install a language server on your machine.  If you have Node.js installed, the easiest way to do that is by running the following command:
-
-#+begin_src shell :tangle no
-
-npm install -g typescript-language-server typescript
-
-#+end_src
-
-This will install the [[https://github.com/theia-ide/typescript-language-server][typescript-language-server]] and the TypeScript compiler package.
 
 *** Python
-
 We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.
 
 Make sure you have the =pyls= language server installed before trying =lsp-mode=!
@@ -903,7 +1154,6 @@ pip install --user "python-language-server[all]"
 There are a number of other language servers for Python so if you find that =pyls= doesn't work for you, consult the =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/languages/][language configuration documentation]] to try the others!
 
 #+begin_src emacs-lisp
-
   (use-package python-mode
     :ensure t
     :hook (python-mode . lsp-deferred)
@@ -914,8 +1164,6 @@ There are a number of other language servers for Python so if you find that =pyl
     (dap-python-debugger 'debugpy)
     :config
     (require 'dap-python))
-
-
 #+end_src
 
 You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
@@ -942,7 +1190,6 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 #+end_src
 
 ** Company Mode
-
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
 
 We also use [[https://github.com/sebastiencs/company-box][company-box]] to further enhance the look of the completions with icons and better overall presentation.
@@ -966,7 +1213,6 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 #+end_src
 
 ** Projectile
-
 [[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
 
 #+begin_src emacs-lisp
@@ -979,8 +1225,8 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     ("C-c p" . projectile-command-map)
     :init
     ;; NOTE: Set this to the folder where you keep your Git repos!
-    (when (file-directory-p "~/Projects/Code")
-      (setq projectile-project-search-path '("~/Projects/Code")))
+    (when (file-directory-p "~/git")
+      (setq projectile-project-search-path '("~/git")))
     (setq projectile-switch-project-action #'projectile-dired))
 
   (use-package counsel-projectile
