@@ -1,6 +1,6 @@
 ;; Set base font sizes
- (defvar efs/default-font-size 145)	
- (defvar efs/default-variable-font-size 145)
+ (defvar efs/default-font-size 135)
+ (defvar efs/default-variable-font-size 135)
 
  ;; Make frame transparency overridable
  (defvar efs/frame-transparency '(100 . 100))
@@ -102,14 +102,14 @@
 (load-theme 'modus-operandi t)
 
 ;; Customize the background color
-;; (custom-set-faces
-;;  '(default ((t (:background "#f0f0ca"))))
-;;  '(vertical-border ((t (:background "#f0f0ca"))))
-;;  '(fringe ((t (:background "#f0f0ca"))))
-;;  '(mode-line ((t (:background "#f0f0ca" :box nil)))))
+(custom-set-faces
+ '(default ((t (:background "#f0f0ca"))))
+ '(vertical-border ((t (:background "#f0f0ca"))))
+ '(fringe ((t (:background "#f0f0ca"))))
+ '(mode-line ((t (:background "#f0f0ca" :box nil)))))
 
 
-    ;; Reload the theme when switching to Emacs.org
+    ;;Reload the theme when switching to Emacs.org
     ;;(add-hook 'org-mode-hook
     ;;	(lambda ()
     ;;	  (load-theme 'modus-vivendi t)))
