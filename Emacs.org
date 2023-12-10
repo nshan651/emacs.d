@@ -158,14 +158,6 @@ I use ==modue-vivendi== as my main theme.
   ;; (load-theme 'modus-vivendi t)
   (load-theme 'modus-operandi t)
 
-  ;; Customize the background color
-  (custom-set-faces
-   '(default ((t (:background "#f0f0ca"))))
-   '(vertical-border ((t (:background "#f0f0ca"))))
-   '(fringe ((t (:background "#f0f0ca"))))
-   '(mode-line ((t (:background "#f0f0ca" :box nil)))))
-
-
       ;;Reload the theme when switching to Emacs.org
       ;;(add-hook 'org-mode-hook
       ;;	(lambda ()
