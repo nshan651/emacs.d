@@ -1,0 +1,42 @@
+;; modus-themes
+(use-package modus-themes
+  :ensure t
+  :config
+  ;; Add all your customizations prior to loading the themes
+  ;;(setq modus-themes-italic-constructs t
+  ;;      modus-themes-bold-constructs nil)
+
+  ;; Maybe define some palette overrides, such as by using our presets
+  ;(setq modus-themes-common-palette-overrides
+  ;      modus-themes-preset-overrides-intense)
+
+  ;; Load the theme of your choice.
+  ;(load-theme 'modus-vivendi)
+
+  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+;;(load-theme 'modus-vivendi t)
+;;(load-theme 'modus-operandi t)
+
+;; ef-themes
+(use-package ef-themes
+  :ensure t
+  :config
+
+  ;; Load the theme of choice
+  ;; (load-theme 'ef-winter)
+  ;; (load-theme 'ef-autumn)
+  (load-theme 'ef-dark)
+  ;; (load-theme 'ef-elea-dark)
+  )
+
+;; Set base font sizes
+(defvar efs/default-font-size 110)
+(defvar efs/default-variable-font-size 110)
+
+(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+
+;; Set the variable pitch face
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)

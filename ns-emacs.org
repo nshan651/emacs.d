@@ -1,144 +1,120 @@
 #+title: GNU Emacs Config
-#+author: Nick Shannon
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+author: nshan651
 
 * Introduction
 
 My config was heavily inspired by David Wilson's [[https://github.com/daviwil/emacs-from-scratch/blob/master/Emacs.org][emacs-from-scratch]] series. Check it out! To update this, just run =C-c C-v t= or =org-babel-tangle=.
 
-* Define Variables
+* Early Initialization
 
-Add some global variable settings.
+This is the first file that Emacs reads when starting up. It should contain code that does not depend on any package or the proportions of the Emacs frame. In general, this early initialization file is meant to set up a few basic things before Emacs produces the initial frame by delegating to the =init.el=. 
 
-#+begin_src emacs-lisp
-   ;; Set base font sizes
-   (defvar efs/default-font-size 135)
-   (defvar efs/default-variable-font-size 135)
+** Macros to run code only in a Desktop Environment
 
-   ;; Make frame transparency overridable
-   (defvar efs/frame-transparency '(100 . 100))
+#+begin_src emacs-lisp :tangle "early-init.el"
+  (defvar ns-emacs-tiling-window-manager-regexp
+    (regexp-opt '("bspwm" "herbstluftwm" "i3" "dwm"))
+    "Regular expression to  tiling window managers.
+  See definition of `ns-emacs-with-desktop-session'.")
 
-  ;; Enable relative line numbers
-  (setq display-line-numbers-type 'relative)
+  (defmacro ns-emacs-with-desktop-session (&rest body) 
+   "Expand BODY if desktop session is not a tiling window manager.
+  See `ns-emacs-tiling-window-manager-regexp' for what
+  constitutes a matching tiling window manager."
+    (declare (indent 0))
+    `(when-let ((session (getenv "DESKTOP_SESSION"))
+                ((not (string-match-p session ns-emacs-tiling-window-manager-regexp))))
+       ,@body))
 #+end_src
 
-#+RESULTS:
-: relative
+** Set frame parameters
 
+Here I am setting parameters for the size of the Emacs frame: the first as well as any future one. In a tiling window manager, these parameters are not relevant, since all windows are forcibly made to fit into rectangles (tiles) that fill up the entire screen. So I use the ns-emacs-with-desktop-session macro that I described above to set these parameters only when I am in a regular desktop environment (The early-init.el macro to run code only in a Desktop Environment).
 
-* Startup Performance
+#+begin_src emacs-lisp :tangle "early-init.el"
+  (defun ns-emacs-add-to-list (list element)
+    "Add to symbol of LIST the given ELEMENT.
+  Simplified version of `add-to-list'."
+    (set list (cons element (symbol-value list))))
 
-#+begin_src emacs-lisp
-  ;; The default is 800 kilobytes.  Measured in bytes.
-  (setq gc-cons-threshold (* 50 1000 1000))
-
-  (defun efs/display-startup-time ()
-    (message "Emacs loaded in %s with %d garbage collections."
-             (format "%.2f seconds"
-                     (float-time
-                       (time-subtract after-init-time before-init-time)))
-             gcs-done))
-
-  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+  (ns-emacs-with-desktop-session
+    (mapc
+     (lambda (var)
+       (ns-emacs-add-to-list var '(width . (text-pixels . 900)))
+       (ns-emacs-add-to-list var '(height . (text-pixels . 600)))
+       (ns-emacs-add-to-list var '(scroll-bar-width  . 10)))
+     '(default-frame-alist initial-frame-alist)))
 #+end_src
 
-* Package System Setup
+** Basic frame settings
 
-Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+These are general frame settngs. Notice the frame-resize-pixelwise and frame-inhibit-implied-resize: by default Emacs will resize the frame if you adjust the font size, which I never want.
 
-#+begin_src emacs-lisp
-  ;; Initialize package sources
-  (require 'package)
+#+begin_src emacs-lisp :tangle "early-init.el"
+(setq frame-resize-pixelwise t
+      frame-inhibit-implied-resize t
+      frame-title-format '("%b")
+      ring-bell-function 'ignore
+      use-dialog-box t ; only for mouse events, which I seldom use
+      use-file-dialog nil
+      use-short-answers t
+      inhibit-splash-screen t
+      inhibit-startup-screen t
+      inhibit-startup-message t
+      initial-scratch-message nil
+      inhibit-x-resources t
+      inhibit-startup-echo-area-message user-login-name ; read the docstring
+      inhibit-startup-buffer-menu t)
 
-  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-			   ("org" . "https://orgmode.org/elpa/")
-			   ("elpa" . "https://elpa.gnu.org/packages/")))
-
-  (package-initialize)
-  (unless package-archive-contents
-    (package-refresh-contents))
-
-    ;; Initialize use-package on non-Linux platforms
-  (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
-
-  (require 'use-package)
-  (setq use-package-always-ensure t)
-#+end_src
-
-** Automatic Package Updates
-
-The auto-package-update package helps us keep our Emacs packages up to date!  It will prompt you after a certain number of days either at startup or at a specific time of day to remind you to update your packages.
-
-You can also use =M-x auto-package-update-now= to update right now!
-
-#+begin_src emacs-lisp
-
-  (use-package auto-package-update
-    :custom
-    (auto-package-update-interval 7)
-    (auto-package-update-prompt-before-update t)
-    (auto-package-update-hide-results t)
-    :config
-    (auto-package-update-maybe)
-    (auto-package-update-at-time "09:00"))
-#+end_src
-
-* Keep Folders Clean
-
-Use the [[https://github.com/emacscollective/no-littering/blob/master/no-littering.el][no-littering]] package to keep folders clean.
-
-#+begin_src emacs-lisp
-  ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
-  (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
-        url-history-file (expand-file-name "url/history" user-emacs-directory))
-  ;; Use no-littering to automatically set common paths to the new user-emacs-directory
-  (use-package no-littering)
-
-  ;; no-littering doesn't set this by default so we must place
-  ;; auto save files in the same path as it uses for sessions
-  (setq auto-save-file-name-transforms
-        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-#+end_src
-
-* Basic UI Configuration
-
-This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern.  If you're just getting started in Emacs, the menu bar might be helpful so you can remove the =(menu-bar-mode -1)= line if you'd like to still see that.
-
-#+begin_src emacs-lisp
-    (setq inhibit-startup-message t)
-    (setq initial-scratch-message nil)
-
-    (scroll-bar-mode -1)        ; Disable visible scrollbar
-    (tool-bar-mode -1)          ; Disable the toolbar
-    (tooltip-mode -1)           ; Disable tooltips
     (set-fringe-mode 10)        ; Give some breathing room
 
     (menu-bar-mode -1)            ; Disable the menu bar
 
-    ;; Improve scrolling
-    (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-    (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-    (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-    (setq scroll-step 1) ;; keyboard scroll one line at a time
+;; Disable graphical elements 
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(tooltip-mode -1) 
 
-    ;; Set frame transparency
-    (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
-    (add-to-list 'default-frame-alist `(alpha . (100 . 100)))
-    (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-    (add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; Set frame transparency
+(set-frame-parameter (selected-frame) 'alpha '(100 . 90))
+(add-to-list 'default-frame-alist `(alpha . (100 . 100)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+end_src
 
-    ;; Relative line numbers
-    (column-number-mode)
-    (global-display-line-numbers-mode t)
+** Improve scrolling
 
-    ;; Disable line numbers for some modes
-    (dolist (mode '(org-mode-hook
-                    term-mode-hook
-                    shell-mode-hook
-                    treemacs-mode-hook
-                    eshell-mode-hook))
-      (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+begin_src emacs-lisp :tangle "early-init.el"
+  ;; Improve mouse scrolling
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+
+  ;; Vim-like key scrolling
+  (setq scroll-step 1
+        scroll-conservatively 10000
+        next-screen-context-lines 5
+        ;; move by logical lines rather than visual lines (better for macros)
+        line-move-visual nil)
+#+end_src
+
+#+RESULTS:
+
+** Line Numbering
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+  ;; Relative line numbers
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+		  term-mode-hook
+		  shell-mode-hook
+		  treemacs-mode-hook
+		  eshell-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
   ;; Revert Dired and other buffers
   (setq global-auto-revert-non-file-buffers t)
@@ -147,71 +123,282 @@ This section configures basic UI settings that remove unneeded elements to make 
   (global-auto-revert-mode 1)
 #+end_src
 
-#+RESULTS:
-: t
+** Garabage collection
 
-** Color Theme
+Here we maximize the GC threshold to make Emacs boot a bit faster.
 
-I use ==modue-vivendi== as my main theme.
+#+begin_src emacs-lisp :tangle "early-init.el"
+;; Temporarily increase the garbage collection threshold.  These
+;; changes help shave off about half a second of startup time.  The
+;; `most-positive-fixnum' is DANGEROUS AS A PERMANENT VALUE.  See the
+;; `emacs-startup-hook' a few lines below for what I actually use.
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.5)
 
-#+begin_src emacs-lisp
-  ;; (load-theme 'modus-vivendi t)
-  (load-theme 'modus-operandi t)
+;; Same idea as above for the `file-name-handler-alist' and the
+;; `vc-handled-backends' with regard to startup speed optimisation.
+;; Here I am storing the default value with the intent of restoring it
+;; via the `emacs-startup-hook'.
+(defvar ns-emacs--file-name-handler-alist file-name-handler-alist)
+(defvar ns-emacs--vc-handled-backends vc-handled-backends)
 
-      ;;Reload the theme when switching to Emacs.org
-      ;;(add-hook 'org-mode-hook
-      ;;	(lambda ()
-      ;;	  (load-theme 'modus-vivendi t)))
+(setq file-name-handler-alist nil
+      vc-handled-backends nil)
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 1024 1024 20)
+                  gc-cons-percentage 0.2
+                  file-name-handler-alist ns-emacs--file-name-handler-alist
+                  vc-handled-backends ns-emacs--vc-handled-backends)))
 #+end_src
 
-#+RESULTS:
+** Declare all themes as safe
 
-** Font Configuration
-
-Set font details here.
-
-#+begin_src emacs-lisp
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
-
-  ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
-
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+#+begin_src emacs-lisp :tangle "early-init.el"
+  (setq custom-safe-themes t)
 #+end_src
 
-** Toggle Transparency
+** Initialize the package cache
 
-#+begin_src emacs-lisp
-  ;; (defun toggle-transparency ()
-  ;;   "Toggle transparency of the Emacs frame."
-  ;;   (interactive)
-  ;;   (if (equal (frame-parameter nil 'alpha) '(100 100))
-  ;;       (set-frame-parameter nil 'alpha '(75 75))
-  ;;     (set-frame-parameter nil 'alpha '(100 100))))
+I use the standard package.el.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+;; Initialise installed packages at this early stage, by using the
+;; available cache.  I had tried a setup with this set to nil in the
+;; early-init.el, but (i) it ended up being slower and (ii) various
+;; package commands, like `describe-package', did not have an index of
+;; packages to work with, requiring a `package-refresh-contents'.
+(setq package-enable-at-startup t)
 #+end_src
 
-#+RESULTS:
+** Give a name to the default frame
 
-** Cleanup Whitespaces
+Finally, I like to call my default frame home. This is because I use my beframe package to group the list of buffers on a per-frame basis.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(add-hook 'after-init-hook (lambda () (set-frame-name "home")))
+#+end_src
+
+* Init Configuration
+** Disable backups and lockfiles
+
+#+begin_src emacs-lisp :tangle "init.el"
+(setq make-backup-files nil)
+(setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
+(setq create-lockfiles nil)
+#+end_src
+
+** Make native compilation silent
+
+#+begin_src emacs-lisp :tangle "init.el"
+;; Make native compilation silent and prune its cache.
+(when (native-comp-available-p)
+  (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation
+  (setq native-compile-prune-cache t)) ; Emacs 29
+#+end_src
+
+** Send custom-file to the shadow realm
+
+By default, Emacs writes persistent customisations to the end of the user’s init file. These are encapsulated in a “custom” block. Emacs writes those whenever the user does something with M-x customize or related.
+
+I personally prefer writing the actual Elisp over using the interface of M-x customize. I also want my init file to only ever contain what I wrote and to never—ever!—evaluate code I have not called myself.
+
+#+begin_src emacs-lisp :tangle "init.el"
+;; Disable the damn thing by making it disposable.
+(setq custom-file (make-temp-file "emacs-custom-"))
+#+end_src
+
+** Enable and disable certain commands
+
+Some Emacs commands are disabled by default. This means that Emacs will produce a warning when we try to invoke them and will ask us for confirmation. Here I define which commands I want to have enabled and then put some on the disabled list.
+
+#+begin_src emacs-lisp :tangle "init.el"
+;; Enable these
+(mapc
+ (lambda (command)
+   (put command 'disabled nil))
+ '(list-timers narrow-to-region narrow-to-page upcase-region downcase-region))
+
+;; And disable these
+(mapc
+ (lambda (command)
+   (put command 'disabled t))
+ '(eshell project-eshell overwrite-mode iconify-frame diary))
+#+end_src
+
+** Start with the =*scratch*= buffer
+
+Keep it simple. I have this disabled by default.
+
+#+begin_src emacs-lisp :tangle "init.el"
+;; Always start with *scratch*
+;;(setq initial-buffer-choice t)
+#+end_src
+
+** Pre-load package configs in =lisp= directory
+
+#+begin_src emacs-lisp :tangle "init.el"
+(mapc
+ (lambda (string)
+   (add-to-list 'load-path (locate-user-emacs-file string)))
+ '("lisp"))
+#+end_src
+
+** Package Setup
+Setup package archives for =package.el=.
+
+#+begin_src emacs-lisp :tangle "init.el"
+;;;; Packages
+
+(require 'package)
+
+(setq package-vc-register-as-project nil) ; Emacs 30
+
+(add-hook 'package-menu-mode-hook #'hl-line-mode)
+
+(setq package-archives
+      '(("elpa" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+
+;; Highest number gets priority (what is not mentioned has priority 0)
+(setq package-archive-priorities
+      '(("elpa" . 3)
+        ("melpa" . 2)
+        ("nongnu" . 1)))
+#+end_src
+
+** Load Some Basic Packages
+These are just some nice packages to have around.
+*** Clean Whitespaces
 Automatically trim extraneous whitespaces.
-#+begin_src emacs-lisp
-  (use-package ws-butler
+
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+(use-package ws-butler
+  :ensure t
+  :config
+  (ws-butler-global-mode 1))
+#+end_src
+
+*** Async
+Provides asynchronous bytecode compilation and various other actions.
+
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+  (use-package async
     :ensure t
-    :config
-    (ws-butler-global-mode 1))
+    :defer t
+    :init
+    (dired-async-mode 1))
+#+end_src
+
+*** Savehist
+
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+  (use-package savehist
+    :defer 2
+    :init (savehist-mode t))
+#+end_src
+
+*** Repeat
+
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+  (use-package repeat
+    :defer 10
+    :init
+    (repeat-mode +1))
 #+end_src
 
 * Keybindings
+All my keybindings are controlled by evil mode.
 
-This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil-mode]] for a Vi-like modal editing experience. [[https://github.com/noctuid/general.el][general.el]] is used for easy keybinding configuration that integrates well with which-key. [[https://github.com/emacs-evil/evil-collection][evil-collection]] is used to automatically configure various Emacs modes with Vi-like keybindings for evil-mode.
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/evil-config.el"))
+#+end_src
 
-#+begin_src emacs-lisp
-  ;; Bind C-x C-b to ibuffer
-  (global-set-key (kbd "C-x C-b") 'ibuffer)
-  ;; Make ESC quit prompts
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+** Evil Keybindings
 
+Load my custom keybindings.
+
+#+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
+;; Bind C-x C-b to ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+;; Make ESC quit prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-respect-visual-line-mode t)
+    ;; (setq evil-undo-system 'undo-tree)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+    ;; Define key bindings for SPC followed by a single key
+    (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+    (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+    (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+    (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+
+    ;; Background transparency
+    ;(define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
+
+    ;; Org Agenda
+    (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+
+    ;; Open TODO agenda file as a pop-up buffer
+    (define-key evil-normal-state-map (kbd "SPC r")
+      (lambda () 
+        (interactive)
+        (let ((file "~/org/agenda/todo.org")
+                (pop-up-buffer "*TODO*"))
+            (pop-to-buffer pop-up-buffer)
+            (find-file file))))
+
+    (defun open-custom-agenda ()
+      "Open the custom agenda view."
+      (interactive)
+      (org-agenda nil "A"))
+
+    (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+
+    ;; Org Roam
+    (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+    (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+    (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+
+    ;; Manage buffers
+    (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+    (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+
+    ;; Manage windows
+    (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
+    (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
+    (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
+    ;; Windmove keys for additional window navigation
+    (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
+    (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
+    (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
+    (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
+
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+
+#+end_src
+
+** General and Evil Collections
+
+#+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
   (use-package general
     :after evil
     :config
@@ -223,77 +410,6 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     (efs/leader-keys
       "t"  '(:ignore t :which-key "toggles")
       "tt" '(counsel-load-theme :which-key "choose theme")))
-#+end_src
-  
-** Evil Mode
-
-#+begin_src emacs-lisp
-  (use-package evil
-      :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
-      (setq evil-want-C-i-jump nil)
-      (setq evil-respect-visual-line-mode t)
-      ;; (setq evil-undo-system 'undo-tree)
-      :config
-      (evil-mode 1)
-      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-      ;; Define key bindings for SPC followed by a single key
-      (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-      (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-      (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-      (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-
-      ;; Background transparency
-      (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
-
-      ;; Org Agenda
-      (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
-
-      ;; Open TODO agenda file as a pop-up buffer
-      (define-key evil-normal-state-map (kbd "SPC r")
-        (lambda () 
-          (interactive)
-          (let ((file "~/org/agenda/todo.org")
-                  (pop-up-buffer "*TODO*"))
-              (pop-to-buffer pop-up-buffer)
-              (find-file file))))
-
-      (defun open-custom-agenda ()
-        "Open the custom agenda view."
-        (interactive)
-        (org-agenda nil "A"))
-
-      (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-
-      ;; Org Roam
-      (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-      (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-      (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
-
-      ;; Manage buffers
-      (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-      (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
-
-      ;; Manage windows
-      (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
-      (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
-      (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
-      ;; Windmove keys for additional window navigation
-      (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
-      (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
-      (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
-      (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
-
-      ;; Use visual line motions even outside of visual-line-mode buffers
-      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal))
 
   (use-package evil-collection
     :after evil
@@ -301,31 +417,104 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     (evil-collection-init))
 #+end_src
 
+** Commenting
+Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
+
+#+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
+  (use-package evil-nerd-commenter
+    :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+#+end_src
+
+* Basic Theme Configuration
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/theme-config.el"))
+#+end_src
+
+** Color Theme
+
+#+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+      ;; modus-themes
+      (use-package modus-themes
+        :ensure t
+        :config
+        ;; Add all your customizations prior to loading the themes
+        ;;(setq modus-themes-italic-constructs t
+        ;;      modus-themes-bold-constructs nil)
+
+        ;; Maybe define some palette overrides, such as by using our presets
+        ;(setq modus-themes-common-palette-overrides
+        ;      modus-themes-preset-overrides-intense)
+
+        ;; Load the theme of your choice.
+        ;(load-theme 'modus-vivendi)
+
+        (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+      ;;(load-theme 'modus-vivendi t)
+      ;;(load-theme 'modus-operandi t)
+
+      ;; ef-themes
+      (use-package ef-themes
+        :ensure t
+        :config
+
+        ;; Load the theme of choice
+        ;; (load-theme 'ef-winter)
+        ;; (load-theme 'ef-autumn)
+        (load-theme 'ef-dark)
+        ;; (load-theme 'ef-elea-dark)
+        )
+
+#+end_src
+
 #+RESULTS:
 : t
 
-* Advanced UI Configuration
+** Font Configuration
 
-I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs' UI capabilities.
+Set font details here.
+
+#+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+  ;; Set base font sizes
+  (defvar efs/default-font-size 110)
+  (defvar efs/default-variable-font-size 110)
+
+  (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+
+  ;; Set the fixed pitch face
+  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+#+end_src
+
+#+RESULTS:
+
+* UI Enhancements
+Some UI enhancements that supercharge Emacs.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/ui-config.el"))
+#+end_src
 
 ** Which Key
 [[https://github.com/justbur/emacs-which-key][which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package which-key
     :defer 0
     :diminish which-key-mode
     :config
     (which-key-mode)
     (setq which-key-idle-delay 1))
-
 #+end_src
 
 ** Vertico
 [[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI based on the default completion system. 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
       (defun ns/minibuffer-backward-kill (arg)
       "When minibuffer is completing a file name delete up to parent
     folder, otherwise delete a character backward"
@@ -372,116 +561,113 @@ I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs
         (setq enable-recursive-minibuffers t))
 #+end_src
 
-#+RESULTS:
-
 ** Consult
 
-#+begin_src emacs-lisp
-;; Example configuration for Consult
-(use-package consult
-  ;; Replace bindings. Lazily loaded due by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s D" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+  ;; Example configuration for Consult
+  (use-package consult
+    ;; Replace bindings. Lazily loaded due by `use-package'.
+    :bind (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s D" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
 
-  ;; The :init configuration is always executed (Not lazy)
-  :init
+    ;; The :init configuration is always executed (Not lazy)
+    :init
 
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
 
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
 
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
 
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; :preview-key "M-."
+     :preview-key '(:debounce 0.4 any))
 
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-)
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; "C-+"
+  )
 #+end_src
-
 ** Orderless
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package orderless
     :ensure t
     :custom
@@ -489,11 +675,9 @@ I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs
     (completion-category-overrides '((file (styles basic partial-completion)))))
 #+end_src
 
-#+RESULTS:
-
 ** Embark
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   ;; (use-package marginalia
   ;;   :ensure t
   ;;   :config
@@ -526,13 +710,10 @@ I use several packages such as =ivy=, =which-key=, and =counsel= to extend Emacs
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-#+RESULTS:
-| embark-consult--upgrade-markers | consult-preview-at-point-mode |
-
 ** Marginalia
 The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia annotations to the minibuffer completions.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
     ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
@@ -546,11 +727,10 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     ;; package.
     (marginalia-mode))
 #+end_src
-
 ** Corfu
 [[https://github.com/minad/corfu][Corfu]] enhances in-buffer completion with a small completion popup.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package corfu
     ;; Optional customizations
     :custom
@@ -567,72 +747,10 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     (global-corfu-mode))
 #+end_src
 
-#+RESULTS:
-
-** Ivy and Counsel
-[[https://oremacs.com/swiper/][Ivy]] is an excellent completion framework for Emacs.  It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.  Counsel is a customized set of commands to replace `find-file` with `counsel-find-file`, etc which provide useful commands for each of the default completion commands. [[https://github.com/Yevgnen/ivy-rich][ivy-rich]] adds extra columns to a few of the Counsel commands to provide more information about each item.
-
-#+begin_src emacs-lisp
-  ;; (use-package ivy
-  ;;   :diminish
-  ;;   :bind (("C-s" . swiper)
-  ;;          :map ivy-minibuffer-map
-  ;;          ("TAB" . ivy-alt-done)
-  ;;          ("C-l" . ivy-alt-done)
-  ;;          ("C-j" . ivy-next-line)
-  ;;          ("C-k" . ivy-previous-line)
-  ;;          :map ivy-switch-buffer-map
-  ;;          ("C-k" . ivy-previous-line)
-  ;;          ("C-l" . ivy-done)
-  ;;          ("C-d" . ivy-switch-buffer-kill)
-  ;;          :map ivy-reverse-i-search-map
-  ;;          ("C-k" . ivy-previous-line)
-  ;;          ("C-d" . ivy-reverse-i-search-kill))
-  ;;   :config
-  ;;   (ivy-mode 1))
-
-  ;; ;; ivy-rich adds extra columns and a few new counsel commands.
-  ;; (use-package ivy-rich
-  ;;   :after ivy
-  ;;   :init
-  ;;   (ivy-rich-mode 1))
-#+end_src
-
-#+RESULTS:
-
-** Counsel
-
-#+begin_src emacs-lisp
-  ;; (use-package counsel
-  ;;   :bind (("C-M-j" . 'counsel-switch-buffer)
-  ;;          :map minibuffer-local-map
-  ;;          ("C-r" . 'counsel-minibuffer-history))
-  ;;   :custom
-  ;;   (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  ;;   :config
-  ;;   (counsel-mode 1))
-#+end_src
-
-#+RESULTS:
-
-*** Ivy Prescient
-
-Prescient provides some helpful behavior for sorting Ivy completion candidates based on how recently or frequently you select them.
-
-#+begin_src emacs-lisp
-  ;; (use-package ivy-prescient
-  ;;   :after counsel
-  ;;   :custom
-  ;;   (ivy-prescient-enable-filtering nil)
-  ;;   :config
-  ;;   (ivy-prescient-mode 1))
-#+end_src
-
-** Helpful Help Commands
-
+** Helpful
 [[https://github.com/Wilfred/helpful][Helpful]] adds a lot of very helpful (get it?) information to Emacs' =describe-= command buffers.  For example, if you use =describe-function=, you will not only get the documentation about the function, you will also see the source code of the function and where it gets used in other places in the Emacs configuration.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package helpful
     :commands (helpful-callable helpful-variable helpful-command helpful-key)
     :custom
@@ -644,36 +762,21 @@ Prescient provides some helpful behavior for sorting Ivy completion candidates b
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 #+end_src
-
 ** Text Scaling
+TODO
 
-This is an example of using [[https://github.com/abo-abo/hydra][Hydra]] to design a transient key binding for quickly adjusting the scale of the text on screen.  We define a hydra that is bound to =C-s t s= and, once activated, =j= and =k= increase and decrease the text scale.  You can press any other key (or =f= specifically) to exit the transient key map.
+* Org
 
-#+begin_src emacs-lisp
-
-  (use-package hydra
-    :defer t)
-
-  (defhydra hydra-text-scale (:timeout 4)
-    "scale text"
-    ("j" text-scale-increase "in")
-    ("k" text-scale-decrease "out")
-    ("f" nil "finished" :exit t))
-
-  (efs/leader-keys
-    "ts" '(hydra-text-scale/body :which-key "scale text"))
-
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/org-config.el"))
 #+end_src
 
-* Org Mode
-
-[[https://orgmode.org/][Org Mode]] is one of the hallmark features of Emacs.  It is a rich document editor, project planner, task and time tracker, blogging engine, and literate coding utility all wrapped up in one package.
-
-** Better Font Faces
+** Font Faces
 
 The =efs/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (defun efs/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
@@ -692,7 +795,8 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
       (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    ;;(set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
     (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -704,19 +808,18 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
     (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
     (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 #+end_src
-
-** Basic Config
+** Basic Org Config
 
 This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
     (defun efs/org-mode-setup ()
       (org-indent-mode)
       (variable-pitch-mode 1)
       (visual-line-mode 1))
 
     (use-package org
-      :pin org
+      ;;:pin org
       :commands (org-capture org-agenda)
       :hook
       (org-mode . efs/org-mode-setup)
@@ -842,22 +945,20 @@ This section contains the basic configuration for =org-mode= plus the configurat
       (efs/org-font-setup))
 #+end_src
 
-*** Nicer Heading Bullets
+** Nicer Heading Bullets
+org-bullets replaces the heading stars in org-mode buffers with nicer looking characters that you can control.
 
-[[https://github.com/sabof/org-bullets][org-bullets]] replaces the heading stars in =org-mode= buffers with nicer looking characters that you can control.
-
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :custom
     (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
-#+end_src
+ #+end_src
 
-*** Center Org Buffers
+** Center Org Buffers
+We use visual-fill-column to center org-mode buffers for a more pleasing writing experience as it centers the contents of the buffer horizontally to seem more like you are editing a document.
 
-We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] to center =org-mode= buffers for a more pleasing writing experience as it centers the contents of the buffer horizontally to seem more like you are editing a document.
-
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (defun efs/org-mode-visual-fill ()
     (setq visual-fill-column-width 100
           visual-fill-column-center-text t)
@@ -865,19 +966,71 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 
   (use-package visual-fill-column
     :hook (org-mode . efs/org-mode-visual-fill))
+ #+end_src
+
+** Babel 
+To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
+
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+        'org-babel-load-languages
+        '(
+          (emacs-lisp . t)
+          (python . t)
+          (shell . t)
+         ))
+    (push '("conf-unix" . conf-unix) org-src-lang-modes))
+  ;; Disable execution confirmations 
+  (setq org-confirm-babel-evaluate nil)
 #+end_src
 
-*** Latex Previewing
+** Structure Templates
+
+Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
+
+You can add more =src= block templates below by copying one of the lines and changing the two strings at the end, the first to be the template name and the second to contain the name of the language [[https://orgmode.org/worg/org-contrib/babel/languages.html][as it is known by Org Babel]].
+
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+  (use-package org-tempo
+    :ensure nil
+    :after org
+    :config
+    (let ((templates '(("sh"  . "src sh")
+                       ("el"  . "src emacs-lisp")
+                       ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
+                       ("vim" . "src vim")
+                       ("py"  . "src python")
+                       ("cpp" . "src C++ :includes <iostream>"))))
+      (dolist (template templates)
+        (push template org-structure-template-alist))))
+#+end_src
+
+** Auto-tangle Configuration Files
+This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-config= gets executed each time such a buffer gets saved.  This function checks to see if the file being saved is the Emacs.org file you're looking at right now, and if so, automatically exports the configuration here to the associated output files. Currently, this is disabled.
 
 #+begin_src emacs-lisp
-  (require 'preview-latex)
+  ;; ;; Automatically tangle our Emacs.org config file when we save it
+  ;; (defun efs/org-babel-tangle-config ()
+  ;;   (when (string-equal (file-name-directory (buffer-file-name))
+  ;;                       (expand-file-name user-emacs-directory))
+  ;;     ;; Dynamic scoping to the rescue
+  ;;     (let ((org-confirm-babel-evaluate nil))
+  ;;       (org-babel-tangle))))
+
+  ;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
+#+end_src
+* Org Roam
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/org-roam-config.el"))
 #+end_src
 
-** Org Roam
-
+** Org Roam Config
 [[https://github.com/org-roam/org-roam][Org Roam]] is a plain-text, graph-based personal knowledge management system.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (use-package org-roam
   :ensure t
   :custom
@@ -897,32 +1050,10 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
   (require 'org-roam-protocol))
 #+end_src
 
-#+RESULTS:
-: org-roam-dailies-capture-today
-
-- Here is my old org-roam setup:
-#+begin_src emacs-lisp
-  ;; (use-package org-roam
-  ;; :ensure t
-  ;; :init
-  ;; (setq org-roam-v2-ack t)
-  ;; :custom
-  ;; (org-roam-directory "~/org")
-  ;; (org-roam-completion-everywhere t)
-  ;; :bind (("C-c n l" . org-roam-buffer-toggle)
-  ;;        ("C-c n f" . org-roam-node-find)
-  ;;        ("C-c n i" . org-roam-node-insert)
-  ;;        :map org-mode-map
-  ;;        ("C-M-i" . completion-at-point))
-  ;; :config
-  ;; (org-roam-setup))
-#+end_src
-
-*** Org Roam Capture Templates
-
+** Org Roam Capture Templates
 Org roam allows you to create various capture templates.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (setq org-roam-capture-templates
     '(("m" "main" plain
         "%?"
@@ -941,14 +1072,11 @@ Org roam allows you to create various capture templates.
         :immediate-finish t
         :unnarrowed t)))
 #+end_src
-
-#+RESULTS:
-
-**** Define the Type of a Node
+*** Define the Type of a Node
 
 It can be useful to differentiate the different types of zettels at completion time.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (with-eval-after-load 'org-roam
     (cl-defmethod org-roam-node-type ((node org-roam-node))
       "Return the TYPE of NODE."
@@ -965,18 +1093,18 @@ It can be useful to differentiate the different types of zettels at completion t
 
 #+RESULTS:
 
-**** Modifying Display Template to Show Node Type
+*** Modifying Display Template to Show Node Type
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (setq org-roam-node-display-template
         (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 #+end_src
 
-*** Org Roam UI Frontend
 
+** Org Roam UI Frontend
 [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] is a graphical frontend for displaying org roam nodes in a graph-like interface.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (use-package websocket
     :after org-roam)
 
@@ -991,76 +1119,23 @@ It can be useful to differentiate the different types of zettels at completion t
           org-roam-ui-open-on-start t))
 #+end_src
 
-#+RESULTS:
-: t
-
-** Configure Babel Languages
-
-To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
-
-#+begin_src emacs-lisp
-  (with-eval-after-load 'org
-    (org-babel-do-load-languages
-        'org-babel-load-languages
-        '(
-          (emacs-lisp . t)
-          (python . t)
-          (shell . t)
-         ))
-    (push '("conf-unix" . conf-unix) org-src-lang-modes))
-  ;; Disable execution confirmations 
-  (setq org-confirm-babel-evaluate nil)
-#+end_src
-
-#+RESULTS:
-
-** Structure Templates
-
-Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
-
-You can add more =src= block templates below by copying one of the lines and changing the two strings at the end, the first to be the template name and the second to contain the name of the language [[https://orgmode.org/worg/org-contrib/babel/languages.html][as it is known by Org Babel]].
-
-#+begin_src emacs-lisp
-  (with-eval-after-load 'org
-    ;; This is needed as of Org 9.2
-    (require 'org-tempo)
-    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-    (add-to-list 'org-structure-template-alist '("py" . "src python")))
-#+end_src
-
-** Auto-tangle Configuration Files
-
-This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-config= gets executed each time such a buffer gets saved.  This function checks to see if the file being saved is the Emacs.org file you're looking at right now, and if so, automatically exports the configuration here to the associated output files.
-
-#+begin_src emacs-lisp
-  ;; Automatically tangle our Emacs.org config file when we save it
-  (defun efs/org-babel-tangle-config ()
-    (when (string-equal (file-name-directory (buffer-file-name))
-                        (expand-file-name user-emacs-directory))
-      ;; Dynamic scoping to the rescue
-      (let ((org-confirm-babel-evaluate nil))
-        (org-babel-tangle))))
-
-  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
-#+end_src
-
 * Development
 
-** Languages
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/development-config.el"))
+#+end_src
 
-*** LSP
+** LSP
 
-**** lsp-mode
-
+*** lsp-mode
 [[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]] enables IDE-like functionality for many different programming languages via "language servers" that speak the [[https://microsoft.github.io/language-server-protocol/][Language Server Protocol]].  Before trying to set up =lsp-mode= for a particular language, check out the [[https://emacs-lsp.github.io/lsp-mode/page/languages/][documentation for your language]] so that you can learn which language servers are available and how to install them.
 
 The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mode='s default keybindings will be added.  I *highly recommend* using the prefix to find out what you can do with =lsp-mode= in a buffer.
 
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (defun efs/lsp-mode-setup ()
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
@@ -1072,24 +1147,19 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
     :config
     (lsp-enable-which-key-integration t))
-
 #+end_src
 
-**** lsp-ui
-
+*** lsp-ui
 [[https://emacs-lsp.github.io/lsp-ui/][lsp-ui]] is a set of UI enhancements built on top of =lsp-mode= which make Emacs feel even more like an IDE.  Check out the screenshots on the =lsp-ui= homepage (linked at the beginning of this paragraph) to see examples of what it can do.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom))
-
 #+end_src
 
-**** lsp-treemacs
-
+*** lsp-treemacs
 [[https://github.com/emacs-lsp/lsp-treemacs][lsp-treemacs]] provides nice tree views for different aspects of your code like symbols in a file, references of a symbol, or diagnostic messages (errors and warnings) that are found in your code.
 
 Try these commands with =M-x=:
@@ -1100,33 +1170,15 @@ Try these commands with =M-x=:
 
 This package is built on the [[https://github.com/Alexander-Miller/treemacs][treemacs]] package which might be of some interest to you if you like to have a file browser at the left side of your screen in your editor.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package lsp-treemacs
     :after lsp)
-
 #+end_src
 
-**** lsp-ivy
-
-[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]] integrates Ivy with =lsp-mode= to make it easy to search for things by name in your code.  When you run these commands, a prompt will appear in the minibuffer allowing you to type part of the name of a symbol in your code.  Results will be populated in the minibuffer so that you can find what you're looking for and jump to that location in the code upon selecting the result.
-
-Try these commands with =M-x=:
-
-- =lsp-ivy-workspace-symbol= - Search for a symbol name in the current project workspace
-- =lsp-ivy-global-workspace-symbol= - Search for a symbol name in all active project workspaces
-
-#+begin_src emacs-lisp
-
-  (use-package lsp-ivy
-    :after lsp)
-
-#+end_src
-
-*** Debugging with dap-mode
+** Debugging with dap-mode
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]].  You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package dap-mode
     :commands dap-debug
     :init
@@ -1135,62 +1187,12 @@ Try these commands with =M-x=:
     (dap-mode 1))
 #+end_src
 
-*** Python
-We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.
-
-Make sure you have the =pyls= language server installed before trying =lsp-mode=!
-
-#+begin_src sh :tangle no
-
-pip install --user "python-language-server[all]"
-
-#+end_src
-
-There are a number of other language servers for Python so if you find that =pyls= doesn't work for you, consult the =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/languages/][language configuration documentation]] to try the others!
-
-#+begin_src emacs-lisp
-  (use-package python-mode
-    :ensure t
-    :hook (python-mode . lsp-deferred)
-    :custom
-    ;; NOTE: Set these if Python 3 is called "python3" on your system!
-    ;; (python-shell-interpreter "python3")
-    ;; (dap-python-executable "python3")
-    (dap-python-debugger 'debugpy)
-    :config
-    (require 'dap-python))
-#+end_src
-
-You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
-
-#+begin_src emacs-lisp
-
-  (use-package pyvenv
-    :after python-mode
-    :config
-    (pyvenv-mode 1))
-
-#+end_src
-
-*** Common Lisp
-
-#+begin_src emacs-lisp
-  ;; Load SLY
-  (require 'sly)
-
-  ;; Set the Common Lisp implementation to SBCL
-  (setq inferior-lisp-program "sbcl")
-
-  (add-to-list 'sly-contribs 'sly-asdf 'append)
-#+end_src
-
 ** Company Mode
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
 
 We also use [[https://github.com/sebastiencs/company-box][company-box]] to further enhance the look of the completions with icons and better overall presentation.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package company
     :after lsp-mode
     :hook (lsp-mode . company-mode)
@@ -1204,14 +1206,12 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
   (use-package company-box
     :hook (company-mode . company-box-mode))
-
 #+end_src
 
 ** Projectile
 [[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package projectile
     :diminish projectile-mode
     :config (projectile-mode)
@@ -1227,15 +1227,13 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (use-package counsel-projectile
     :after projectile
     :config (counsel-projectile-mode))
-
 #+end_src
 
 ** Magit
 
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package magit
     :commands magit-status
     :custom
@@ -1246,42 +1244,91 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
   (use-package forge
     :after magit)
-
 #+end_src
-
-** Commenting
-
-Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
-
-#+begin_src emacs-lisp
-  ;;(require 'evil-nerd-commenter)
-
-  ;;(global-set-key (kbd "M-/") 'evilnc-comment-or-uncomment-lines)
-
-  (use-package evil-nerd-commenter
-    :bind ("M-/" . evilnc-comment-or-uncomment-lines))
-#+end_src
-
-#+RESULTS:
-: evilnc-comment-or-uncomment-lines
 
 ** Rainbow Delimiters
-
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
 
-#+begin_src emacs-lisp
-    (use-package rainbow-delimiters
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook
+    (prog-mode . rainbow-delimiters-mode)
+    (org-mode . rainbow-delimiters-mode)
+    (lisp-mode . rainbow-delimiters-mode))
+#+end_src
+
+* Programming Languages
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/programming-languages-config.el"))
+#+end_src
+
+** C/C++
+TODO
+** Common Lisp
+
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  ;; Load SLY
+  (require 'sly)
+
+  ;; Set the Common Lisp implementation to SBCL
+  (setq inferior-lisp-program "sbcl")
+
+  (add-to-list 'sly-contribs 'sly-asdf 'append)
+#+end_src
+
+** Python
+We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.
+
+Make sure you have the =pyls= language server installed before trying =lsp-mode=!
+
+#+begin_src sh :tangle no
+
+pip install --user "python-language-server[all]"
+
+#+end_src
+
+There are a number of other language servers for Python so if you find that =pyls= doesn't work for you, consult the =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/languages/][language configuration documentation]] to try the others!
+
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+    (use-package python-mode
       :ensure t
-      :hook
-      (prog-mode . rainbow-delimiters-mode)
-      (org-mode . rainbow-delimiters-mode)
-      (lisp-mode . rainbow-delimiters-mode))
+      :hook (python-mode . lsp-deferred)
+      :custom
+      ;; NOTE: Set these if Python 3 is called "python3" on your system!
+      ;; (python-shell-interpreter "python3")
+      ;; (dap-python-executable "python3")
+      (dap-python-debugger 'debugpy)
+      ;; :config
+      ;; (require 'dap-python)
+      )
 #+end_src
 
 #+RESULTS:
-| rainbow-delimiters-mode | sly-editing-mode |
+| evil-collection-python-set-evil-shift-width | lsp-deferred |
+
+You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
+
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+
+  ;; (use-package pyvenv
+  ;;   :after python-mode
+  ;;   :config
+  ;;   (pyvenv-mode 1))
+
+#+end_src
+
+#+RESULTS:
+: t
 
 * Terminals
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/terminal-config.el"))
+#+end_src
 
 ** term-mode
 
@@ -1300,8 +1347,7 @@ Run a terminal with =M-x term!=
 - =C-c C-j= - Return to line-mode
 - If you have =evil-collection= installed, =term-mode= will enter char mode when you use Evil's Insert mode
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
   (use-package term
     :commands term
     :config
@@ -1310,18 +1356,15 @@ Run a terminal with =M-x term!=
 
     ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
     (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
-
 #+end_src
 
 *** Better term-mode colors
 
 The =eterm-256color= package enhances the output of =term-mode= to enable handling of a wider range of color codes so that many popular terminal applications look as you would expect them to.  Keep in mind that this package requires =ncurses= to be installed on your machine so that it has access to the =tic= program.  Most Linux distributions come with this program installed already so you may not have to do anything extra to use it.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
   (use-package eterm-256color
     :hook (term-mode . eterm-256color-mode))
-
 #+end_src
 
 ** vterm
@@ -1330,15 +1373,13 @@ The =eterm-256color= package enhances the output of =term-mode= to enable handli
 
 Make sure that you have the [[https://github.com/akermu/emacs-libvterm/#requirements][necessary dependencies]] installed before trying to use =vterm= because there is a module that will need to be compiled before you can use it successfully.
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
   (use-package vterm
     :commands vterm
     :config
     (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
     ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
     (setq vterm-max-scrollback 10000))
-
 #+end_src
 
 ** shell-mode
@@ -1354,12 +1395,10 @@ Make sure that you have the [[https://github.com/akermu/emacs-libvterm/#requirem
 
 One advantage of =shell-mode= on Windows is that it's the only way to run =cmd.exe=, PowerShell, Git Bash, etc from within Emacs.  Here's an example of how you would set up =shell-mode= to run PowerShell on Windows:
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
   (when (eq system-type 'windows-nt)
     (setq explicit-shell-file-name "powershell.exe")
     (setq explicit-powershell.exe-args '()))
-
 #+end_src
 
 ** Eshell
@@ -1381,8 +1420,7 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 - https://ambrevar.xyz/emacs-eshell/index.html
 - https://ambrevar.xyz/emacs-eshell-versus-shell/index.html
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
   (defun efs/configure-eshell ()
     ;; Save command history when commands are entered
     (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
@@ -1412,18 +1450,20 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
       (setq eshell-visual-commands '("htop" "zsh" "vim")))
 
     (eshell-git-prompt-use-theme 'powerline))
-
-
 #+end_src
 
 * File Management
+
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/dired-config.el"))
+#+end_src
 
 ** Dired
 
 Dired is a built-in file manager for Emacs that does some pretty amazing things!  Here are some key bindings you should try out:
 
 *** Key Bindings
-
 **** Navigation
 
 *Emacs* / *Evil*
@@ -1465,13 +1505,13 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 - =x= - Execute deletion for marks
 - =delete-by-moving-to-trash= - Move to trash instead of deleting permanently
 
-**** Creating and extracting archives
+***** Creating and extracting archives
 
 - =Z= - Compress or uncompress a file or folder to (=.tar.gz=)
 - =c= - Compress selection to a specific file
 - =dired-compress-files-alist= - Bind compression commands to file extension
 
-**** Other common operations
+***** Other common operations
 
 - =T= - Touch (change timestamp)
 - =M= - Change file mode
@@ -1480,9 +1520,10 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 - =S= - Create a symbolic link to this file
 - =L= - Load an Emacs Lisp file into Emacs
 
+
 *** Configuration
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/dired-config.el" :mkdirp yes
 
   (use-package dired
     :ensure nil
@@ -1513,37 +1554,5 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
     :config
     (evil-collection-define-key 'normal 'dired-mode-map
       "H" 'dired-hide-dotfiles-mode))
-
-#+end_src
-
-* Applications
-
-** Some App
-
-This is an example of configuring another non-Emacs application using org-mode.  Not only do we write out the configuration at =.config/some-app/config=, we also compute the value that gets stored in this configuration from the Emacs Lisp block above it.
-
-#+NAME: the-value
-#+begin_src emacs-lisp :tangle no
-
-  (+ 55 100)
-
-#+end_src
-
-*NOTE*: Set the =:tangle= parameter below to =.config/some-app/config= for this to work!
-
-#+begin_src conf :tangle no :noweb yes
-
-  value=<<the-value()>>
-
-#+end_src
-
-* Runtime Performance
-
-Dial the GC threshold back down so that garbage collection happens more frequently but in less time.
-
-#+begin_src emacs-lisp
-
-  ;; Make gc pauses faster by decreasing the threshold.
-  (setq gc-cons-threshold (* 2 1000 1000))
 
 #+end_src

@@ -13,7 +13,11 @@ var/
 
 # Backup files
 *~
-#*
 
 # Undo-tree save-files
 *.~undo-tree
+
+history
+
+# Org DB files
+*.db
