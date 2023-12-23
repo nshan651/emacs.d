@@ -23,11 +23,6 @@ folder, otherwise delete a character backward"
     :bind (:map minibuffer-local-map
                 ("<backspace>" . ns/minibuffer-backward-kill)))
 
-  ;; Persist history over Emacs restarts. Vertico sorts by history position.
-  (use-package savehist
-    :init
-    (savehist-mode))
-
   ;; A few more useful configurations...
   (use-package emacs
     :init

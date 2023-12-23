@@ -293,12 +293,14 @@ Provides asynchronous bytecode compilation and various other actions.
 #+end_src
 
 *** Savehist
+Persist history over Emacs restarts. Vertico sorts by history position.
 
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package savehist
-    :defer 2
     :init (savehist-mode t))
 #+end_src
+
+#+RESULTS:
 
 *** Repeat
 
@@ -322,108 +324,162 @@ All my keybindings are controlled by evil mode.
 Load my custom keybindings.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
-;; Bind C-x C-b to ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-;; Make ESC quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  ;; Bind C-x C-b to ibuffer
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+    ;; Make ESC quit prompts
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-(use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-respect-visual-line-mode t)
-    ;; (setq evil-undo-system 'undo-tree)
-    :config
-    (evil-mode 1)
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (use-package evil
+        :init
+        (setq evil-want-integration t)
+        (setq evil-want-keybinding nil)
+        (setq evil-want-C-u-scroll t)
+        (setq evil-want-C-i-jump nil)
+        (setq evil-respect-visual-line-mode t)
+        ;; (setq evil-undo-system 'undo-tree)
+        :config
+        (evil-mode 1)
+        (evil-set-initial-state 'messages-buffer-mode 'normal)
+        (evil-set-initial-state 'dashboard-mode 'normal)
+        ;; (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+        ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-    ;; Define key bindings for SPC followed by a single key
-    (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-    (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-    (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-    (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
+        ;; Define key bindings for SPC followed by a single key
+        ;; (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
+        ;; (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
+        ;; (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
+        ;; (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
 
-    ;; Background transparency
-    ;(define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency) 
+        ;; Background transparency
+        ;; (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency)
 
-    ;; Org Agenda
-    (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+        ;; Org Agenda
+        (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
-    ;; Open TODO agenda file as a pop-up buffer
-    (define-key evil-normal-state-map (kbd "SPC r")
-      (lambda () 
-        (interactive)
-        (let ((file "~/org/agenda/todo.org")
-                (pop-up-buffer "*TODO*"))
-            (pop-to-buffer pop-up-buffer)
-            (find-file file))))
+        ;; Open TODO agenda file as a pop-up buffer
+        (define-key evil-normal-state-map (kbd "SPC r")
+          (lambda ()
+            (interactive)
+            (let ((file "~/org/agenda/todo.org")
+                    (pop-up-buffer "*TODO*"))
+                (pop-to-buffer pop-up-buffer)
+                (find-file file))))
 
-    (defun open-custom-agenda ()
-      "Open the custom agenda view."
-      (interactive)
-      (org-agenda nil "A"))
+        (defun open-custom-agenda ()
+          "Open the custom agenda view."
+          (interactive)
+          (org-agenda nil "A"))
 
-    (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+        (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
 
-    ;; Org Roam
-    (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-    (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-    (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
+        ;; Org Roam
+        ;; (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
+        ;; (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
+        ;; (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
 
-    ;; Manage buffers
-    (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-    (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
+        ;; Manage buffers
+        ;; (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
+        ;; (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
 
-    ;; Manage windows
-    (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
-    (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
-    (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
-    ;; Windmove keys for additional window navigation
-    (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
-    (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
-    (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
-    (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
+        ;; Manage windows
+        ;; (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
+        ;; (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
+        ;; (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
+        ;; ;; Windmove keys for additional window navigation
+        ;; (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
+        ;; (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
+        ;; (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
+        ;; (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
 
-    ;; Use visual line motions even outside of visual-line-mode buffers
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal))
+        ;; ;; Use visual line motions even outside of visual-line-mode buffers
+        ;; (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+        ;; (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  )
 
 #+end_src
 
-** General and Evil Collections
+** Evil Collection
+Evil collection adds some additional compatability to modes that otherwise don't play well with evil-mode.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
-  (use-package general
-    :after evil
-    :config
-    (general-create-definer efs/leader-keys
-      :keymaps '(normal insert visual emacs)
-      :prefix "SPC"
-      :global-prefix "C-SPC")
-
-    (efs/leader-keys
-      "t"  '(:ignore t :which-key "toggles")
-      "tt" '(counsel-load-theme :which-key "choose theme")))
-
   (use-package evil-collection
     :after evil
     :config
     (evil-collection-init))
 #+end_src
 
-** Commenting
+** General
+General is the best method that I've found for organizing keybindings.
+
+#+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
+  (use-package general
+    :after evil
+    :config
+    ;; Create definer keys to map keys with
+    (general-create-definer ns/leader-spc
+      :states 'normal
+      :keymaps 'override
+      :prefix "SPC")
+    (general-create-definer ns/leader-t
+      :states 'normal
+      :keymaps 'override
+      :prefix "t")
+    (general-create-definer ns/leader-r
+      :states 'motion
+      :prefix "r")
+    (general-create-definer ns/leader-m
+      :states 'normal
+      :prefix "m")
+    (general-create-definer ns/leader-ca
+      :states 'normal
+      :keymaps 'override
+      :prefix "C-a")
+    (general-create-definer ns/leader-comma
+      :states 'normal
+      :prefix ","))
+#+end_src
+
+** Basic Keybindings
+These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
+
+#+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (general-def 'motion
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line)
+
+  ;; Choose a theme
+  ;; TODO move this to consult
+  (ns/leader-t
+    "tt" '(consult-theme :which-key "Choose a theme"))
+
+  (ns/leader-spc
+    "f"  'find-file
+    "b"  'switch-to-buffer
+    "k"  'kill-buffer
+    "eb" 'eval-buffer)
+
+  ;; Manage windows
+  (ns/leader-ca
+    "<backspace>" 'delete-window
+    "\\"          'split-window-right
+    "-"           'split-window-below
+    ;; Windmove keys for additional window navigation
+    "h"           'windmove-left
+    "l"           'windmove-right
+    "k"           'windmove-up
+    "j"           'windmove-down)
+#+end_src
+
+*** Commenting
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
   (use-package evil-nerd-commenter
-    :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+    :general ("M-/" 'evilnc-comment-or-uncomment-lines))
 #+end_src
+
+#+RESULTS:
 
 * Basic Theme Configuration
 
@@ -468,11 +524,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 
 #+end_src
 
-#+RESULTS:
-: t
-
 ** Font Configuration
-
 Set font details here.
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
@@ -487,6 +539,24 @@ Set font details here.
 
   ;; Set the variable pitch face
   (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+
+  ;; Nerd icon fonts
+  (use-package nerd-icons
+    :custom
+    ;; The Nerd Font you want to use in GUI
+    ;; "Symbols Nerd Font Mono" is the default and is recommended
+    ;; but you can use any other Nerd Font if you want
+    (nerd-icons-font-family "Symbols Nerd Font Mono"))
+#+end_src
+
+#+RESULTS:
+
+** Modeline
+I use doom modeline.
+#+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
 #+end_src
 
 #+RESULTS:
@@ -515,50 +585,45 @@ Some UI enhancements that supercharge Emacs.
 [[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI based on the default completion system. 
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
-      (defun ns/minibuffer-backward-kill (arg)
-      "When minibuffer is completing a file name delete up to parent
-    folder, otherwise delete a character backward"
-      (interactive "p")
-      (if minibuffer-completing-file-name
-          ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
-          (if (string-match-p "/." (minibuffer-contents))
-              (zap-up-to-char (- arg) ?/)
-            (delete-minibuffer-contents))
-          (delete-backward-char arg)))
+    (defun ns/minibuffer-backward-kill (arg)
+    "When minibuffer is completing a file name delete up to parent
+  folder, otherwise delete a character backward"
+    (interactive "p")
+    (if minibuffer-completing-file-name
+        ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
+        (if (string-match-p "/." (minibuffer-contents))
+            (zap-up-to-char (- arg) ?/)
+          (delete-minibuffer-contents))
+        (delete-backward-char arg)))
 
-      ;; Enable vertico
-      (use-package vertico
-        :init
-        (vertico-mode)
-        :bind (:map minibuffer-local-map
-                    ("<backspace>" . ns/minibuffer-backward-kill)))
+    ;; Enable vertico
+    (use-package vertico
+      :init
+      (vertico-mode)
+      :bind (:map minibuffer-local-map
+                  ("<backspace>" . ns/minibuffer-backward-kill)))
 
-      ;; Persist history over Emacs restarts. Vertico sorts by history position.
-      (use-package savehist
-        :init
-        (savehist-mode))
+    ;; A few more useful configurations...
+    (use-package emacs
+      :init
+      ;; Add prompt indicator to `completing-read-multiple'.
+      ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+      (defun crm-indicator (args)
+        (cons (format "[CRM%s] %s"
+                      (replace-regexp-in-string
+                       "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                       crm-separator)
+                      (car args))
+              (cdr args)))
+      (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
 
-      ;; A few more useful configurations...
-      (use-package emacs
-        :init
-        ;; Add prompt indicator to `completing-read-multiple'.
-        ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-        (defun crm-indicator (args)
-          (cons (format "[CRM%s] %s"
-                        (replace-regexp-in-string
-                         "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                         crm-separator)
-                        (car args))
-                (cdr args)))
-        (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+      ;; Do not allow the cursor in the minibuffer prompt
+      (setq minibuffer-prompt-properties
+            '(read-only t cursor-intangible t face minibuffer-prompt))
+      (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
-        ;; Do not allow the cursor in the minibuffer prompt
-        (setq minibuffer-prompt-properties
-              '(read-only t cursor-intangible t face minibuffer-prompt))
-        (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-
-        ;; Enable recursive minibuffers
-        (setq enable-recursive-minibuffers t))
+      ;; Enable recursive minibuffers
+      (setq enable-recursive-minibuffers t))
 #+end_src
 
 ** Consult
@@ -1028,26 +1093,30 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 #+end_src
 
 ** Org Roam Config
-[[https://github.com/org-roam/org-roam][Org Roam]] is a plain-text, graph-based personal knowledge management system.
+[[[[https://github.com/org-roam/org-roam]]][Org Roam]] is a plain-text, graph-based personal knowledge management system.
 
 #+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (use-package org-roam
-  :ensure t
-  :custom
-  (org-roam-directory (file-truename "~/org"))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode)
-  ;; If using org-roam-protocol
-  (require 'org-roam-protocol))
+    :ensure t
+    :custom
+    (org-roam-directory (file-truename "~/org"))
+    :config
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)
+    ;; If using org-roam-protocol
+    (require 'org-roam-protocol))
+
+  ;; Keybindings
+  (ns/leader-spc
+    "n"  '(:ignore t :wk "org node selection")
+    "nl" '(org-roam-buffer-toggle :wk "org roam buffer toggle")
+    "nf" '(org-roam-node-find :wk "org roam buffer find")
+    "ng" '(org-roam-graph :wk "org roam graph")
+    "ni" '(org-roam-node-insert :wk "org roam insert")
+    "nc" '(org-roam-capture :wk "org roam capture")
+    "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
+
 #+end_src
 
 ** Org Roam Capture Templates
@@ -1099,7 +1168,6 @@ It can be useful to differentiate the different types of zettels at completion t
   (setq org-roam-node-display-template
         (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 #+end_src
-
 
 ** Org Roam UI Frontend
 [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] is a graphical frontend for displaying org roam nodes in a graph-like interface.
@@ -1230,7 +1298,6 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 #+end_src
 
 ** Magit
-
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
@@ -1239,12 +1306,22 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+  (use-package forge
+    :after magit)
+#+end_src
+
+** Forge
+Forge allows use to work with varios git forges using the magit interface.
+
+#+begin_src emacs-lisp :tangle "lisp/development.el" :mkdirp yes
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
   (use-package forge
-    :after magit)
+    :after 'magit)
 #+end_src
+
+#+RESULTS:
 
 ** Rainbow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.

@@ -61,7 +61,6 @@
   (dired-async-mode 1))
 
 (use-package savehist
-  :defer 2
   :init (savehist-mode t))
 
 (use-package repeat
