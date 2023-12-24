@@ -49,11 +49,6 @@
         ("melpa" . 2)
         ("nongnu" . 1)))
 
-(use-package ws-butler
-  :ensure t
-  :config
-  (ws-butler-global-mode 1))
-
 (use-package async
   :ensure t
   :defer t
@@ -67,6 +62,11 @@
   :defer 10
   :init
   (repeat-mode +1))
+
+(use-package ws-butler
+  :ensure t
+  :config
+  (ws-butler-global-mode 1))
 
 (load (locate-user-emacs-file
        "lisp/evil-config.el"))

@@ -271,15 +271,6 @@ Setup package archives for =package.el=.
 
 ** Load Some Basic Packages
 These are just some nice packages to have around.
-*** Clean Whitespaces
-Automatically trim extraneous whitespaces.
-
-#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
-(use-package ws-butler
-  :ensure t
-  :config
-  (ws-butler-global-mode 1))
-#+end_src
 
 *** Async
 Provides asynchronous bytecode compilation and various other actions.
@@ -311,6 +302,16 @@ Persist history over Emacs restarts. Vertico sorts by history position.
     (repeat-mode +1))
 #+end_src
 
+*** Clean Whitespaces
+Automatically trim extraneous whitespaces.
+
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+(use-package ws-butler
+  :ensure t
+  :config
+  (ws-butler-global-mode 1))
+#+end_src
+
 * Keybindings
 All my keybindings are controlled by evil mode.
 
@@ -336,7 +337,6 @@ Load my custom keybindings.
         (setq evil-want-C-u-scroll t)
         (setq evil-want-C-i-jump nil)
         (setq evil-respect-visual-line-mode t)
-        ;; (setq evil-undo-system 'undo-tree)
         :config
         (evil-mode 1)
         (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -398,6 +398,9 @@ Load my custom keybindings.
 
 #+end_src
 
+#+RESULTS:
+: t
+
 ** Evil Collection
 Evil collection adds some additional compatability to modes that otherwise don't play well with evil-mode.
 
@@ -434,10 +437,15 @@ General is the best method that I've found for organizing keybindings.
       :states 'normal
       :keymaps 'override
       :prefix "C-a")
+    (general-create-definer ns/leader-ct
+      :keymaps '(insert normal)
+      :keymaps 'override
+      :prefix "C-t")
     (general-create-definer ns/leader-comma
       :states 'normal
       :prefix ","))
 #+end_src
+
 
 ** Basic Keybindings
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
@@ -455,7 +463,7 @@ These are basic keybindings that aren't tied to any particular package (except e
 
   (ns/leader-spc
     "f"  'find-file
-    "b"  'switch-to-buffer
+    ;; "b"  'switch-to-buffer
     "k"  'kill-buffer
     "eb" 'eval-buffer)
 
@@ -549,8 +557,6 @@ Set font details here.
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
 #+end_src
 
-#+RESULTS:
-
 ** Modeline
 I use doom modeline.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
@@ -568,6 +574,23 @@ Some UI enhancements that supercharge Emacs.
 (load (locate-user-emacs-file
        "lisp/ui-config.el"))
 #+end_src
+
+** Undo System
+Linear undo while maintaining all history.
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+  (use-package undo-fu
+    :general
+    ('normal
+     "u" #'undo-fu-only-undo
+     "U" #'undo-fu-only-redo
+     "C-r" #'undo-fu-only-redo))
+
+  ;; ignores encrypted files by default
+  (use-package undo-fu-session
+    :init (undo-fu-session-global-mode))
+#+end_src
+
+#+RESULTS:
 
 ** Which Key
 [[https://github.com/justbur/emacs-which-key][which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
@@ -632,53 +655,19 @@ Some UI enhancements that supercharge Emacs.
   ;; Example configuration for Consult
   (use-package consult
     ;; Replace bindings. Lazily loaded due by `use-package'.
-    :bind (;; C-c bindings in `mode-specific-map'
-           ("C-c M-x" . consult-mode-command)
-           ("C-c h" . consult-history)
-           ("C-c k" . consult-kmacro)
-           ("C-c m" . consult-man)
-           ("C-c i" . consult-info)
-           ([remap Info-search] . consult-info)
-           ;; C-x bindings in `ctl-x-map'
-           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+    :bind (
+           ;; TODO generalize (hehe, see what I did there) these keybinds later
            ;; Custom M-# bindings for fast register access
            ("M-#" . consult-register-load)
            ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
            ("C-M-#" . consult-register)
            ;; Other custom bindings
            ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-           ;; M-g bindings in `goto-map'
-           ("M-g e" . consult-compile-error)
-           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-           ("M-g g" . consult-goto-line)             ;; orig. goto-line
-           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-           ("M-g m" . consult-mark)
-           ("M-g k" . consult-global-mark)
-           ("M-g i" . consult-imenu)
-           ("M-g I" . consult-imenu-multi)
-           ;; M-s bindings in `search-map'
-           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-           ("M-s D" . consult-locate)
-           ("M-s g" . consult-grep)
-           ("M-s G" . consult-git-grep)
-           ("M-s r" . consult-ripgrep)
-           ("M-s l" . consult-line)
-           ("M-s L" . consult-line-multi)
-           ("M-s k" . consult-keep-lines)
-           ("M-s u" . consult-focus-lines)
            ;; Isearch integration
            ("M-s e" . consult-isearch-history)
            :map isearch-mode-map
            ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
            ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
            ;; Minibuffer history
            :map minibuffer-local-map
            ("M-s" . consult-history)                 ;; orig. next-matching-history-element
@@ -709,13 +698,6 @@ Some UI enhancements that supercharge Emacs.
     ;; after lazily loading the package.
     :config
 
-    ;; Optionally configure preview. The default value
-    ;; is 'any, such that any key triggers the preview.
-    ;; (setq consult-preview-key 'any)
-    ;; (setq consult-preview-key "M-.")
-    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-    ;; For some commands and buffer sources it is useful to configure the
-    ;; :preview-key on a per-command basis using the `consult-customize' macro.
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)
      consult-ripgrep consult-git-grep consult-grep
@@ -727,9 +709,72 @@ Some UI enhancements that supercharge Emacs.
 
     ;; Optionally configure the narrowing key.
     ;; Both < and C-+ work reasonably well.
-    (setq consult-narrow-key "<") ;; "C-+"
-  )
+    (setq consult-narrow-key "<"))
+
+  ;; Buffer management
+  (ns/leader-spc
+    ;; repeat-complex-command
+    "M-:" 'consult-complex-command
+    "b"   '(:ignore t :wk "consult buffer selection")
+    ;; switch-to-buffer
+    "bb"  '(consult-buffer :wk "consult buffer")
+    ;; switch-to-buffer-other-window
+    "b/"  '(consult-buffer-other-window :wk "open buffer in another window")
+    ;; switch-to-buffer-other-frame
+    "b\\" '(consult-buffer-other-frame :wk "open buffer in another frame")
+    ;; bookmark-jump
+    "br"  '(consult-bookmark :wk "bookmark jump")
+    ;; project-switch-to-buffer
+    "bp"  '(consult-project-buffer :wk "switch between project buffers"))
+
+  ;; C-c bindings in `mode-specific-map'
+  (general-def 'normal
+    :keymaps 'mode-specific-map
+    :prefix "C-c"
+    "M-x" 'consult-mode-command
+    "h"   'consult-history
+    "k"   'consult-kmacro
+    "m"   'consult-man
+    "i"   'consult-info)
+
+  ;; M-g bindings in `goto-map'
+  (general-def 'normal
+    :keymaps 'goto-map
+    :prefix "M-g"
+    "f"   'consult-flymake         ;; Alternative: consult-flycheck
+    "g"   'consult-goto-line       ;; orig. goto-line
+    "M-g" 'consult-goto-line       ;; orig. goto-line
+    "o"   'consult-outline         ;; Alternative: consult-org-heading
+    "m"   'consult-mark
+    "k"   'consult-global-mark
+    "i"   'consult-imenu
+    "I"   'consult-imenu-multi)
+
+  ;; M-s bindings in `search-map'
+  (general-def '(normal insert visual emacs)
+    :keymaps 'search-map
+    :prefix "M-s"
+    "d"   'consult-find            ;; Alt: consult-fd
+    "D"   'consult-locate
+    "g"   'consult-grep
+    "G"   'consult-git-grep
+    "r"   'consult-ripgrep
+    "k"   'consult-keep-lines
+    "u"   'consult-focus-lines)
+
+  ;; C-s bindings in `search-mode-map'
+  ;; Prefer `consult-line' over Isearch for a swiper-like experience
+   (general-def 'override
+     :keymaps 'isearch-mode-map
+     "C-s" 'consult-line)
+
+  ;; Other custom bindings
+  (general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
+
 #+end_src
+
+#+RESULTS:
+
 ** Orderless
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
@@ -740,20 +785,13 @@ Some UI enhancements that supercharge Emacs.
     (completion-category-overrides '((file (styles basic partial-completion)))))
 #+end_src
 
+#+RESULTS:
+
 ** Embark
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
-  ;; (use-package marginalia
-  ;;   :ensure t
-  ;;   :config
-  ;;   (marginalia-mode))
-
   (use-package embark
     :ensure t
-    :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
     :init
     ;; Optionally replace the key help with a completing-read interface
     (setq prefix-help-command #'embark-prefix-help-command)
@@ -773,7 +811,14 @@ Some UI enhancements that supercharge Emacs.
     :ensure t ; only need to install it, embark loads it after consult if found
     :hook
     (embark-collect-mode . consult-preview-at-point-mode))
+
+  (general-def 'override
+    "C-."   'embark-act
+    "C-;"   'embark-dwim
+    "C-h B" 'embark-bindings)
 #+end_src
+
+#+RESULTS:
 
 ** Marginalia
 The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia annotations to the minibuffer completions.
@@ -781,36 +826,32 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
-    ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
-    ;; available in the *Completions* buffer, add it to the
-    ;; `completion-list-mode-map'.
-    :bind (:map minibuffer-local-map
-           ("M-A" . marginalia-cycle))
-    :init
-    ;; Marginalia must be activated in the :init section of use-package such that
-    ;; the mode gets enabled right away. Note that this forces loading the
-    ;; package.
+    :after vertico
+    :demand t
+    :config
     (marginalia-mode))
 #+end_src
+
+#+RESULTS:
+: marginalia-cycle
+
 ** Corfu
 [[https://github.com/minad/corfu][Corfu]] enhances in-buffer completion with a small completion popup.
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package corfu
-    ;; Optional customizations
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-    ;; (corfu-auto t)                 ;; Enable auto completion
     (corfu-separator ?\s)          ;; Orderless field separator
-    ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-    ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-    ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-    ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-    ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-    ;; (corfu-scroll-margin 5)        ;; Use scroll margin
     :init
     (global-corfu-mode))
+
+  (use-package emacs
+    :init
+    (setq tab-always-indent 'complete))
 #+end_src
+
+#+RESULTS:
 
 ** Helpful
 [[https://github.com/Wilfred/helpful][Helpful]] adds a lot of very helpful (get it?) information to Emacs' =describe-= command buffers.  For example, if you use =describe-function=, you will not only get the documentation about the function, you will also see the source code of the function and where it gets used in other places in the Emacs configuration.
@@ -1215,6 +1256,20 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
     :config
     (lsp-enable-which-key-integration t))
+
+  (ns/leader-m 'lsp-mode-map
+    "a" 'lsp-execute-code-action
+    "v" 'lsp-avy-lens
+    "n" 'lsp-describe-thing-at-point
+    "i" 'lsp-goto-implementation
+    "d" 'lsp-find-definition
+    "D" 'lsp-find-declaration
+    "t" 'lsp-find-type-definition
+    "x" 'lsp-find-references
+    "r" 'lsp-rename
+    "R" 'lsp-restart-workspace
+    "=" 'lsp-format-buffer
+    "l" 'lsp-workspace-show-log)
 #+end_src
 
 *** lsp-ui
@@ -1224,8 +1279,27 @@ The =which-key= integration adds helpful descriptions of the various keys so you
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
     :custom
-    (lsp-ui-doc-position 'bottom))
+    (lsp-ui-doc-position 'bottom)
+    :config
+    (setq lsp-ui-sideline-show-code-actions nil))
 #+end_src
+
+#+RESULTS:
+| company-mode | lsp-ui-mode | efs/lsp-mode-setup |
+
+*** consult-lsp
+LSP integration with consult.
+
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package consult-lsp
+    :after lsp-mode
+    :general
+    (ns/leader-m 'lsp-mode-map
+      "y" 'consult-lsp-symbols
+      "e" 'consult-lsp-diagnostics))
+#+end_src
+
+#+RESULTS:
 
 *** lsp-treemacs
 [[https://github.com/emacs-lsp/lsp-treemacs][lsp-treemacs]] provides nice tree views for different aspects of your code like symbols in a file, references of a symbol, or diagnostic messages (errors and warnings) that are found in your code.
@@ -1242,6 +1316,21 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
   (use-package lsp-treemacs
     :after lsp)
 #+end_src
+
+** Tree Sitter
+Tree sitter support is now built in to Emacs.
+
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package treesit-auto
+    :demand t
+    :config
+    (setq treesit-auto-install 'prompt)
+    ;; use treesitter where possible
+    (global-treesit-auto-mode))
+#+end_src
+
+#+RESULTS:
+: t
 
 ** Debugging with dap-mode
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]].  You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
@@ -1275,6 +1364,42 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (use-package company-box
     :hook (company-mode . company-box-mode))
 #+end_src
+
+** Yasnippet
+A template system for Emacs.
+
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package yasnippet
+    :general
+    (ns/leader-ct 'override
+      "Y" #'yas-new-snippet)
+    :config
+    ;; Don't expand snippets in normal mode
+    (general-def 'normal yas-minor-mode-map
+      [remap yas-expand] #'ignore)
+    (general-def input-decode-map "C-i" [C-i])
+    (general-def 'insert yas-minor-mode-map
+      "<C-i>" #'yas-expand))
+#+end_src
+
+*** Extra Snippets
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package yasnippet-snippets
+    :after yasnippet
+    :demand t
+    :config
+    ;; Necessary for my personal snippets to override some of these
+  (yas-reload-all))
+#+end_src
+
+*** Consult Yasnippet
+A better ~yas-insert-snippet~.
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package consult-yasnippet
+    :general ('insert "C-<tab>" #'consult-yasnippet))
+#+end_src
+
+#+RESULTS:
 
 ** Projectile
 [[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
@@ -1313,7 +1438,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
 
-#+begin_src emacs-lisp :tangle "lisp/development.el" :mkdirp yes
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started

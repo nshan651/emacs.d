@@ -10,13 +10,43 @@
   :config
   (lsp-enable-which-key-integration t))
 
+(ns/leader-m 'lsp-mode-map
+  "a" 'lsp-execute-code-action
+  "v" 'lsp-avy-lens
+  "n" 'lsp-describe-thing-at-point
+  "i" 'lsp-goto-implementation
+  "d" 'lsp-find-definition
+  "D" 'lsp-find-declaration
+  "t" 'lsp-find-type-definition
+  "x" 'lsp-find-references
+  "r" 'lsp-rename
+  "R" 'lsp-restart-workspace
+  "=" 'lsp-format-buffer
+  "l" 'lsp-workspace-show-log)
+
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
   :custom
-  (lsp-ui-doc-position 'bottom))
+  (lsp-ui-doc-position 'bottom)
+  :config
+  (setq lsp-ui-sideline-show-code-actions nil))
+
+(use-package consult-lsp
+  :after lsp-mode
+  :general
+  (ns/leader-m 'lsp-mode-map
+    "y" 'consult-lsp-symbols
+    "e" 'consult-lsp-diagnostics))
 
 (use-package lsp-treemacs
   :after lsp)
+
+(use-package treesit-auto
+  :demand t
+  :config
+  (setq treesit-auto-install 'prompt)
+  ;; use treesitter where possible
+  (global-treesit-auto-mode))
 
 (use-package dap-mode
   :commands dap-debug
@@ -38,6 +68,28 @@
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
+
+(use-package yasnippet
+  :general
+  (ns/leader-ct 'override
+    "Y" #'yas-new-snippet)
+  :config
+  ;; Don't expand snippets in normal mode
+  (general-def 'normal yas-minor-mode-map
+    [remap yas-expand] #'ignore)
+  (general-def input-decode-map "C-i" [C-i])
+  (general-def 'insert yas-minor-mode-map
+    "<C-i>" #'yas-expand))
+
+(use-package yasnippet-snippets
+  :after yasnippet
+  :demand t
+  :config
+  ;; Necessary for my personal snippets to override some of these
+(yas-reload-all))
+
+(use-package consult-yasnippet
+  :general ('insert "C-<tab>" #'consult-yasnippet))
 
 (use-package projectile
   :diminish projectile-mode
@@ -62,6 +114,12 @@
 
 (use-package forge
   :after magit)
+
+;; NOTE: Make sure to configure a GitHub token before using this package!
+;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+(use-package forge
+  :after 'magit)
 
 (use-package rainbow-delimiters
   :ensure t

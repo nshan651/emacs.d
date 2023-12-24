@@ -1,3 +1,14 @@
+(use-package undo-fu
+  :general
+  ('normal
+   "u" #'undo-fu-only-undo
+   "U" #'undo-fu-only-redo
+   "C-r" #'undo-fu-only-redo))
+
+;; ignores encrypted files by default
+(use-package undo-fu-session
+  :init (undo-fu-session-global-mode))
+
 (use-package which-key
   :defer 0
   :diminish which-key-mode
@@ -48,53 +59,19 @@ folder, otherwise delete a character backward"
 ;; Example configuration for Consult
 (use-package consult
   ;; Replace bindings. Lazily loaded due by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+  :bind (
+         ;; TODO generalize (hehe, see what I did there) these keybinds later
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
          ("C-M-#" . consult-register)
          ;; Other custom bindings
          ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s D" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
          ;; Isearch integration
          ("M-s e" . consult-isearch-history)
          :map isearch-mode-map
          ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
          ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
          ;; Minibuffer history
          :map minibuffer-local-map
          ("M-s" . consult-history)                 ;; orig. next-matching-history-element
@@ -125,13 +102,6 @@ folder, otherwise delete a character backward"
   ;; after lazily loading the package.
   :config
 
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
   (consult-customize
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
@@ -143,8 +113,67 @@ folder, otherwise delete a character backward"
 
   ;; Optionally configure the narrowing key.
   ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-)
+  (setq consult-narrow-key "<"))
+
+;; Buffer management
+(ns/leader-spc
+  ;; repeat-complex-command
+  "M-:" 'consult-complex-command
+  "b"   '(:ignore t :wk "consult buffer selection")
+  ;; switch-to-buffer
+  "bb"  '(consult-buffer :wk "consult buffer")
+  ;; switch-to-buffer-other-window
+  "b/"  '(consult-buffer-other-window :wk "open buffer in another window")
+  ;; switch-to-buffer-other-frame
+  "b\\" '(consult-buffer-other-frame :wk "open buffer in another frame")
+  ;; bookmark-jump
+  "br"  '(consult-bookmark :wk "bookmark jump")
+  ;; project-switch-to-buffer
+  "bp"  '(consult-project-buffer :wk "switch between project buffers"))
+
+;; C-c bindings in `mode-specific-map'
+(general-def 'normal
+  :keymaps 'mode-specific-map
+  :prefix "C-c"
+  "M-x" 'consult-mode-command
+  "h"   'consult-history
+  "k"   'consult-kmacro
+  "m"   'consult-man
+  "i"   'consult-info)
+
+;; M-g bindings in `goto-map'
+(general-def 'normal
+  :keymaps 'goto-map
+  :prefix "M-g"
+  "f"   'consult-flymake         ;; Alternative: consult-flycheck
+  "g"   'consult-goto-line       ;; orig. goto-line
+  "M-g" 'consult-goto-line       ;; orig. goto-line
+  "o"   'consult-outline         ;; Alternative: consult-org-heading
+  "m"   'consult-mark
+  "k"   'consult-global-mark
+  "i"   'consult-imenu
+  "I"   'consult-imenu-multi)
+
+;; M-s bindings in `search-map'
+(general-def '(normal insert visual emacs)
+  :keymaps 'search-map
+  :prefix "M-s"
+  "d"   'consult-find            ;; Alt: consult-fd
+  "D"   'consult-locate
+  "g"   'consult-grep
+  "G"   'consult-git-grep
+  "r"   'consult-ripgrep
+  "k"   'consult-keep-lines
+  "u"   'consult-focus-lines)
+
+;; C-s bindings in `search-mode-map'
+;; Prefer `consult-line' over Isearch for a swiper-like experience
+ (general-def 'override
+   :keymaps 'isearch-mode-map
+   "C-s" 'consult-line)
+
+;; Other custom bindings
+(general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
 
 (use-package orderless
   :ensure t
@@ -152,17 +181,8 @@ folder, otherwise delete a character backward"
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-;; (use-package marginalia
-;;   :ensure t
-;;   :config
-;;   (marginalia-mode))
-
 (use-package embark
   :ensure t
-  :bind
-  (("C-." . embark-act)         ;; pick some comfortable binding
-   ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
   :init
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -183,33 +203,28 @@ folder, otherwise delete a character backward"
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
+(general-def 'override
+  "C-."   'embark-act
+  "C-;"   'embark-dwim
+  "C-h B" 'embark-bindings)
+
 ;; Enable rich annotations using the Marginalia package
 (use-package marginalia
-  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
-  ;; available in the *Completions* buffer, add it to the
-  ;; `completion-list-mode-map'.
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
-  :init
-  ;; Marginalia must be activated in the :init section of use-package such that
-  ;; the mode gets enabled right away. Note that this forces loading the
-  ;; package.
+  :after vertico
+  :demand t
+  :config
   (marginalia-mode))
 
 (use-package corfu
-  ;; Optional customizations
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  ;; (corfu-auto t)                 ;; Enable auto completion
   (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
   :init
   (global-corfu-mode))
+
+(use-package emacs
+  :init
+  (setq tab-always-indent 'complete))
 
 (use-package helpful
   :commands (helpful-callable helpful-variable helpful-command helpful-key)

@@ -10,7 +10,6 @@
       (setq evil-want-C-u-scroll t)
       (setq evil-want-C-i-jump nil)
       (setq evil-respect-visual-line-mode t)
-      ;; (setq evil-undo-system 'undo-tree)
       :config
       (evil-mode 1)
       (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -97,6 +96,10 @@
     :states 'normal
     :keymaps 'override
     :prefix "C-a")
+  (general-create-definer ns/leader-ct
+    :keymaps '(insert normal)
+    :keymaps 'override
+    :prefix "C-t")
   (general-create-definer ns/leader-comma
     :states 'normal
     :prefix ","))
@@ -113,7 +116,7 @@
 
 (ns/leader-spc
   "f"  'find-file
-  "b"  'switch-to-buffer
+  ;; "b"  'switch-to-buffer
   "k"  'kill-buffer
   "eb" 'eval-buffer)
 
