@@ -11,7 +11,7 @@
   ;      modus-themes-preset-overrides-intense)
 
   ;; Load the theme of your choice.
-  ;(load-theme 'modus-vivendi)
+  (load-theme 'modus-vivendi)
 
   (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 ;;(load-theme 'modus-vivendi t)
@@ -25,7 +25,7 @@
   ;; Load the theme of choice
   ;; (load-theme 'ef-winter)
   ;; (load-theme 'ef-autumn)
-  (load-theme 'ef-dark)
+  ;(load-theme 'ef-dark)
   ;; (load-theme 'ef-elea-dark)
   )
 

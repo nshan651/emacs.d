@@ -94,7 +94,8 @@
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
+  ;; :custom ((projectile-completion-system 'ivy))
+  :custom ((projectile-completion-system 'vertico))
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
@@ -103,9 +104,9 @@
     (setq projectile-project-search-path '("~/git")))
   (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package counsel-projectile
-  :after projectile
-  :config (counsel-projectile-mode))
+;; (use-package counsel-projectile
+;;   :after projectile
+;;   :config (counsel-projectile-mode))
 
 (use-package magit
   :commands magit-status

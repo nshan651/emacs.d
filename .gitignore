@@ -4,6 +4,7 @@ elpa/
 transient/
 etc/
 var/
+.cache/
 
 # Other random dirs that somehow end up here
 games/
@@ -19,7 +20,7 @@ snippets/
 
 # Backup files
 *~
-#*
+*#
 
 # Undo-tree save-files
 *.~undo-tree
@@ -34,3 +35,8 @@ bookmarks
 org-roam.db
 projectile-bookmarks.eld
 forge-database.sqlite
+
+# Misc hidden files
+.last-package-update-day
+.slp-session-v1
+.org-id-locations

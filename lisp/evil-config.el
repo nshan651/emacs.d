@@ -14,17 +14,6 @@
       (evil-mode 1)
       (evil-set-initial-state 'messages-buffer-mode 'normal)
       (evil-set-initial-state 'dashboard-mode 'normal)
-      ;; (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-      ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-      ;; Define key bindings for SPC followed by a single key
-      ;; (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-      ;; (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-      ;; (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-      ;; (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-
-      ;; Background transparency
-      ;; (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency)
 
       ;; Org Agenda
       (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
@@ -44,29 +33,6 @@
         (org-agenda nil "A"))
 
       (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-
-      ;; Org Roam
-      ;; (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-      ;; (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-      ;; (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
-
-      ;; Manage buffers
-      ;; (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-      ;; (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
-
-      ;; Manage windows
-      ;; (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
-      ;; (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
-      ;; (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
-      ;; ;; Windmove keys for additional window navigation
-      ;; (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
-      ;; (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
-      ;; (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
-      ;; (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
-
-      ;; ;; Use visual line motions even outside of visual-line-mode buffers
-      ;; (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-      ;; (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 )
 
 (use-package evil-collection

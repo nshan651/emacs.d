@@ -341,17 +341,6 @@ Load my custom keybindings.
         (evil-mode 1)
         (evil-set-initial-state 'messages-buffer-mode 'normal)
         (evil-set-initial-state 'dashboard-mode 'normal)
-        ;; (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-        ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-        ;; Define key bindings for SPC followed by a single key
-        ;; (define-key evil-normal-state-map (kbd "SPC f") 'find-file)
-        ;; (define-key evil-normal-state-map (kbd "SPC p") 'projectile-command-map)
-        ;; (define-key evil-normal-state-map (kbd "SPC b") 'switch-to-buffer)
-        ;; (define-key evil-normal-state-map (kbd "SPC s") 'counsel-projectile-rg)
-
-        ;; Background transparency
-        ;; (define-key evil-normal-state-map (kbd "SPC z") 'toggle-transparency)
 
         ;; Org Agenda
         (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
@@ -371,29 +360,6 @@ Load my custom keybindings.
           (org-agenda nil "A"))
 
         (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-
-        ;; Org Roam
-        ;; (define-key evil-normal-state-map (kbd "SPC n l") 'org-roam-buffer-toggle)
-        ;; (define-key evil-normal-state-map (kbd "SPC n f") 'org-roam-node-find)
-        ;; (define-key evil-normal-state-map (kbd "SPC n i") 'org-roam-node-insert)
-
-        ;; Manage buffers
-        ;; (define-key evil-normal-state-map (kbd "SPC k") 'kill-buffer)
-        ;; (define-key evil-normal-state-map (kbd "SPC eb") 'eval-buffer)
-
-        ;; Manage windows
-        ;; (evil-global-set-key 'normal (kbd "C-a <backspace>") 'delete-window)
-        ;; (evil-global-set-key 'normal (kbd "C-a \\") 'split-window-right)
-        ;; (evil-global-set-key 'normal (kbd "C-a -") 'split-window-below)
-        ;; ;; Windmove keys for additional window navigation
-        ;; (evil-global-set-key 'normal (kbd "C-a h")  'windmove-left)
-        ;; (evil-global-set-key 'normal (kbd "C-a l")  'windmove-right)
-        ;; (evil-global-set-key 'normal (kbd "C-a k")  'windmove-up)
-        ;; (evil-global-set-key 'normal (kbd "C-a j")  'windmove-down)
-
-        ;; ;; Use visual line motions even outside of visual-line-mode buffers
-        ;; (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-        ;; (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
   )
 
 #+end_src
@@ -512,7 +478,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
         ;      modus-themes-preset-overrides-intense)
 
         ;; Load the theme of your choice.
-        ;(load-theme 'modus-vivendi)
+        (load-theme 'modus-vivendi)
 
         (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
       ;;(load-theme 'modus-vivendi t)
@@ -526,7 +492,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
         ;; Load the theme of choice
         ;; (load-theme 'ef-winter)
         ;; (load-theme 'ef-autumn)
-        (load-theme 'ef-dark)
+        ;(load-theme 'ef-dark)
         ;; (load-theme 'ef-elea-dark)
         )
 
@@ -1126,6 +1092,7 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   ;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 #+end_src
+
 * Org Roam
 
 #+begin_src emacs-lisp :tangle "init.el"
@@ -1408,7 +1375,8 @@ A better ~yas-insert-snippet~.
   (use-package projectile
     :diminish projectile-mode
     :config (projectile-mode)
-    :custom ((projectile-completion-system 'ivy))
+    ;; :custom ((projectile-completion-system 'ivy))
+    :custom ((projectile-completion-system 'vertico))
     :bind-keymap
     ("C-c p" . projectile-command-map)
     :init
@@ -1417,10 +1385,13 @@ A better ~yas-insert-snippet~.
       (setq projectile-project-search-path '("~/git")))
     (setq projectile-switch-project-action #'projectile-dired))
 
-  (use-package counsel-projectile
-    :after projectile
-    :config (counsel-projectile-mode))
+  ;; (use-package counsel-projectile
+  ;;   :after projectile
+  ;;   :config (counsel-projectile-mode))
 #+end_src
+
+#+RESULTS:
+| lambda | nil | (interactive) | (use-package-autoload-keymap 'projectile-command-map 'projectile nil) |
 
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
