@@ -40,14 +40,12 @@
 
 (setq package-archives
       '(("elpa" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+        ("melpa" . "https://melpa.org/packages/")))
 
 ;; Highest number gets priority (what is not mentioned has priority 0)
 (setq package-archive-priorities
-      '(("elpa" . 3)
-        ("melpa" . 2)
-        ("nongnu" . 1)))
+      '(("elpa" . 2)
+        ("melpa" . 1)))
 
 (use-package async
   :ensure t
