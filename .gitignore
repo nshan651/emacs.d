@@ -5,6 +5,12 @@ transient/
 etc/
 var/
 
+# Other random dirs that somehow end up here
+games/
+tree-sitter/
+undo-foo-session/
+snippets/
+
 # Compiled
 *.elc
 
@@ -13,14 +19,18 @@ var/
 
 # Backup files
 *~
+#*
 
 # Undo-tree save-files
 *.~undo-tree
 
-history
-
 # Org DB files
 *.db
 
+# Misc files
+history
+projects
+bookmarks
+org-roam.db
 projectile-bookmarks.eld
 forge-database.sqlite
