@@ -180,6 +180,7 @@
         (emacs-lisp . t)
         (python . t)
         (shell . t)
+        (C . t)
        ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
 ;; Disable execution confirmations 

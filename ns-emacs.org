@@ -1049,11 +1049,14 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
           (emacs-lisp . t)
           (python . t)
           (shell . t)
+          (C . t)
          ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes))
   ;; Disable execution confirmations 
   (setq org-confirm-babel-evaluate nil)
 #+end_src
+
+#+RESULTS:
 
 ** Structure Templates
 
