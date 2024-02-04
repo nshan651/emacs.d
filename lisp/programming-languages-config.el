@@ -1,3 +1,7 @@
+(use-package ccls
+  :hook lsp
+  (:hook-into c-mode c++-mode))
+
 ;; Load SLY
 (require 'sly)
 

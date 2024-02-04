@@ -1,10 +1,12 @@
-(defun efs/lsp-mode-setup ()
+(defun ns/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
+  :hook
+  ((lsp-mode . ns/lsp-mode-setup)
+   (python-mode . lsp))
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :config
@@ -95,7 +97,7 @@
   :diminish projectile-mode
   :config (projectile-mode)
   ;; :custom ((projectile-completion-system 'ivy))
-  :custom ((projectile-completion-system 'vertico))
+  :custom ((projectile-completion-system 'default))
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
@@ -103,6 +105,15 @@
   (when (file-directory-p "~/git")
     (setq projectile-project-search-path '("~/git")))
   (setq projectile-switch-project-action #'projectile-dired))
+
+(ns/leader-m 'override
+  "p"  '(:ignore p :wk "projectile commands")
+  "pf" '(projectile-find-file :wk "projectile find file")
+  "ps" '(projectile-switch-project :wk "projectile switch project")
+  "pg" '(consult-ripgrep :wk "consult ripgrep")
+  "pp" '(projectile-find-file :wk "projectile find file")
+  "pc" '(projectile-compile-project :wk "projectile compile project")
+  "pd" '(projectile-dired :wk "projectile dired"))
 
 ;; (use-package counsel-projectile
 ;;   :after projectile

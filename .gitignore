@@ -2,7 +2,6 @@
 auto-save-list/
 elpa/
 transient/
-etc/
 var/
 .cache/
 
@@ -10,6 +9,7 @@ var/
 games/
 tree-sitter/
 undo-foo-session/
+url/
 snippets/
 
 # Compiled
@@ -25,16 +25,16 @@ snippets/
 # Undo-tree save-files
 *.~undo-tree
 
-# Org DB files
+# DB files
 *.db
+org-roam.db
+forge-database.sqlite
 
-# Misc files
+# 
 history
 projects
 bookmarks
-org-roam.db
 projectile-bookmarks.eld
-forge-database.sqlite
 
 # Misc hidden files
 .last-package-update-day

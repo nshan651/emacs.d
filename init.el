@@ -54,7 +54,9 @@
   (dired-async-mode 1))
 
 (use-package savehist
-  :init (savehist-mode t))
+  :init
+  (setq history-length 25)
+  (savehist-mode t))
 
 (use-package repeat
   :defer 10
@@ -89,6 +91,9 @@
 
 (load (locate-user-emacs-file
        "lisp/terminal-config.el"))
+
+(load (locate-user-emacs-file
+       "lisp/applications-config.el"))
 
 (load (locate-user-emacs-file
        "lisp/dired-config.el"))

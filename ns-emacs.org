@@ -286,7 +286,9 @@ Persist history over Emacs restarts. Vertico sorts by history position.
 
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package savehist
-    :init (savehist-mode t))
+    :init
+    (setq history-length 25)
+    (savehist-mode t))
 #+end_src
 
 #+RESULTS:
@@ -1213,32 +1215,36 @@ The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mo
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-  (defun efs/lsp-mode-setup ()
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
+      (defun ns/lsp-mode-setup ()
+        (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+        (lsp-headerline-breadcrumb-mode))
 
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred)
-    :hook (lsp-mode . efs/lsp-mode-setup)
-    :init
-    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-    :config
-    (lsp-enable-which-key-integration t))
+      (use-package lsp-mode
+        :commands (lsp lsp-deferred)
+        :hook
+        ((lsp-mode . ns/lsp-mode-setup)
+         (python-mode . lsp))
+        :init
+        (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+        :config
+        (lsp-enable-which-key-integration t))
 
-  (ns/leader-m 'lsp-mode-map
-    "a" 'lsp-execute-code-action
-    "v" 'lsp-avy-lens
-    "n" 'lsp-describe-thing-at-point
-    "i" 'lsp-goto-implementation
-    "d" 'lsp-find-definition
-    "D" 'lsp-find-declaration
-    "t" 'lsp-find-type-definition
-    "x" 'lsp-find-references
-    "r" 'lsp-rename
-    "R" 'lsp-restart-workspace
-    "=" 'lsp-format-buffer
-    "l" 'lsp-workspace-show-log)
+      (ns/leader-m 'lsp-mode-map
+        "a" 'lsp-execute-code-action
+        "v" 'lsp-avy-lens
+        "n" 'lsp-describe-thing-at-point
+        "i" 'lsp-goto-implementation
+        "d" 'lsp-find-definition
+        "D" 'lsp-find-declaration
+        "t" 'lsp-find-type-definition
+        "x" 'lsp-find-references
+        "r" 'lsp-rename
+        "R" 'lsp-restart-workspace
+        "=" 'lsp-format-buffer
+        "l" 'lsp-workspace-show-log)
 #+end_src
+
+#+RESULTS:
 
 *** lsp-ui
 [[https://emacs-lsp.github.io/lsp-ui/][lsp-ui]] is a set of UI enhancements built on top of =lsp-mode= which make Emacs feel even more like an IDE.  Check out the screenshots on the =lsp-ui= homepage (linked at the beginning of this paragraph) to see examples of what it can do.
@@ -1377,7 +1383,7 @@ A better ~yas-insert-snippet~.
     :diminish projectile-mode
     :config (projectile-mode)
     ;; :custom ((projectile-completion-system 'ivy))
-    :custom ((projectile-completion-system 'vertico))
+    :custom ((projectile-completion-system 'default))
     :bind-keymap
     ("C-c p" . projectile-command-map)
     :init
@@ -1386,13 +1392,21 @@ A better ~yas-insert-snippet~.
       (setq projectile-project-search-path '("~/git")))
     (setq projectile-switch-project-action #'projectile-dired))
 
+  (ns/leader-m 'override
+    "p"  '(:ignore p :wk "projectile commands")
+    "pf" '(projectile-find-file :wk "projectile find file")
+    "ps" '(projectile-switch-project :wk "projectile switch project")
+    "pg" '(consult-ripgrep :wk "consult ripgrep")
+    "pp" '(projectile-find-file :wk "projectile find file")
+    "pc" '(projectile-compile-project :wk "projectile compile project")
+    "pd" '(projectile-dired :wk "projectile dired"))
+
   ;; (use-package counsel-projectile
   ;;   :after projectile
   ;;   :config (counsel-projectile-mode))
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (use-package-autoload-keymap 'projectile-command-map 'projectile nil) |
 
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
@@ -1440,7 +1454,16 @@ Forge allows use to work with varios git forges using the magit interface.
 #+end_src
 
 ** C/C++
-TODO
+
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  (use-package ccls
+    :hook lsp
+    (:hook-into c-mode c++-mode))
+#+end_src
+
+#+RESULTS:
+: t
+
 ** Common Lisp
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
@@ -1481,7 +1504,7 @@ There are a number of other language servers for Python so if you find that =pyl
 #+end_src
 
 #+RESULTS:
-| evil-collection-python-set-evil-shift-width | lsp-deferred |
+| lsp-deferred | evil-collection-python-set-evil-shift-width | doom-modeline-env-setup-python |
 
 You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
 
@@ -1626,6 +1649,29 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
 
+
+* Applications
+#+begin_src emacs-lisp :tangle "init.el"
+(load (locate-user-emacs-file
+       "lisp/applications-config.el"))
+#+end_src
+
+** Elfeed
+
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  (load (locate-user-emacs-file
+         "etc/feed.el"))
+
+  (use-package elfeed
+    :ensure t)
+
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :feed-url "youtube\\.com"
+                                :add '(video youtube)))
+
+  (setq elfeed-feeds rss-feeds)
+#+end_src
+
 * File Management
 
 #+begin_src emacs-lisp :tangle "init.el"
@@ -1730,3 +1776,6 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
       "H" 'dired-hide-dotfiles-mode))
 
 #+end_src
+
+#+RESULTS:
+| dired-extra-startup | dired-hide-dotfiles-mode | all-the-icons-dired-mode |
