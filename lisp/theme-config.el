@@ -14,8 +14,6 @@
   (load-theme 'modus-vivendi)
 
   (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
-;;(load-theme 'modus-vivendi t)
-;;(load-theme 'modus-operandi t)
 
 ;; ef-themes
 (use-package ef-themes
@@ -27,6 +25,13 @@
   ;; (load-theme 'ef-autumn)
   ;(load-theme 'ef-dark)
   ;; (load-theme 'ef-elea-dark)
+  )
+
+;; Doom Themes
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; (load-theme 'doom-one)
   )
 
 ;; Set base font sizes
@@ -52,3 +57,6 @@
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1))
+
+;; (setq-default tab-width 2)
+;; (setq-default evil-shift-width tab-width)

@@ -25,10 +25,37 @@
 ;; Always start with *scratch*
 ;;(setq initial-buffer-choice t)
 
+;; Load my lisp package config paths
 (mapc
- (lambda (string)
-   (add-to-list 'load-path (locate-user-emacs-file string)))
- '("lisp"))
+(lambda (string)
+  (add-to-list 'load-path (locate-user-emacs-file string)))
+  '("lisp"))
+
+(defun ns/load-lisp-config (file-list)
+  "Loads all config files in lisp directory."
+  (dolist (file file-list)
+  (let ((full-path (locate-user-emacs-file (concat "lisp/" file))))
+  (when (file-readable-p full-path)
+  (load full-path)))))
+
+  ;; Load paths in specific order
+    (let ((file-list
+      '("evil-config.el"
+        "theme-config.el"
+        "ui-config.el"
+        "org-config.el"
+        "org-roam-config.el"
+        "development-config.el"
+        "programming-languages-config.el"
+        "terminal-config.el"
+        "applications-config.el"
+        "dired-config.el")))
+
+(ns/load-lisp-config file-list))
+
+;;Also load my `org-templates.el' and `feed.el'
+(load (locate-user-emacs-file "etc/org-templates.el"))
+(load (locate-user-emacs-file "etc/feed.el"))
 
 ;;;; Packages
 
@@ -67,33 +94,3 @@
   :ensure t
   :config
   (ws-butler-global-mode 1))
-
-(load (locate-user-emacs-file
-       "lisp/evil-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/theme-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/ui-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/org-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/org-roam-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/development-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/programming-languages-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/terminal-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/applications-config.el"))
-
-(load (locate-user-emacs-file
-       "lisp/dired-config.el"))

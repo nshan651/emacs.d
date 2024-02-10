@@ -7,7 +7,7 @@ My config was heavily inspired by David Wilson's [[https://github.com/daviwil/em
 
 * Early Initialization
 
-This is the first file that Emacs reads when starting up. It should contain code that does not depend on any package or the proportions of the Emacs frame. In general, this early initialization file is meant to set up a few basic things before Emacs produces the initial frame by delegating to the =init.el=. 
+This is the first file that Emacs reads when starting up. It should contain code that does not depend on any package or the proportions of the Emacs frame. In general, this early initialization file is meant to set up a few basic things before Emacs produces the initial frame by delegating to the =init.el=.
 
 ** Macros to run code only in a Desktop Environment
 
@@ -17,7 +17,7 @@ This is the first file that Emacs reads when starting up. It should contain code
     "Regular expression to  tiling window managers.
   See definition of `ns-emacs-with-desktop-session'.")
 
-  (defmacro ns-emacs-with-desktop-session (&rest body) 
+  (defmacro ns-emacs-with-desktop-session (&rest body)
    "Expand BODY if desktop session is not a tiling window manager.
   See `ns-emacs-tiling-window-manager-regexp' for what
   constitutes a matching tiling window manager."
@@ -70,11 +70,11 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
 
     (menu-bar-mode -1)            ; Disable the menu bar
 
-;; Disable graphical elements 
+;; Disable graphical elements
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-(tooltip-mode -1) 
+(tooltip-mode -1)
 
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
@@ -239,11 +239,41 @@ Keep it simple. I have this disabled by default.
 ** Pre-load package configs in =lisp= directory
 
 #+begin_src emacs-lisp :tangle "init.el"
-(mapc
- (lambda (string)
-   (add-to-list 'load-path (locate-user-emacs-file string)))
- '("lisp"))
+  ;; Load my lisp package config paths
+  (mapc
+  (lambda (string)
+    (add-to-list 'load-path (locate-user-emacs-file string)))
+    '("lisp"))
+
+  (defun ns/load-lisp-config (file-list)
+    "Loads all config files in lisp directory."
+    (dolist (file file-list)
+    (let ((full-path (locate-user-emacs-file (concat "lisp/" file))))
+    (when (file-readable-p full-path)
+    (load full-path)))))
+
+    ;; Load paths in specific order
+      (let ((file-list
+        '("evil-config.el"
+          "theme-config.el"
+          "ui-config.el"
+          "org-config.el"
+          "org-roam-config.el"
+          "development-config.el"
+          "programming-languages-config.el"
+          "terminal-config.el"
+          "applications-config.el"
+          "dired-config.el")))
+
+  (ns/load-lisp-config file-list))
+
+  ;;Also load my `org-templates.el' and `feed.el'
+  (load (locate-user-emacs-file "etc/org-templates.el"))
+  (load (locate-user-emacs-file "etc/feed.el"))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Package Setup
 Setup package archives for =package.el=.
@@ -315,11 +345,6 @@ Automatically trim extraneous whitespaces.
 * Keybindings
 All my keybindings are controlled by evil mode.
 
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/evil-config.el"))
-#+end_src
-
 ** Evil Keybindings
 
 Load my custom keybindings.
@@ -343,23 +368,23 @@ Load my custom keybindings.
         (evil-set-initial-state 'dashboard-mode 'normal)
 
         ;; Org Agenda
-        (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+        ;; (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
         ;; Open TODO agenda file as a pop-up buffer
-        (define-key evil-normal-state-map (kbd "SPC r")
-          (lambda ()
-            (interactive)
-            (let ((file "~/org/agenda/todo.org")
-                    (pop-up-buffer "*TODO*"))
-                (pop-to-buffer pop-up-buffer)
-                (find-file file))))
+        ;;(define-key evil-normal-state-map (kbd "SPC r")
+        ;;  (lambda ()
+        ;;    (interactive)
+        ;;    (let ((file "~/org/agenda/todo.org")
+        ;;            (pop-up-buffer "*TODO*"))
+        ;;        (pop-to-buffer pop-up-buffer)
+        ;;        (find-file file))))
 
-        (defun open-custom-agenda ()
-          "Open the custom agenda view."
-          (interactive)
-          (org-agenda nil "A"))
+        ;;(defun open-custom-agenda ()
+        ;;  "Open the custom agenda view."
+        ;;  (interactive)
+        ;;  (org-agenda nil "A"))
 
-        (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+        ;; (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
   )
 
 #+end_src
@@ -412,7 +437,6 @@ General is the best method that I've found for organizing keybindings.
       :prefix ","))
 #+end_src
 
-
 ** Basic Keybindings
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
 
@@ -425,7 +449,7 @@ These are basic keybindings that aren't tied to any particular package (except e
   ;; Choose a theme
   ;; TODO move this to consult
   (ns/leader-t
-    "tt" '(consult-theme :which-key "Choose a theme"))
+    "t" '(consult-theme :wk "Choose a theme"))
 
   (ns/leader-spc
     "f"  'find-file
@@ -445,6 +469,8 @@ These are basic keybindings that aren't tied to any particular package (except e
     "j"           'windmove-down)
 #+end_src
 
+#+RESULTS:
+
 *** Commenting
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
@@ -455,48 +481,48 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 
 #+RESULTS:
 
-* Basic Theme Configuration
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/theme-config.el"))
-#+end_src
-
+* Theme Configuration
 ** Color Theme
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-      ;; modus-themes
-      (use-package modus-themes
-        :ensure t
-        :config
-        ;; Add all your customizations prior to loading the themes
-        ;;(setq modus-themes-italic-constructs t
-        ;;      modus-themes-bold-constructs nil)
+    ;; modus-themes
+    (use-package modus-themes
+      :ensure t
+      :config
+      ;; Add all your customizations prior to loading the themes
+      ;;(setq modus-themes-italic-constructs t
+      ;;      modus-themes-bold-constructs nil)
 
-        ;; Maybe define some palette overrides, such as by using our presets
-        ;(setq modus-themes-common-palette-overrides
-        ;      modus-themes-preset-overrides-intense)
+      ;; Maybe define some palette overrides, such as by using our presets
+      ;(setq modus-themes-common-palette-overrides
+      ;      modus-themes-preset-overrides-intense)
 
-        ;; Load the theme of your choice.
-        (load-theme 'modus-vivendi)
+      ;; Load the theme of your choice.
+      (load-theme 'modus-vivendi)
 
-        (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
-      ;;(load-theme 'modus-vivendi t)
-      ;;(load-theme 'modus-operandi t)
+      (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 
-      ;; ef-themes
-      (use-package ef-themes
-        :ensure t
-        :config
+    ;; ef-themes
+    (use-package ef-themes
+      :ensure t
+      :config
 
-        ;; Load the theme of choice
-        ;; (load-theme 'ef-winter)
-        ;; (load-theme 'ef-autumn)
-        ;(load-theme 'ef-dark)
-        ;; (load-theme 'ef-elea-dark)
-        )
+      ;; Load the theme of choice
+      ;; (load-theme 'ef-winter)
+      ;; (load-theme 'ef-autumn)
+      ;(load-theme 'ef-dark)
+      ;; (load-theme 'ef-elea-dark)
+      )
 
+    ;; Doom Themes
+    (use-package doom-themes
+      :ensure t
+      :config
+      ;; (load-theme 'doom-one)
+      )
 #+end_src
+
+#+RESULTS:
 
 ** Font Configuration
 Set font details here.
@@ -533,13 +559,16 @@ I use doom modeline.
 
 #+RESULTS:
 
+** Tab Widths
+#+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+  ;; (setq-default tab-width 2)
+  ;; (setq-default evil-shift-width tab-width)
+#+end_src
+
+#+RESULTS:
+
 * UI Enhancements
 Some UI enhancements that supercharge Emacs.
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/ui-config.el"))
-#+end_src
 
 ** Undo System
 Linear undo while maintaining all history.
@@ -571,7 +600,7 @@ Linear undo while maintaining all history.
 #+end_src
 
 ** Vertico
-[[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI based on the default completion system. 
+[[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI based on the default completion system.
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
     (defun ns/minibuffer-backward-kill (arg)
@@ -747,8 +776,8 @@ Linear undo while maintaining all history.
   (use-package orderless
     :ensure t
     :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+    (completion-styles '(orderless))
+    (completion-category-overrides '((file (styles . (partial-completion))))))
 #+end_src
 
 #+RESULTS:
@@ -806,6 +835,12 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package corfu
+    :general
+    (general-def 'corfu-mode-map
+      "C-j" 'corfu-next
+      "C-k" 'corfu-previous
+      "TAB" 'corfu-insert
+      "C-f" 'corfu-insert)
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     (corfu-separator ?\s)          ;; Orderless field separator
@@ -816,6 +851,7 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     :init
     (setq tab-always-indent 'complete))
 #+end_src
+
 
 #+RESULTS:
 
@@ -834,15 +870,21 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 #+end_src
-** Text Scaling
-TODO
+** Avy
+Avy is useful for jumping around the screen and selecting different elements.
+
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+  ;;(use-package avy
+  ;;  :general
+  ;;  (ns/leader-spc
+  ;;    "j"   '(:ignore t :which-key "jump")
+  ;;    "jj"  '(avy-goto-char :which-key "jump to char")
+  ;;    "jw"  '(avy-goto-word-0 :which-key "jump to word")
+  ;;    "jl"  '(avy-goto-line :which-key "jump to line")))
+#+end_src
 
 * Org
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/org-config.el"))
-#+end_src
+My capture templates, agenda views, and other Org customizations can be found in [[ns-orgmode.org]].
 
 ** Font Faces
 
@@ -880,142 +922,179 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
     (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
     (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 #+end_src
-** Basic Org Config
 
+** Basic Org Config
 This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-    (defun efs/org-mode-setup ()
-      (org-indent-mode)
-      (variable-pitch-mode 1)
-      (visual-line-mode 1))
+  (defun ns/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (visual-line-mode 1))
 
-    (use-package org
-      ;;:pin org
-      :commands (org-capture org-agenda)
-      :hook
-      (org-mode . efs/org-mode-setup)
-      :config
-      (setq org-ellipsis " ▾")
-      (setq org-agenda-start-with-log-mode t)
-      (setq org-log-done 'time)
-      (setq org-log-into-drawer t)
-      (setq org-agenda-files
-            '("~/org/agenda/todo.org"
-              "~/org/agenda/birthdays.org"
-              "~/org/agenda/projects.org"))
+  (use-package org
+    :commands (org-capture org-agenda)
+    :hook
+    (org-mode . ns/org-mode-setup)
+    :config
+    (setq org-ellipsis " ▾"
+          org-hide-emphasis-markers t
+          org-src-fontify-natively t
+          org-fontify-quote-and-verse-blocks t
+          ;; org-src-tab-acts-natively t
+          ;;org-edit-src-content-indentation 2
+          org-hide-block-startup nil
+          ;;org-src-preserve-indentation nil
+          org-startup-folded 'content
+          org-cycle-separator-lines 2
+          org-capture-bookmark nil)
 
-      (require 'org-habit)
-      (add-to-list 'org-modules 'org-habit)
-      (setq org-habit-graph-column 60)
+    (setq org-modules
+          '(org-habit))
 
-      (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
+    ;; Resize latex figures
+    (setq org-format-latex-options
+          (plist-put org-format-latex-options :scale 1.5))
 
-      (setq org-refile-targets
-        '(("archive.org" :maxlevel . 1)
-          ("todo.org" :maxlevel . 1)))
+    (setq org-habit-graph-column 60)
 
-      ;; Save Org buffers after refiling!
-      (advice-add 'org-refile :after 'org-save-all-org-buffers)
+    ;; Save Org buffers after refiling!
+    (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-      (setq org-tag-alist
-        '((:startgroup)
-           ; Put mutually exclusive tags here
-           (:endgroup)
-           ("@errand" . ?E)
-           ("@home" . ?H)
-           ("@work" . ?W)
-           ("agenda" . ?a)
-           ("planning" . ?p)
-           ("publish" . ?P)
-           ("batch" . ?b)
-           ("note" . ?n)
-           ("idea" . ?i)))
+    (efs/org-font-setup))
+     #+end_src
 
-      ;; Open the agenda file as the only window
-      (setq org-agenda-window-setup 'only-window)
+** Org Agenda
 
-      ;; Configure custom agenda views
-      (setq org-agenda-custom-commands
-              `(("A" "Daily agenda and top priority tasks"
-              ((tags-todo "*"
-                          ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                              (org-agenda-skip-function
-                              `(org-agenda-skip-entry-if
-                              'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
-                              (org-agenda-block-separator nil)
-                              (org-agenda-overriding-header "Important Tasks Without a Date\n")))
-                  (agenda "" ((org-agenda-span 1)
-                              (org-deadline-warning-days 0)
-                              (org-agenda-block-separator nil)
-                              (org-scheduled-past-days 0)
-                              (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
-                              (org-agenda-format-date "%A %-e %B %Y")
-                              (org-agenda-overriding-header "\nToday's Agenda\n")))
-                  (agenda "" ((org-agenda-start-on-weekday nil)
-                              (org-agenda-start-day "+1d")
-                              (org-agenda-span 3)
-                              (org-deadline-warning-days 0)
-                              (org-agenda-block-separator nil)
-                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                              (org-agenda-overriding-header "\nNext Three Days\n")))
-                  (agenda "" ((org-agenda-time-grid nil)
-                              (org-agenda-start-on-weekday nil)
-                              ;; We don't want to replicate the previous section's
-                              ;; three days, so we start counting from the day after.
-                              (org-agenda-start-day "+4d")
-                              (org-agenda-span 14)
-                              (org-agenda-show-all-dates nil)
-                              (org-deadline-warning-days 0)
-                              (org-agenda-block-separator nil)
-                              (org-agenda-entry-types '(:deadline))
-                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                              (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
-                  (todo "PROJECT"
+     #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+       ;; Open the agenda file as the only window
+       (setq org-agenda-window-setup 'only-window)
+       (setq org-agenda-files
+             '("~/org/agenda/todo.org"
+               "~/org/agenda/birthdays.org"
+               "~/org/agenda/projects.org"))
+
+       (setq org-todo-keywords
+             '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+               (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+       (setq org-refile-targets
+             '(("archive.org" :maxlevel . 1)
+               ("todo.org" :maxlevel . 1)))
+
+       (setq org-tag-alist
+             '((:startgroup)
+                                               ; Put mutually exclusive tags here
+               (:endgroup)
+               ("@errand" . ?E)
+               ("@home" . ?H)
+               ("@work" . ?W)
+               ("agenda" . ?a)
+               ("planning" . ?p)
+               ("publish" . ?P)
+               ("batch" . ?b)
+               ("note" . ?n)
+               ("idea" . ?i)))
+
+       ;; Configure custom agenda views
+       (setq org-agenda-custom-commands
+             `(("A" "Daily agenda and top priority tasks"
+                ((tags-todo "*"
                             ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                            (org-agenda-block-separator nil)
-                            (org-agenda-overriding-header "\nProjects\n")))
-                  ))
-              ))
+                             (org-agenda-skip-function
+                              `(org-agenda-skip-entry-if
+                                'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
+                             (org-agenda-block-separator nil)
+                             (org-agenda-overriding-header "Important Tasks Without a Date\n")))
+                 (agenda "" ((org-agenda-span 1)
+                             (org-deadline-warning-days 0)
+                             (org-agenda-block-separator nil)
+                             (org-scheduled-past-days 0)
+                             (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                             (org-agenda-format-date "%A %-e %B %Y")
+                             (org-agenda-overriding-header "\nToday's Agenda\n")))
+                 (agenda "" ((org-agenda-start-on-weekday nil)
+                             (org-agenda-start-day "+1d")
+                             (org-agenda-span 3)
+                             (org-deadline-warning-days 0)
+                             (org-agenda-block-separator nil)
+                             (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                             (org-agenda-overriding-header "\nNext Three Days\n")))
+                 (agenda "" ((org-agenda-time-grid nil)
+                             (org-agenda-start-on-weekday nil)
+                             ;; We don't want to replicate the previous section's
+                             ;; three days, so we start counting from the day after.
+                             (org-agenda-start-day "+4d")
+                             (org-agenda-span 14)
+                             (org-agenda-show-all-dates nil)
+                             (org-deadline-warning-days 0)
+                             (org-agenda-block-separator nil)
+                             (org-agenda-entry-types '(:deadline))
+                             (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                             (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
+                 (todo "PROJECT"
+                       ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+                        (org-agenda-block-separator nil)
+                        (org-agenda-overriding-header "\nProjects\n")))
+                 ))
+               ("d" "Dashboard"
+                ((agenda "" ((org-deadline-warning-days 7)))
+                 (tags-todo "+PRIORITY=\"A\""
+                            ((org-agenda-overriding-header "High Priority")))
+                 (tags-todo "+followup" ((org-agenda-overriding-header "Needs Follow Up")))
+                 (todo "NEXT"
+                       ((org-agenda-overriding-header "Next Actions")
+                        (org-agenda-max-todos nil)))
+                 (todo "TODO"
+                       ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
+                        (org-agenda-files '("~/org/agenda/todo.org"))
+                        (org-agenda-text-search-extra-files nil)))))
 
-      (setq org-capture-templates
-        `(("t" "todo" entry (file org-default-notes-file)
-            "* TODO %?\n%u\n%a\n" :clock-in t :clock-resume t)
-          ;("t" "Tasks / Projects")
-          ;("tt" "Task" entry (file+olp ;"~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
-          ;     "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+               ("n" "Next Tasks"
+                ((agenda "" ((org-deadline-warning-days 7)))
+                 (todo "NEXT"
+                       ((org-agenda-overriding-header "Next Tasks")))))
 
-          ("j" "Journal Entries")
-          ("jj" "Journal" entry
-               (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-               "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-               ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-               :clock-in :clock-resume
-               :empty-lines 1)
-          ("jm" "Meeting" entry
-               (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-               "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-               :clock-in :clock-resume
-               :empty-lines 1)
+               ;; Low-effort next actions
+               ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+                ((org-agenda-overriding-header "Low Effort Tasks")
+                 (org-agenda-max-todos 20)
+                 (org-agenda-files org-agenda-files)))
+               ))
 
-          ("w" "Workflows")
-          ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-               "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+       (setq org-capture-templates
+             `(("t" "Tasks")
+               ("tt" "Task" entry (file "~/org/agenda/todo.org")
+                "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+               ("ts" "Clocked Entry Subtask" entry (clock)
+                "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-          ("m" "Metrics Capture")
-          ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-           "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)
+               ("j" "Journal Entries")
+               ("je" "General Entry" entry
+                (file+olp+datetree "~/org/journal/journal.org")
+                "\n* %<%I:%M %p> - %^{Title} \n\n%?\n\n"
+                :tree-type week
+                :clock-in :clock-resume
+                :empty-lines 1)
+               ("jt" "Task Entry" entry
+                (file+olp+datetree "~/org/journal/journal.org")
+                "\n* %<%I:%M %p> - Task Notes: %a\n\n%?\n\n"
+                :tree-type week
+                :clock-in :clock-resume
+                :empty-lines 1)
+               ("jj" "Journal" entry
+                (file+olp+datetree "~/org/journal/journal.org")
+                "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+                :tree-type week
+                :clock-in :clock-resume
+                :empty-lines 1)))
 
-          ("s" "Slipbox" entry  (file "~/org/inbox.org")
-         "* %?\n")))
+       (define-key global-map (kbd "C-c j")
+                   (lambda () (interactive) (org-capture nil "jj")))
 
-      (define-key global-map (kbd "C-c j")
-        (lambda () (interactive) (org-capture nil "jj")))
-
-      (efs/org-font-setup))
 #+end_src
+
+#+RESULTS:
 
 ** Nicer Heading Bullets
 org-bullets replaces the heading stars in org-mode buffers with nicer looking characters that you can control.
@@ -1040,7 +1119,43 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
     :hook (org-mode . efs/org-mode-visual-fill))
  #+end_src
 
-** Babel 
+** Auto-show Markup Symbols
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+  (use-package org-appear
+     :hook (org-mode . org-appear-mode))
+#+end_src
+
+* Org Modules and Packages
+** Evil Org
+#+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-set-key-theme '(navigation todo insert textobjects additional))
+    (evil-org-agenda-set-keys))
+
+  (ns/leader-spc 'override
+    "o"   '(:ignore t :wk "org mode")
+
+    "oi"  '(:ignore t :wk "insert")
+    "oil" '(org-insert-link :wk "insert link")
+
+    "oo"  '(org-agenda :wk "open agenda")
+
+    "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
+    "os"  '(consult-org-roam-search :wk "search notes")
+    ;; "oa"  '(org-agenda :wk "status")
+    "ot"  '(org-todo-list :wk "todos")
+    "oc"  '(org-capture t :wk "capture")
+    "ox"  '(org-export-dispatch t :wk "export"))
+#+end_src
+
+#+RESULTS:
+
+** Babel
 To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
@@ -1054,7 +1169,7 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
           (C . t)
          ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes))
-  ;; Disable execution confirmations 
+  ;; Disable execution confirmations
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
@@ -1066,43 +1181,61 @@ Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure temp
 
 You can add more =src= block templates below by copying one of the lines and changing the two strings at the end, the first to be the template name and the second to contain the name of the language [[https://orgmode.org/worg/org-contrib/babel/languages.html][as it is known by Org Babel]].
 
+ #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+   (defun ns/org-get-file-basename ()
+     "Return the base name of the current buffer's file."
+     (when buffer-file-name
+       (file-name-base buffer-file-name)))
+
+   (use-package org-tempo
+     :ensure nil
+     :after org
+     :config
+     (let ((templates '(("sh"  . "src sh")
+                        ("el"  . "src emacs-lisp")
+                        ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
+                        ("vim" . "src vim")
+                        ("py"  . "src python")
+                        ;; Leetcode snippet
+                        ("leet" .
+                         "src C++ :includes <iostream> :flags -I./src/util -std=c++20 :tangle src/ .cpp")
+
+                        ("cpp" . "src C++ :includes <iostream>"))))
+       (dolist (template templates)
+         (push template org-structure-template-alist))))
+#+end_src
+
+
+
+#+RESULTS:
+: t
+
+** Calendar Sync
+
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-  (use-package org-tempo
-    :ensure nil
-    :after org
+  (use-package org-caldav
+    :disabled t
     :config
-    (let ((templates '(("sh"  . "src sh")
-                       ("el"  . "src emacs-lisp")
-                       ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
-                       ("vim" . "src vim")
-                       ("py"  . "src python")
-                       ("cpp" . "src C++ :includes <iostream>"))))
-      (dolist (template templates)
-        (push template org-structure-template-alist))))
+    (setq org-caldav-url "TODO"
+          ;; org-caldav-files '("~/Notes/Calendar/Personal.org" "~/Notes/Calendar/Work.org")
+          ;; org-caldav-inbox '("~/Notes/Calendar/Personal.org" "~/Notes/Calendar/Work.org")
+          org-caldav-calendar-id "fe098bfb-0726-4e10-bff2-55f8278c8a56"
+          org-caldav-files '("~/org/calendar/personal.org")
+          org-caldav-inbox "~/org/calendar/personal-inbox.org"
+          org-caldav-calendars
+          '((:calendar-id "fe098bfb-0726-4e10-bff2-55f8278c8a56"
+                          :files ("~/org/calendar/personal.org")
+                          :inbox "~/org/calendar/personal-inbox.org"))
+          ;; (:calendar-id "8f150437-cc57-4ba0-9200-d1d98389e2e4"
+          ;;  :files ("~/Notes/Calendar/Work.org")
+          ;;  :inbox "~/Notes/Calendar/Work.org"))
+          org-caldav-delete-org-entries 'always
+          org-caldav-delete-calendar-entries 'never))
 #+end_src
 
-** Auto-tangle Configuration Files
-This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-config= gets executed each time such a buffer gets saved.  This function checks to see if the file being saved is the Emacs.org file you're looking at right now, and if so, automatically exports the configuration here to the associated output files. Currently, this is disabled.
-
-#+begin_src emacs-lisp
-  ;; ;; Automatically tangle our Emacs.org config file when we save it
-  ;; (defun efs/org-babel-tangle-config ()
-  ;;   (when (string-equal (file-name-directory (buffer-file-name))
-  ;;                       (expand-file-name user-emacs-directory))
-  ;;     ;; Dynamic scoping to the rescue
-  ;;     (let ((org-confirm-babel-evaluate nil))
-  ;;       (org-babel-tangle))))
-
-  ;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
-#+end_src
+#+RESULTS:
 
 * Org Roam
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/org-roam-config.el"))
-#+end_src
-
 ** Org Roam Config
 [[[[https://github.com/org-roam/org-roam]]][Org Roam]] is a plain-text, graph-based personal knowledge management system.
 
@@ -1111,6 +1244,8 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
     :ensure t
     :custom
     (org-roam-directory (file-truename "~/org"))
+    (org-roam-dailies-directory "~/org/journal")
+    (org-roam-completion-everywhere t)
     :config
     ;; If you're using a vertical completion framework, you might want a more informative completion interface
     ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
@@ -1200,11 +1335,6 @@ It can be useful to differentiate the different types of zettels at completion t
 
 * Development
 
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/development-config.el"))
-#+end_src
-
 ** LSP
 
 *** lsp-mode
@@ -1229,19 +1359,19 @@ The =which-key= integration adds helpful descriptions of the various keys so you
         :config
         (lsp-enable-which-key-integration t))
 
-      (ns/leader-m 'lsp-mode-map
-        "a" 'lsp-execute-code-action
-        "v" 'lsp-avy-lens
-        "n" 'lsp-describe-thing-at-point
-        "i" 'lsp-goto-implementation
-        "d" 'lsp-find-definition
-        "D" 'lsp-find-declaration
-        "t" 'lsp-find-type-definition
-        "x" 'lsp-find-references
-        "r" 'lsp-rename
-        "R" 'lsp-restart-workspace
-        "=" 'lsp-format-buffer
-        "l" 'lsp-workspace-show-log)
+      ;;(ns/leader-m 'lsp-mode-map
+      ;;  "a" 'lsp-execute-code-action
+      ;;  "v" 'lsp-avy-lens
+      ;;  "n" 'lsp-describe-thing-at-point
+      ;;  "i" 'lsp-goto-implementation
+       ;; "d" 'lsp-find-definition
+        ;;"D" 'lsp-find-declaration
+        ;;"t" 'lsp-find-type-definition
+        ;;"x" 'lsp-find-references
+        ;;"r" 'lsp-rename
+        ;;"R" 'lsp-restart-workspace
+        ;;"=" 'lsp-format-buffer
+        ;;"l" 'lsp-workspace-show-log)
 #+end_src
 
 #+RESULTS:
@@ -1311,12 +1441,15 @@ Tree sitter support is now built in to Emacs.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package dap-mode
+    :disabled t
     :commands dap-debug
     :init
     :config
     (dap-ui-mode 1)
     (dap-mode 1))
 #+end_src
+
+#+RESULTS:
 
 ** Company Mode
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
@@ -1447,22 +1580,18 @@ Forge allows use to work with varios git forges using the magit interface.
 #+end_src
 
 * Programming Languages
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/programming-languages-config.el"))
-#+end_src
-
 ** C/C++
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package ccls
-    :hook lsp
-    (:hook-into c-mode c++-mode))
+    :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp)))
+    :config
+    (setq ccls-executable "/usr/bin/ccls")
+    )
 #+end_src
 
 #+RESULTS:
-: t
+| lambda | nil | (require 'ccls) | (lsp) |
 
 ** Common Lisp
 
@@ -1521,12 +1650,6 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 : t
 
 * Terminals
-
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/terminal-config.el"))
-#+end_src
-
 ** term-mode
 
 =term-mode= is a built-in terminal emulator in Emacs.  Because it is written in Emacs Lisp, you can start using it immediately with very little configuration.  If you are on Linux or macOS, =term-mode= is a great choice to get started because it supports fairly complex terminal applications (=htop=, =vim=, etc) and works pretty reliably.  However, because it is written in Emacs Lisp, it can be slower than other options like =vterm=.  The speed will only be an issue if you regularly run console apps with a lot of output.
@@ -1651,34 +1774,25 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 
 
 * Applications
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/applications-config.el"))
-#+end_src
-
 ** Elfeed
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
-  (load (locate-user-emacs-file
-         "etc/feed.el"))
-
   (use-package elfeed
     :commands elfeed
     :config
     (setq elfeed-feeds rss-feeds))
+  ;; (add-hook 'elfeed-new-entry-hook
+  ;;           (elfeed-make-tagger :feed-url "youtube\\.com"
+  ;; :add '(video youtube)))
 
-  (add-hook 'elfeed-new-entry-hook
-            (elfeed-make-tagger :feed-url "youtube\\.com"
-                                :add '(video youtube)))
 
 #+end_src
+
+#+RESULTS:
+: t
 
 * File Management
 
-#+begin_src emacs-lisp :tangle "init.el"
-(load (locate-user-emacs-file
-       "lisp/dired-config.el"))
-#+end_src
 
 ** Dired
 

@@ -29,136 +29,166 @@
   (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
   (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 
-(defun efs/org-mode-setup ()
+(defun ns/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1)
   (visual-line-mode 1))
 
 (use-package org
-  ;;:pin org
   :commands (org-capture org-agenda)
   :hook
-  (org-mode . efs/org-mode-setup)
+  (org-mode . ns/org-mode-setup)
   :config
-  (setq org-ellipsis " ▾")
-  (setq org-agenda-start-with-log-mode t)
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
-  (setq org-agenda-files
-        '("~/org/agenda/todo.org"
-          "~/org/agenda/birthdays.org"
-          "~/org/agenda/projects.org"))
+  (setq org-ellipsis " ▾"
+        org-hide-emphasis-markers t
+        org-src-fontify-natively t
+        org-fontify-quote-and-verse-blocks t
+        ;; org-src-tab-acts-natively t
+        ;;org-edit-src-content-indentation 2
+        org-hide-block-startup nil
+        ;;org-src-preserve-indentation nil
+        org-startup-folded 'content
+        org-cycle-separator-lines 2
+        org-capture-bookmark nil)
 
-  (require 'org-habit)
-  (add-to-list 'org-modules 'org-habit)
+  (setq org-modules
+        '(org-habit))
+
+  ;; Resize latex figures
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 1.5))
+
   (setq org-habit-graph-column 60)
-
-  (setq org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
-
-  (setq org-refile-targets
-    '(("archive.org" :maxlevel . 1)
-      ("todo.org" :maxlevel . 1)))
 
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-  (setq org-tag-alist
-    '((:startgroup)
-       ; Put mutually exclusive tags here
-       (:endgroup)
-       ("@errand" . ?E)
-       ("@home" . ?H)
-       ("@work" . ?W)
-       ("agenda" . ?a)
-       ("planning" . ?p)
-       ("publish" . ?P)
-       ("batch" . ?b)
-       ("note" . ?n)
-       ("idea" . ?i)))
-
-  ;; Open the agenda file as the only window
-  (setq org-agenda-window-setup 'only-window)
-
-  ;; Configure custom agenda views
-  (setq org-agenda-custom-commands
-          `(("A" "Daily agenda and top priority tasks"
-          ((tags-todo "*"
-                      ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                          (org-agenda-skip-function
-                          `(org-agenda-skip-entry-if
-                          'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
-                          (org-agenda-block-separator nil)
-                          (org-agenda-overriding-header "Important Tasks Without a Date\n")))
-              (agenda "" ((org-agenda-span 1)
-                          (org-deadline-warning-days 0)
-                          (org-agenda-block-separator nil)
-                          (org-scheduled-past-days 0)
-                          (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
-                          (org-agenda-format-date "%A %-e %B %Y")
-                          (org-agenda-overriding-header "\nToday's Agenda\n")))
-              (agenda "" ((org-agenda-start-on-weekday nil)
-                          (org-agenda-start-day "+1d")
-                          (org-agenda-span 3)
-                          (org-deadline-warning-days 0)
-                          (org-agenda-block-separator nil)
-                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                          (org-agenda-overriding-header "\nNext Three Days\n")))
-              (agenda "" ((org-agenda-time-grid nil)
-                          (org-agenda-start-on-weekday nil)
-                          ;; We don't want to replicate the previous section's
-                          ;; three days, so we start counting from the day after.
-                          (org-agenda-start-day "+4d")
-                          (org-agenda-span 14)
-                          (org-agenda-show-all-dates nil)
-                          (org-deadline-warning-days 0)
-                          (org-agenda-block-separator nil)
-                          (org-agenda-entry-types '(:deadline))
-                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                          (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
-              (todo "PROJECT"
-                        ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                        (org-agenda-block-separator nil)
-                        (org-agenda-overriding-header "\nProjects\n")))
-              ))
-          ))
-
-  (setq org-capture-templates
-    `(("t" "todo" entry (file org-default-notes-file)
-        "* TODO %?\n%u\n%a\n" :clock-in t :clock-resume t)
-      ;("t" "Tasks / Projects")
-      ;("tt" "Task" entry (file+olp ;"~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
-      ;     "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-
-      ("j" "Journal Entries")
-      ("jj" "Journal" entry
-           (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume
-           :empty-lines 1)
-      ("jm" "Meeting" entry
-           (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-           :clock-in :clock-resume
-           :empty-lines 1)
-
-      ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
-
-      ("m" "Metrics Capture")
-      ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)
-
-      ("s" "Slipbox" entry  (file "~/org/inbox.org")
-     "* %?\n")))
-
-  (define-key global-map (kbd "C-c j")
-    (lambda () (interactive) (org-capture nil "jj")))
-
   (efs/org-font-setup))
+
+;; Open the agenda file as the only window
+(setq org-agenda-window-setup 'only-window)
+(setq org-agenda-files
+      '("~/org/agenda/todo.org"
+        "~/org/agenda/birthdays.org"
+        "~/org/agenda/projects.org"))
+
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+(setq org-refile-targets
+      '(("archive.org" :maxlevel . 1)
+        ("todo.org" :maxlevel . 1)))
+
+(setq org-tag-alist
+      '((:startgroup)
+                                        ; Put mutually exclusive tags here
+        (:endgroup)
+        ("@errand" . ?E)
+        ("@home" . ?H)
+        ("@work" . ?W)
+        ("agenda" . ?a)
+        ("planning" . ?p)
+        ("publish" . ?P)
+        ("batch" . ?b)
+        ("note" . ?n)
+        ("idea" . ?i)))
+
+;; Configure custom agenda views
+(setq org-agenda-custom-commands
+      `(("A" "Daily agenda and top priority tasks"
+         ((tags-todo "*"
+                     ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+                      (org-agenda-skip-function
+                       `(org-agenda-skip-entry-if
+                         'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
+                      (org-agenda-block-separator nil)
+                      (org-agenda-overriding-header "Important Tasks Without a Date\n")))
+          (agenda "" ((org-agenda-span 1)
+                      (org-deadline-warning-days 0)
+                      (org-agenda-block-separator nil)
+                      (org-scheduled-past-days 0)
+                      (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                      (org-agenda-format-date "%A %-e %B %Y")
+                      (org-agenda-overriding-header "\nToday's Agenda\n")))
+          (agenda "" ((org-agenda-start-on-weekday nil)
+                      (org-agenda-start-day "+1d")
+                      (org-agenda-span 3)
+                      (org-deadline-warning-days 0)
+                      (org-agenda-block-separator nil)
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                      (org-agenda-overriding-header "\nNext Three Days\n")))
+          (agenda "" ((org-agenda-time-grid nil)
+                      (org-agenda-start-on-weekday nil)
+                      ;; We don't want to replicate the previous section's
+                      ;; three days, so we start counting from the day after.
+                      (org-agenda-start-day "+4d")
+                      (org-agenda-span 14)
+                      (org-agenda-show-all-dates nil)
+                      (org-deadline-warning-days 0)
+                      (org-agenda-block-separator nil)
+                      (org-agenda-entry-types '(:deadline))
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                      (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
+          (todo "PROJECT"
+                ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+                 (org-agenda-block-separator nil)
+                 (org-agenda-overriding-header "\nProjects\n")))
+          ))
+        ("d" "Dashboard"
+         ((agenda "" ((org-deadline-warning-days 7)))
+          (tags-todo "+PRIORITY=\"A\""
+                     ((org-agenda-overriding-header "High Priority")))
+          (tags-todo "+followup" ((org-agenda-overriding-header "Needs Follow Up")))
+          (todo "NEXT"
+                ((org-agenda-overriding-header "Next Actions")
+                 (org-agenda-max-todos nil)))
+          (todo "TODO"
+                ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
+                 (org-agenda-files '("~/org/agenda/todo.org"))
+                 (org-agenda-text-search-extra-files nil)))))
+
+        ("n" "Next Tasks"
+         ((agenda "" ((org-deadline-warning-days 7)))
+          (todo "NEXT"
+                ((org-agenda-overriding-header "Next Tasks")))))
+
+        ;; Low-effort next actions
+        ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+         ((org-agenda-overriding-header "Low Effort Tasks")
+          (org-agenda-max-todos 20)
+          (org-agenda-files org-agenda-files)))
+        ))
+
+(setq org-capture-templates
+      `(("t" "Tasks")
+        ("tt" "Task" entry (file "~/org/agenda/todo.org")
+         "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+        ("ts" "Clocked Entry Subtask" entry (clock)
+         "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+
+        ("j" "Journal Entries")
+        ("je" "General Entry" entry
+         (file+olp+datetree "~/org/journal/journal.org")
+         "\n* %<%I:%M %p> - %^{Title} \n\n%?\n\n"
+         :tree-type week
+         :clock-in :clock-resume
+         :empty-lines 1)
+        ("jt" "Task Entry" entry
+         (file+olp+datetree "~/org/journal/journal.org")
+         "\n* %<%I:%M %p> - Task Notes: %a\n\n%?\n\n"
+         :tree-type week
+         :clock-in :clock-resume
+         :empty-lines 1)
+        ("jj" "Journal" entry
+         (file+olp+datetree "~/org/journal/journal.org")
+         "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+         :tree-type week
+         :clock-in :clock-resume
+         :empty-lines 1)))
+
+(define-key global-map (kbd "C-c j")
+            (lambda () (interactive) (org-capture nil "jj")))
 
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode)
@@ -173,6 +203,33 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
+(use-package org-appear
+   :hook (org-mode . org-appear-mode))
+
+(use-package evil-org
+  :ensure t
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-set-key-theme '(navigation todo insert textobjects additional))
+  (evil-org-agenda-set-keys))
+
+(ns/leader-spc 'override
+  "o"   '(:ignore t :wk "org mode")
+
+  "oi"  '(:ignore t :wk "insert")
+  "oil" '(org-insert-link :wk "insert link")
+
+  "oo"  '(org-agenda :wk "open agenda")
+
+  "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
+  "os"  '(consult-org-roam-search :wk "search notes")
+  ;; "oa"  '(org-agenda :wk "status")
+  "ot"  '(org-todo-list :wk "todos")
+  "oc"  '(org-capture t :wk "capture")
+  "ox"  '(org-export-dispatch t :wk "export"))
+
 (with-eval-after-load 'org
   (org-babel-do-load-languages
       'org-babel-load-languages
@@ -183,8 +240,13 @@
         (C . t)
        ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
-;; Disable execution confirmations 
+;; Disable execution confirmations
 (setq org-confirm-babel-evaluate nil)
+
+(defun ns/org-get-file-basename ()
+  "Return the base name of the current buffer's file."
+  (when buffer-file-name
+    (file-name-base buffer-file-name)))
 
 (use-package org-tempo
   :ensure nil
@@ -195,6 +257,29 @@
                      ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
                      ("vim" . "src vim")
                      ("py"  . "src python")
+                     ;; Leetcode snippet
+                     ("leet" .
+                      "src C++ :includes <iostream> :flags -I./src/util -std=c++20 :tangle src/ .cpp")
+
                      ("cpp" . "src C++ :includes <iostream>"))))
     (dolist (template templates)
       (push template org-structure-template-alist))))
+
+(use-package org-caldav
+  :disabled t
+  :config
+  (setq org-caldav-url "TODO"
+        ;; org-caldav-files '("~/Notes/Calendar/Personal.org" "~/Notes/Calendar/Work.org")
+        ;; org-caldav-inbox '("~/Notes/Calendar/Personal.org" "~/Notes/Calendar/Work.org")
+        org-caldav-calendar-id "fe098bfb-0726-4e10-bff2-55f8278c8a56"
+        org-caldav-files '("~/org/calendar/personal.org")
+        org-caldav-inbox "~/org/calendar/personal-inbox.org"
+        org-caldav-calendars
+        '((:calendar-id "fe098bfb-0726-4e10-bff2-55f8278c8a56"
+                        :files ("~/org/calendar/personal.org")
+                        :inbox "~/org/calendar/personal-inbox.org"))
+        ;; (:calendar-id "8f150437-cc57-4ba0-9200-d1d98389e2e4"
+        ;;  :files ("~/Notes/Calendar/Work.org")
+        ;;  :inbox "~/Notes/Calendar/Work.org"))
+        org-caldav-delete-org-entries 'always
+        org-caldav-delete-calendar-entries 'never))

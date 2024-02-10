@@ -16,23 +16,23 @@
       (evil-set-initial-state 'dashboard-mode 'normal)
 
       ;; Org Agenda
-      (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
+      ;; (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
 
       ;; Open TODO agenda file as a pop-up buffer
-      (define-key evil-normal-state-map (kbd "SPC r")
-        (lambda ()
-          (interactive)
-          (let ((file "~/org/agenda/todo.org")
-                  (pop-up-buffer "*TODO*"))
-              (pop-to-buffer pop-up-buffer)
-              (find-file file))))
+      ;;(define-key evil-normal-state-map (kbd "SPC r")
+      ;;  (lambda ()
+      ;;    (interactive)
+      ;;    (let ((file "~/org/agenda/todo.org")
+      ;;            (pop-up-buffer "*TODO*"))
+      ;;        (pop-to-buffer pop-up-buffer)
+      ;;        (find-file file))))
 
-      (defun open-custom-agenda ()
-        "Open the custom agenda view."
-        (interactive)
-        (org-agenda nil "A"))
+      ;;(defun open-custom-agenda ()
+      ;;  "Open the custom agenda view."
+      ;;  (interactive)
+      ;;  (org-agenda nil "A"))
 
-      (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
+      ;; (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
 )
 
 (use-package evil-collection
@@ -78,7 +78,7 @@
 ;; Choose a theme
 ;; TODO move this to consult
 (ns/leader-t
-  "tt" '(consult-theme :which-key "Choose a theme"))
+  "t" '(consult-theme :wk "Choose a theme"))
 
 (ns/leader-spc
   "f"  'find-file

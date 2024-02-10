@@ -178,8 +178,8 @@ folder, otherwise delete a character backward"
 (use-package orderless
   :ensure t
   :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-styles '(orderless))
+  (completion-category-overrides '((file (styles . (partial-completion))))))
 
 (use-package embark
   :ensure t
@@ -216,6 +216,12 @@ folder, otherwise delete a character backward"
   (marginalia-mode))
 
 (use-package corfu
+  :general
+  (general-def 'corfu-mode-map
+    "C-j" 'corfu-next
+    "C-k" 'corfu-previous
+    "TAB" 'corfu-insert
+    "C-f" 'corfu-insert)
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-separator ?\s)          ;; Orderless field separator
@@ -236,3 +242,11 @@ folder, otherwise delete a character backward"
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
+
+;;(use-package avy
+;;  :general
+;;  (ns/leader-spc
+;;    "j"   '(:ignore t :which-key "jump")
+;;    "jj"  '(avy-goto-char :which-key "jump to char")
+;;    "jw"  '(avy-goto-word-0 :which-key "jump to word")
+;;    "jl"  '(avy-goto-line :which-key "jump to line")))

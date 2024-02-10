@@ -90,6 +90,9 @@
 	;; === Philosophy ===
 	"http://feeds.feedburner.com/PhilosophyEtCetera"
 
+	;; === Politics ===
+	"https://reason.com/latest/feed/"
+
 	;; === Chicago ===
 	"https://chicagoboyz.net/feed"
 	;; https://www.chicagocontrarian.com/atom

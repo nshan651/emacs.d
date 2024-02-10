@@ -12,19 +12,19 @@
   :config
   (lsp-enable-which-key-integration t))
 
-(ns/leader-m 'lsp-mode-map
-  "a" 'lsp-execute-code-action
-  "v" 'lsp-avy-lens
-  "n" 'lsp-describe-thing-at-point
-  "i" 'lsp-goto-implementation
-  "d" 'lsp-find-definition
-  "D" 'lsp-find-declaration
-  "t" 'lsp-find-type-definition
-  "x" 'lsp-find-references
-  "r" 'lsp-rename
-  "R" 'lsp-restart-workspace
-  "=" 'lsp-format-buffer
-  "l" 'lsp-workspace-show-log)
+;;(ns/leader-m 'lsp-mode-map
+;;  "a" 'lsp-execute-code-action
+;;  "v" 'lsp-avy-lens
+;;  "n" 'lsp-describe-thing-at-point
+;;  "i" 'lsp-goto-implementation
+ ;; "d" 'lsp-find-definition
+  ;;"D" 'lsp-find-declaration
+  ;;"t" 'lsp-find-type-definition
+  ;;"x" 'lsp-find-references
+  ;;"r" 'lsp-rename
+  ;;"R" 'lsp-restart-workspace
+  ;;"=" 'lsp-format-buffer
+  ;;"l" 'lsp-workspace-show-log)
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
@@ -51,6 +51,7 @@
   (global-treesit-auto-mode))
 
 (use-package dap-mode
+  :disabled t
   :commands dap-debug
   :init
   :config

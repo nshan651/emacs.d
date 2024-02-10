@@ -1,6 +1,8 @@
 (use-package ccls
-  :hook lsp
-  (:hook-into c-mode c++-mode))
+  :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp)))
+  :config
+  (setq ccls-executable "/usr/bin/ccls")
+  )
 
 ;; Load SLY
 (require 'sly)

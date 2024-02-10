@@ -3,7 +3,7 @@
   "Regular expression to  tiling window managers.
 See definition of `ns-emacs-with-desktop-session'.")
 
-(defmacro ns-emacs-with-desktop-session (&rest body) 
+(defmacro ns-emacs-with-desktop-session (&rest body)
  "Expand BODY if desktop session is not a tiling window manager.
 See `ns-emacs-tiling-window-manager-regexp' for what
 constitutes a matching tiling window manager."
@@ -44,11 +44,11 @@ Simplified version of `add-to-list'."
 
     (menu-bar-mode -1)            ; Disable the menu bar
 
-;; Disable graphical elements 
+;; Disable graphical elements
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-(tooltip-mode -1) 
+(tooltip-mode -1)
 
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha '(100 . 90))

@@ -2,6 +2,8 @@
   :ensure t
   :custom
   (org-roam-directory (file-truename "~/org"))
+  (org-roam-dailies-directory "~/org/journal")
+  (org-roam-completion-everywhere t)
   :config
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
