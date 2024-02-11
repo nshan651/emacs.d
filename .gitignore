@@ -28,7 +28,7 @@ snippets/
 # DB files
 *.db
 org-roam.db
-forge-database.sqlite
+*.sqlite
 
 # 
 history

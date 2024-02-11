@@ -279,22 +279,22 @@ Keep it simple. I have this disabled by default.
 Setup package archives for =package.el=.
 
 #+begin_src emacs-lisp :tangle "init.el"
-;;;; Packages
+  ;;;; Packages
 
-(require 'package)
+  (require 'package)
 
-(setq package-vc-register-as-project nil) ; Emacs 30
+  (setq package-vc-register-as-project nil) ; Emacs 30
 
-(add-hook 'package-menu-mode-hook #'hl-line-mode)
+  (add-hook 'package-menu-mode-hook #'hl-line-mode)
 
-(setq package-archives
-      '(("elpa" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
+  (setq package-archives
+        '(("elpa" . "https://elpa.gnu.org/packages/")
+          ("melpa" . "https://melpa.org/packages/")))
 
-;; Highest number gets priority (what is not mentioned has priority 0)
-(setq package-archive-priorities
-      '(("elpa" . 2)
-        ("melpa" . 1)))
+  ;; Highest number gets priority (what is not mentioned has priority 0)
+  (setq package-archive-priorities
+        '(("elpa" . 2)
+          ("melpa" . 1)))
 #+end_src
 
 ** Load Some Basic Packages
@@ -346,51 +346,26 @@ Automatically trim extraneous whitespaces.
 All my keybindings are controlled by evil mode.
 
 ** Evil Keybindings
-
 Load my custom keybindings.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
   ;; Bind C-x C-b to ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer)
-    ;; Make ESC quit prompts
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  ;; Make ESC quit prompts
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-    (use-package evil
-        :init
-        (setq evil-want-integration t)
-        (setq evil-want-keybinding nil)
-        (setq evil-want-C-u-scroll t)
-        (setq evil-want-C-i-jump nil)
-        (setq evil-respect-visual-line-mode t)
-        :config
-        (evil-mode 1)
-        (evil-set-initial-state 'messages-buffer-mode 'normal)
-        (evil-set-initial-state 'dashboard-mode 'normal)
-
-        ;; Org Agenda
-        ;; (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
-
-        ;; Open TODO agenda file as a pop-up buffer
-        ;;(define-key evil-normal-state-map (kbd "SPC r")
-        ;;  (lambda ()
-        ;;    (interactive)
-        ;;    (let ((file "~/org/agenda/todo.org")
-        ;;            (pop-up-buffer "*TODO*"))
-        ;;        (pop-to-buffer pop-up-buffer)
-        ;;        (find-file file))))
-
-        ;;(defun open-custom-agenda ()
-        ;;  "Open the custom agenda view."
-        ;;  (interactive)
-        ;;  (org-agenda nil "A"))
-
-        ;; (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-  )
-
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-respect-visual-line-mode t)
+    :config
+    (evil-mode 1)
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
 #+end_src
-
-#+RESULTS:
-: t
 
 ** Evil Collection
 Evil collection adds some additional compatability to modes that otherwise don't play well with evil-mode.
@@ -441,32 +416,39 @@ General is the best method that I've found for organizing keybindings.
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
-  ;; Use visual line motions even outside of visual-line-mode buffers
-  (general-def 'motion
-    "j" 'evil-next-visual-line
-    "k" 'evil-previous-visual-line)
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (general-def 'motion
+      "j" 'evil-next-visual-line
+      "k" 'evil-previous-visual-line)
 
-  ;; Choose a theme
-  ;; TODO move this to consult
-  (ns/leader-t
-    "t" '(consult-theme :wk "Choose a theme"))
+    ;; Choose a theme
+    ;; TODO move this to consult
+    (ns/leader-t
+      "t" '(consult-theme :wk "Choose a theme"))
 
-  (ns/leader-spc
-    "f"  'find-file
-    ;; "b"  'switch-to-buffer
-    "k"  'kill-buffer
-    "eb" 'eval-buffer)
+    (ns/leader-spc
+      "f"  'find-file
+      ;; "b"  'switch-to-buffer
+      "k"  'kill-buffer
+      "eb" 'eval-buffer)
 
-  ;; Manage windows
-  (ns/leader-ca
-    "<backspace>" 'delete-window
-    "\\"          'split-window-right
-    "-"           'split-window-below
-    ;; Windmove keys for additional window navigation
-    "h"           'windmove-left
-    "l"           'windmove-right
-    "k"           'windmove-up
-    "j"           'windmove-down)
+    ;; Manage windows
+    (ns/leader-ca 'override
+      "<backspace>" 'delete-window
+      "\\"          'split-window-right
+      "-"           'split-window-below
+      ;; Windmove keys for additional window navigation
+      "h"          'windmove-left
+      "l"           'windmove-right
+      "k"          'windmove-up
+      "j"           'windmove-down
+       ;; Window resizing
+      "C-h"           (lambda () (interactive) (shrink-window-horizontally 21))
+      "C-l"                  (lambda () (interactive) (enlarge-window-horizontally 21))
+      "C-j"                  (lambda () (interactive) (enlarge-window 11))
+      "C-k"                  (lambda () (interactive) (shrink-window 11))
+      )
+
 #+end_src
 
 #+RESULTS:
@@ -1552,6 +1534,7 @@ A better ~yas-insert-snippet~.
       "gk " '(magit-push :wk "git push")
       "gj " '(magit-pull  :wk "git pull")
       "gc " '(magit-commit :wk "git commit")
+      "ga " '(magit-stage :wk "git add")
       )
 #+end_src
 
@@ -1823,6 +1806,29 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
   )
  #+end_src
  #+RESULTS:
+
+** Popper
+#+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
+  (use-package popper
+    :ensure t
+    :init
+    (setq popper-reference-buffers
+          '("\\*\\*Messages"
+            "Output\\*$"
+            "\\*Async Shell Command\\*"
+            help-mode
+            compilation-mode))
+    (popper-mode +1)
+    (popper-echo-mode +1))                ; For echo area hints
+
+  (general-def 'override
+    "C-`" '(popper-toggle :wk "toggle popup")
+    "M-`" '(popper-cycle :wk "cycle through popups")
+    "C-M-`" '(popper-toggle-type :wk "change current buffer's toggle type"))
+
+#+end_src
+
+#+RESULTS:
 
 * File Management
 ** Dired

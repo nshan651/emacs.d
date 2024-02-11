@@ -137,6 +137,7 @@
   "gk " '(magit-push :wk "git push")
   "gj " '(magit-pull  :wk "git pull")
   "gc " '(magit-commit :wk "git commit")
+  "ga " '(magit-stage :wk "git add")
   )
 
 ;; NOTE: Make sure to configure a GitHub token before using this package!

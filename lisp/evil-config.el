@@ -1,39 +1,19 @@
 ;; Bind C-x C-b to ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-  ;; Make ESC quit prompts
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+;; Make ESC quit prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-  (use-package evil
-      :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
-      (setq evil-want-C-i-jump nil)
-      (setq evil-respect-visual-line-mode t)
-      :config
-      (evil-mode 1)
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal)
-
-      ;; Org Agenda
-      ;; (define-key evil-normal-state-map (kbd "SPC o") 'org-agenda)
-
-      ;; Open TODO agenda file as a pop-up buffer
-      ;;(define-key evil-normal-state-map (kbd "SPC r")
-      ;;  (lambda ()
-      ;;    (interactive)
-      ;;    (let ((file "~/org/agenda/todo.org")
-      ;;            (pop-up-buffer "*TODO*"))
-      ;;        (pop-to-buffer pop-up-buffer)
-      ;;        (find-file file))))
-
-      ;;(defun open-custom-agenda ()
-      ;;  "Open the custom agenda view."
-      ;;  (interactive)
-      ;;  (org-agenda nil "A"))
-
-      ;; (define-key evil-normal-state-map (kbd "SPC a") 'open-custom-agenda)
-)
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  (setq evil-respect-visual-line-mode t)
+  :config
+  (evil-mode 1)
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
   :after evil
@@ -87,15 +67,21 @@
   "eb" 'eval-buffer)
 
 ;; Manage windows
-(ns/leader-ca
+(ns/leader-ca 'override
   "<backspace>" 'delete-window
   "\\"          'split-window-right
   "-"           'split-window-below
   ;; Windmove keys for additional window navigation
-  "h"           'windmove-left
+  "h"          'windmove-left
   "l"           'windmove-right
-  "k"           'windmove-up
-  "j"           'windmove-down)
+  "k"          'windmove-up
+  "j"           'windmove-down
+   ;; Window resizing
+  "C-h"           (lambda () (interactive) (shrink-window-horizontally 21))
+  "C-l"                  (lambda () (interactive) (enlarge-window-horizontally 21))
+  "C-j"                  (lambda () (interactive) (enlarge-window 11))
+  "C-k"                  (lambda () (interactive) (shrink-window 11))
+  )
 
 (use-package evil-nerd-commenter
   :general ("M-/" 'evilnc-comment-or-uncomment-lines))
