@@ -54,7 +54,7 @@
 (ns/load-lisp-config file-list))
 
 ;;Also load my `org-templates.el' and `feed.el'
-(load (locate-user-emacs-file "etc/org-templates.el"))
+;; (load (locate-user-emacs-file "etc/org-templates.el"))
 (load (locate-user-emacs-file "etc/feed.el"))
 
 ;;;; Packages

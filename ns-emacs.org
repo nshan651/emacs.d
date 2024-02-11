@@ -268,7 +268,7 @@ Keep it simple. I have this disabled by default.
   (ns/load-lisp-config file-list))
 
   ;;Also load my `org-templates.el' and `feed.el'
-  (load (locate-user-emacs-file "etc/org-templates.el"))
+  ;; (load (locate-user-emacs-file "etc/org-templates.el"))
   (load (locate-user-emacs-file "etc/feed.el"))
 #+end_src
 
@@ -835,12 +835,12 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package corfu
-    :general
-    (general-def 'corfu-mode-map
-      "C-j" 'corfu-next
-      "C-k" 'corfu-previous
-      "TAB" 'corfu-insert
-      "C-f" 'corfu-insert)
+    ;; :general
+    ;; (general-def 'corfu-mode-map
+    ;;   "C-j" 'corfu-next
+    ;;   "C-k" 'corfu-previous
+    ;;   "TAB" 'corfu-insert
+    ;;   "C-f" 'corfu-insert)
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     (corfu-separator ?\s)          ;; Orderless field separator
@@ -873,7 +873,7 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 ** Avy
 Avy is useful for jumping around the screen and selecting different elements.
 
-#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+#+begin_src emacs-lisp :tangle no :mkdirp yes
   ;;(use-package avy
   ;;  :general
   ;;  (ns/leader-spc
@@ -1182,11 +1182,6 @@ Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure temp
 You can add more =src= block templates below by copying one of the lines and changing the two strings at the end, the first to be the template name and the second to contain the name of the language [[https://orgmode.org/worg/org-contrib/babel/languages.html][as it is known by Org Babel]].
 
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-   (defun ns/org-get-file-basename ()
-     "Return the base name of the current buffer's file."
-     (when buffer-file-name
-       (file-name-base buffer-file-name)))
-
    (use-package org-tempo
      :ensure nil
      :after org
@@ -1204,11 +1199,6 @@ You can add more =src= block templates below by copying one of the lines and cha
        (dolist (template templates)
          (push template org-structure-template-alist))))
 #+end_src
-
-
-
-#+RESULTS:
-: t
 
 ** Calendar Sync
 
@@ -1303,7 +1293,7 @@ It can be useful to differentiate the different types of zettels at completion t
               (org-roam-node-file node)
               org-roam-directory))))
         (error "")))
-  )
+    )
 #+end_src
 
 #+RESULTS:
@@ -1545,14 +1535,27 @@ A better ~yas-insert-snippet~.
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-  (use-package magit
-    :commands magit-status
-    :custom
-    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+    (use-package magit
+      :commands magit-status
+      :custom
+      (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-  (use-package forge
-    :after magit)
+    (use-package forge
+      :after magit)
+
+    (ns/leader-m 'override
+      "g"  '(:ignore g :wk "magit commands")
+      "gs" '(magit-status :wk "git status")
+      "gd" '(magit-diff :wk "git diff")
+      "gl " '(magit-log :wk "git log")
+      ;; Pushing and pulling
+      "gk " '(magit-push :wk "git push")
+      "gj " '(magit-pull  :wk "git pull")
+      "gc " '(magit-commit :wk "git commit")
+      )
 #+end_src
+
+#+RESULTS:
 
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
@@ -1772,7 +1775,6 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
 
-
 * Applications
 ** Elfeed
 
@@ -1784,16 +1786,45 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
   ;; (add-hook 'elfeed-new-entry-hook
   ;;           (elfeed-make-tagger :feed-url "youtube\\.com"
   ;; :add '(video youtube)))
-
-
 #+end_src
 
-#+RESULTS:
-: t
+* Window Management
+
+** Perspective
+#+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
+  (use-package perspective
+    :ensure t
+    :custom
+    (persp-initial-frame-name "main")
+    (persp-mode-prefix-key (kbd "C-a"))
+    :init
+    (unless (equal persp-mode t)
+      (persp-mode)))
+
+  (ns/leader-ca 'persp-mode-map
+    "s"  '(persp-switch :wk "query or create persp")
+    "k"  '(persp-kill :wk "kill a persp")
+
+    "r"  '(persp-rename :wk "rename a persp")
+    ;; Buffer management
+    "a"  '(persp-add-buffer :wk "add buffer to current persp")
+    "A"  '(persp-set-buffer :wk "add buffer to current persp, remove from others")
+    "b"  '(persp-switch-to-buffer :wk "switch to buffer, global by default")
+    ;; Switch perspectives
+    "n"  '(persp-next :wk "next persp")
+    "p"  '(persp-prev :wk "previous persp")
+    ;; Merging and importing
+    "m"  '(persp-merge :wk "merge buffers into another persp")
+    "u"  '(persp-unmerge :wk "undo effects of `persp-merge'")
+    "i"  '(persp-import :wk "import a given perspective from another frame")
+    ;; Save and load perspectives
+    "C-s"  '(persp-state-save :wk "Save all persps in all frames to a file")
+    "C-l"  '(persp-state-load :wk "load all persps from a file")
+  )
+ #+end_src
+ #+RESULTS:
 
 * File Management
-
-
 ** Dired
 
 Dired is a built-in file manager for Emacs that does some pretty amazing things!  Here are some key bindings you should try out:
@@ -1807,7 +1838,7 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 - =j= / =J= - jump to file in buffer
 - =RET= - select file or directory
 - =^= - go to parent directory
-- =S-RET= / =g O= - Open file in "other" window
+- =S-RET= / =g O= - Open file in "" window
 - =M-RET= - Show file in other window without focusing (previewing files)
 - =g o= (=dired-view-file=) - Open file but in a "preview" mode, close with =q=
 - =g= / =g r= Refresh the buffer with =revert-buffer= after changing configuration (and after filesystem changes!)

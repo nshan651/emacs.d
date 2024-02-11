@@ -128,6 +128,17 @@
 (use-package forge
   :after magit)
 
+(ns/leader-m 'override
+  "g"  '(:ignore g :wk "magit commands")
+  "gs" '(magit-status :wk "git status")
+  "gd" '(magit-diff :wk "git diff")
+  "gl " '(magit-log :wk "git log")
+  ;; Pushing and pulling
+  "gk " '(magit-push :wk "git push")
+  "gj " '(magit-pull  :wk "git pull")
+  "gc " '(magit-commit :wk "git commit")
+  )
+
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started

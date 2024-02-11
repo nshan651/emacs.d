@@ -21,6 +21,7 @@
 	"http://www.devrand.org/feeds/posts/default"
 	"https://nullprogram.com/blog/"
 	"https://buttondown.email/hillelwayne/rss"
+	"https://karthinks.com/index.xml"
 
 	;; === Tech ===
 	"https://www.archlinux.org/feeds/news/"

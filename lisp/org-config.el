@@ -243,11 +243,6 @@
 ;; Disable execution confirmations
 (setq org-confirm-babel-evaluate nil)
 
-(defun ns/org-get-file-basename ()
-  "Return the base name of the current buffer's file."
-  (when buffer-file-name
-    (file-name-base buffer-file-name)))
-
 (use-package org-tempo
   :ensure nil
   :after org
