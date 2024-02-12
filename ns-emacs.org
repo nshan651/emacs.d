@@ -1605,6 +1605,20 @@ Forge allows use to work with varios git forges using the magit interface.
     (lisp-mode . rainbow-delimiters-mode))
 #+end_src
 
+** Smartparens
+[[https://github.com/Fuco1/smartparens][Smartparens]] is a minor mode for dealing with pairs in Emacs.
+
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package smartparens
+    :ensure smartparens
+    ;; :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+    :init
+    (smartparens-global-mode)
+    :config
+    ;; load default config
+    (require 'smartparens-config))
+#+end_src
+
 * Programming Languages
 ** C/C++
 

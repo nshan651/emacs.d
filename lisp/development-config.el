@@ -152,3 +152,12 @@
   (prog-mode . rainbow-delimiters-mode)
   (org-mode . rainbow-delimiters-mode)
   (lisp-mode . rainbow-delimiters-mode))
+
+(use-package smartparens
+  :ensure smartparens
+  ;; :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+  :init
+  (smartparens-global-mode)
+  :config
+  ;; load default config
+  (require 'smartparens-config))
