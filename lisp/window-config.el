@@ -10,7 +10,6 @@
 (ns/leader-ca 'persp-mode-map
   "s"  '(persp-switch :wk "query or create persp")
   "k"  '(persp-kill :wk "kill a persp")
-
   "r"  '(persp-rename :wk "rename a persp")
   ;; Buffer management
   "a"  '(persp-add-buffer :wk "add buffer to current persp")

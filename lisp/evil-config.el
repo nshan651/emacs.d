@@ -75,13 +75,54 @@
   "h"          'windmove-left
   "l"           'windmove-right
   "k"          'windmove-up
-  "j"           'windmove-down
-   ;; Window resizing
-  "C-h"           (lambda () (interactive) (shrink-window-horizontally 21))
-  "C-l"                  (lambda () (interactive) (enlarge-window-horizontally 21))
-  "C-j"                  (lambda () (interactive) (enlarge-window 11))
-  "C-k"                  (lambda () (interactive) (shrink-window 11))
+  "j"           'windmove-down)
+;; Window resizing
+;; "C-h"        (lambda () (interactive) (shrink-window-horizontally 21))
+;; "C-l"         (lambda () (interactive) (enlarge-window-horizontally 21))
+;; "C-j"         (lambda () (interactive) (enlarge-window 11))
+;; "C-k"        (lambda () (interactive) (shrink-window 11))
+
+;; https://www.emacswiki.org/emacs/WindowResize
+(defun ns/define-x-pos ()
+  "Find the window's position on the x-axis."
+  (let* ((win-edges (window-edges))
+         (x-min (nth 0 win-edges))
+         (x-max (nth 2 win-edges))
+         (max-width (+ 2 (frame-width))))
+    (cond
+     ((equal max-width x-max)
+      "right")
+     ((and (> x-min 0) (< x-max max-width))
+      "mid")
+     (t "left"))))
+
+(defun ns/win-resize-left ()
+  (interactive)
+  (let ((x-pos (ns/define-x-pos)))
+    (cond
+     ((equal "right" x-pos)
+      (enlarge-window-horizontally +15))
+     (t (enlarge-window-horizontally -15))
+     ))
   )
+
+(defun ns/win-resize-right ()
+  (interactive)
+  (let ((x-pos (ns/define-x-pos)))
+    (cond
+     ((equal "right" x-pos)
+      (enlarge-window-horizontally -15))
+     (t (enlarge-window-horizontally +15))
+     ))
+  )
+
+(ns/leader-ca 'override
+  "C-h"       (lambda () (interactive)
+                (ns/win-resize-left))
+  "C-l"        (lambda () (interactive)
+                 (ns/win-resize-right))
+  "C-j"         (lambda () (interactive) (enlarge-window 11))
+  "C-k"        (lambda () (interactive) (shrink-window 11)))
 
 (use-package evil-nerd-commenter
   :general ("M-/" 'evilnc-comment-or-uncomment-lines))

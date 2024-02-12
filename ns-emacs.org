@@ -416,39 +416,79 @@ General is the best method that I've found for organizing keybindings.
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
-    ;; Use visual line motions even outside of visual-line-mode buffers
-    (general-def 'motion
-      "j" 'evil-next-visual-line
-      "k" 'evil-previous-visual-line)
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (general-def 'motion
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line)
 
-    ;; Choose a theme
-    ;; TODO move this to consult
-    (ns/leader-t
-      "t" '(consult-theme :wk "Choose a theme"))
+  ;; Choose a theme
+  ;; TODO move this to consult
+  (ns/leader-t
+    "t" '(consult-theme :wk "Choose a theme"))
 
-    (ns/leader-spc
-      "f"  'find-file
-      ;; "b"  'switch-to-buffer
-      "k"  'kill-buffer
-      "eb" 'eval-buffer)
+  (ns/leader-spc
+    "f"  'find-file
+    ;; "b"  'switch-to-buffer
+    "k"  'kill-buffer
+    "eb" 'eval-buffer)
 
-    ;; Manage windows
-    (ns/leader-ca 'override
-      "<backspace>" 'delete-window
-      "\\"          'split-window-right
-      "-"           'split-window-below
-      ;; Windmove keys for additional window navigation
-      "h"          'windmove-left
-      "l"           'windmove-right
-      "k"          'windmove-up
-      "j"           'windmove-down
-       ;; Window resizing
-      "C-h"           (lambda () (interactive) (shrink-window-horizontally 21))
-      "C-l"                  (lambda () (interactive) (enlarge-window-horizontally 21))
-      "C-j"                  (lambda () (interactive) (enlarge-window 11))
-      "C-k"                  (lambda () (interactive) (shrink-window 11))
-      )
+  ;; Manage windows
+  (ns/leader-ca 'override
+    "<backspace>" 'delete-window
+    "\\"          'split-window-right
+    "-"           'split-window-below
+    ;; Windmove keys for additional window navigation
+    "h"          'windmove-left
+    "l"           'windmove-right
+    "k"          'windmove-up
+    "j"           'windmove-down)
+  ;; Window resizing
+  ;; "C-h"        (lambda () (interactive) (shrink-window-horizontally 21))
+  ;; "C-l"         (lambda () (interactive) (enlarge-window-horizontally 21))
+  ;; "C-j"         (lambda () (interactive) (enlarge-window 11))
+  ;; "C-k"        (lambda () (interactive) (shrink-window 11))
 
+  ;; https://www.emacswiki.org/emacs/WindowResize
+  (defun ns/define-x-pos ()
+    "Find the window's position on the x-axis."
+    (let* ((win-edges (window-edges))
+           (x-min (nth 0 win-edges))
+           (x-max (nth 2 win-edges))
+           (max-width (+ 2 (frame-width))))
+      (cond
+       ((equal max-width x-max)
+        "right")
+       ((and (> x-min 0) (< x-max max-width))
+        "mid")
+       (t "left"))))
+
+  (defun ns/win-resize-left ()
+    (interactive)
+    (let ((x-pos (ns/define-x-pos)))
+      (cond
+       ((equal "right" x-pos)
+        (enlarge-window-horizontally +15))
+       (t (enlarge-window-horizontally -15))
+       ))
+    )
+
+  (defun ns/win-resize-right ()
+    (interactive)
+    (let ((x-pos (ns/define-x-pos)))
+      (cond
+       ((equal "right" x-pos)
+        (enlarge-window-horizontally -15))
+       (t (enlarge-window-horizontally +15))
+       ))
+    )
+
+  (ns/leader-ca 'override
+    "C-h"       (lambda () (interactive)
+                  (ns/win-resize-left))
+    "C-l"        (lambda () (interactive)
+                   (ns/win-resize-right))
+    "C-j"         (lambda () (interactive) (enlarge-window 11))
+    "C-k"        (lambda () (interactive) (shrink-window 11)))
 #+end_src
 
 #+RESULTS:
@@ -1787,7 +1827,6 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
   (ns/leader-ca 'persp-mode-map
     "s"  '(persp-switch :wk "query or create persp")
     "k"  '(persp-kill :wk "kill a persp")
-
     "r"  '(persp-rename :wk "rename a persp")
     ;; Buffer management
     "a"  '(persp-add-buffer :wk "add buffer to current persp")
