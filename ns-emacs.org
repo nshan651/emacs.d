@@ -263,6 +263,7 @@ Keep it simple. I have this disabled by default.
           "programming-languages-config.el"
           "terminal-config.el"
           "applications-config.el"
+          "window-config.el"
           "dired-config.el")))
 
   (ns/load-lisp-config file-list))
@@ -1357,33 +1358,47 @@ The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mo
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-      (defun ns/lsp-mode-setup ()
-        (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-        (lsp-headerline-breadcrumb-mode))
+    (defun ns/lsp-mode-setup ()
+      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+      (lsp-headerline-breadcrumb-mode))
 
-      (use-package lsp-mode
-        :commands (lsp lsp-deferred)
-        :hook
-        ((lsp-mode . ns/lsp-mode-setup)
-         (python-mode . lsp))
-        :init
-        (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-        :config
-        (lsp-enable-which-key-integration t))
+    (use-package lsp-mode
+      :ensure t
+      :defer t
+      :commands (lsp lsp-deferred)
+      :hook
+      (
+       ;;((c-mode c++-mode) . lsp)
+       (c-mode . lsp-deferred)
+       (c++-mode . lsp-deferred)
+       (python-mode . lsp-deferred)
+       (lsp-mode . ns/lsp-mode-setup)
+       )
+      :init
+      (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+      :custom
+      (lsp-auto-configure t)
+      (lsp-enable-symbol-highlighting t)
+      :config
+      (lsp-enable-which-key-integration t)
+      (setq lsp-log-io t)
 
-      ;;(ns/leader-m 'lsp-mode-map
-      ;;  "a" 'lsp-execute-code-action
-      ;;  "v" 'lsp-avy-lens
-      ;;  "n" 'lsp-describe-thing-at-point
-      ;;  "i" 'lsp-goto-implementation
-       ;; "d" 'lsp-find-definition
-        ;;"D" 'lsp-find-declaration
-        ;;"t" 'lsp-find-type-definition
-        ;;"x" 'lsp-find-references
-        ;;"r" 'lsp-rename
-        ;;"R" 'lsp-restart-workspace
-        ;;"=" 'lsp-format-buffer
-        ;;"l" 'lsp-workspace-show-log)
+      ;; Activate lsp-mode
+      )
+
+    (ns/leader-m 'lsp-mode-map
+     "a" 'lsp-execute-code-action
+     "v" 'lsp-avy-lens
+     "n" 'lsp-describe-thing-at-point
+     "i" 'lsp-goto-implementation
+     "d" 'lsp-find-definition
+     "D" 'lsp-find-declaration
+     "t" 'lsp-find-type-definition
+     "x" 'lsp-find-references
+     "r" 'lsp-rename
+     "R" 'lsp-restart-workspace
+     "=" 'lsp-format-buffer
+     "l" 'lsp-workspace-show-log)
 #+end_src
 
 #+RESULTS:
@@ -1396,12 +1411,12 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom)
-    :config
-    (setq lsp-ui-sideline-show-code-actions nil))
+    (lsp-ui-sideline-show-code-actions nil)
+    )
 #+end_src
 
 #+RESULTS:
-| company-mode | lsp-ui-mode | efs/lsp-mode-setup |
+| company-mode | lsp-ui-mode | ns/lsp-mode-setup |
 
 *** consult-lsp
 LSP integration with consult.
@@ -1439,9 +1454,10 @@ Tree sitter support is now built in to Emacs.
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package treesit-auto
     :demand t
+    :custom
+    (treesit-auto-install 'prompt)
     :config
-    (setq treesit-auto-install 'prompt)
-    ;; use treesitter where possible
+    (treesit-auto-add-to-auto-mode-alist 'all)
     (global-treesit-auto-mode))
 #+end_src
 
@@ -1484,11 +1500,23 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     :hook (company-mode . company-box-mode))
 #+end_src
 
+** TRAMP Mode
+TRAMP (Transparent remote access, multiple protocols) allows users to edit remote files.
+
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  ;; Setup TRAMP mode
+  (setq tramp-default-method "ssh")
+#+end_src
+
+#+RESULTS:
+: ssh
+
 ** Yasnippet
 A template system for Emacs.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package yasnippet
+    :disabled t
     :general
     (ns/leader-ct 'override
       "Y" #'yas-new-snippet)
@@ -1501,9 +1529,12 @@ A template system for Emacs.
       "<C-i>" #'yas-expand))
 #+end_src
 
+#+RESULTS:
+
 *** Extra Snippets
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package yasnippet-snippets
+    :disabled t
     :after yasnippet
     :demand t
     :config
@@ -1515,6 +1546,7 @@ A template system for Emacs.
 A better ~yas-insert-snippet~.
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package consult-yasnippet
+    :disabled t
     :general ('insert "C-<tab>" #'consult-yasnippet))
 #+end_src
 
@@ -1624,14 +1656,16 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package ccls
-    :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp)))
-    :config
-    (setq ccls-executable "/usr/bin/ccls")
-    )
+    ;; :hook ((c-mode c++-mode) . (lambda () (require 'ccls) (lsp-deferred)))
+    :hook
+    ((c-mode . lsp-deferred)
+     (c++-mode . lsp-deferred))
+    :custom
+    (ccls-executable "/usr/bin/ccls"))
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (require 'ccls) | (lsp) |
+| lsp | lsp-deferred |
 
 ** Common Lisp
 
@@ -1659,17 +1693,19 @@ pip install --user "python-language-server[all]"
 There are a number of other language servers for Python so if you find that =pyls= doesn't work for you, consult the =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/languages/][language configuration documentation]] to try the others!
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
-    (use-package python-mode
-      :ensure t
-      :hook (python-mode . lsp-deferred)
-      :custom
-      ;; NOTE: Set these if Python 3 is called "python3" on your system!
-      ;; (python-shell-interpreter "python3")
-      ;; (dap-python-executable "python3")
-      (dap-python-debugger 'debugpy)
-      ;; :config
-      ;; (require 'dap-python)
-      )
+  (use-package python-mode
+    :ensure t
+    :hook (python-mode . lsp-deferred)
+    :custom
+    (lsp-pyls-server-command '("/home/nick/.local/lib/python3.10/site-packages/pyls
+"))
+    ;; NOTE: Set these if Python 3 is called "python3" on your system!
+    ;; (python-shell-interpreter "python3")
+    ;; (dap-python-executable "python3")
+    (dap-python-debugger 'debugpy)
+    ;; :config
+    ;; (require 'dap-python)
+    )
 #+end_src
 
 #+RESULTS:
@@ -1871,8 +1907,8 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
             "\\*Async Shell Command\\*"
             help-mode
             compilation-mode))
-    (popper-mode +1)
-    (popper-echo-mode +1))                ; For echo area hints
+    (popper-mode 1)
+    (popper-echo-mode 1))                ; For echo area hints
 
   (general-def 'override
     "C-`" '(popper-toggle :wk "toggle popup")

@@ -49,6 +49,7 @@
         "programming-languages-config.el"
         "terminal-config.el"
         "applications-config.el"
+        "window-config.el"
         "dired-config.el")))
 
 (ns/load-lisp-config file-list))

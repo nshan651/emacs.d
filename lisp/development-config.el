@@ -3,35 +3,49 @@
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
+  :ensure t
+  :defer t
   :commands (lsp lsp-deferred)
   :hook
-  ((lsp-mode . ns/lsp-mode-setup)
-   (python-mode . lsp))
+  (
+   ;;((c-mode c++-mode) . lsp)
+   (c-mode . lsp-deferred)
+   (c++-mode . lsp-deferred)
+   (python-mode . lsp-deferred)
+   (lsp-mode . ns/lsp-mode-setup)
+   )
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :custom
+  (lsp-auto-configure t)
+  (lsp-enable-symbol-highlighting t)
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  (setq lsp-log-io t)
 
-;;(ns/leader-m 'lsp-mode-map
-;;  "a" 'lsp-execute-code-action
-;;  "v" 'lsp-avy-lens
-;;  "n" 'lsp-describe-thing-at-point
-;;  "i" 'lsp-goto-implementation
- ;; "d" 'lsp-find-definition
-  ;;"D" 'lsp-find-declaration
-  ;;"t" 'lsp-find-type-definition
-  ;;"x" 'lsp-find-references
-  ;;"r" 'lsp-rename
-  ;;"R" 'lsp-restart-workspace
-  ;;"=" 'lsp-format-buffer
-  ;;"l" 'lsp-workspace-show-log)
+  ;; Activate lsp-mode
+  )
+
+(ns/leader-m 'lsp-mode-map
+ "a" 'lsp-execute-code-action
+ "v" 'lsp-avy-lens
+ "n" 'lsp-describe-thing-at-point
+ "i" 'lsp-goto-implementation
+ "d" 'lsp-find-definition
+ "D" 'lsp-find-declaration
+ "t" 'lsp-find-type-definition
+ "x" 'lsp-find-references
+ "r" 'lsp-rename
+ "R" 'lsp-restart-workspace
+ "=" 'lsp-format-buffer
+ "l" 'lsp-workspace-show-log)
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'bottom)
-  :config
-  (setq lsp-ui-sideline-show-code-actions nil))
+  (lsp-ui-sideline-show-code-actions nil)
+  )
 
 (use-package consult-lsp
   :after lsp-mode
@@ -45,9 +59,10 @@
 
 (use-package treesit-auto
   :demand t
+  :custom
+  (treesit-auto-install 'prompt)
   :config
-  (setq treesit-auto-install 'prompt)
-  ;; use treesitter where possible
+  (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
 (use-package dap-mode
@@ -72,7 +87,11 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
+;; Setup TRAMP mode
+(setq tramp-default-method "ssh")
+
 (use-package yasnippet
+  :disabled t
   :general
   (ns/leader-ct 'override
     "Y" #'yas-new-snippet)
@@ -85,6 +104,7 @@
     "<C-i>" #'yas-expand))
 
 (use-package yasnippet-snippets
+  :disabled t
   :after yasnippet
   :demand t
   :config
@@ -92,6 +112,7 @@
 (yas-reload-all))
 
 (use-package consult-yasnippet
+  :disabled t
   :general ('insert "C-<tab>" #'consult-yasnippet))
 
 (use-package projectile

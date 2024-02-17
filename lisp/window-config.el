@@ -36,8 +36,8 @@
           "\\*Async Shell Command\\*"
           help-mode
           compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
+  (popper-mode 1)
+  (popper-echo-mode 1))                ; For echo area hints
 
 (general-def 'override
   "C-`" '(popper-toggle :wk "toggle popup")
