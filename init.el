@@ -42,10 +42,10 @@
     (let ((file-list
       '("evil-config.el"
         "theme-config.el"
+        "development-config.el"
         "ui-config.el"
         "org-config.el"
         "org-roam-config.el"
-        "development-config.el"
         "programming-languages-config.el"
         "terminal-config.el"
         "applications-config.el"

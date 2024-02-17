@@ -4,24 +4,24 @@
 
 (use-package lsp-mode
   :ensure t
-  :defer t
-  :commands (lsp lsp-deferred)
-  :hook
-  (
-   ;;((c-mode c++-mode) . lsp)
-   (c-mode . lsp-deferred)
-   (c++-mode . lsp-deferred)
-   (python-mode . lsp-deferred)
-   (lsp-mode . ns/lsp-mode-setup)
-   )
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-  :custom
-  (lsp-auto-configure t)
-  (lsp-enable-symbol-highlighting t)
+  :hook
+  (
+   (lsp-mode . ns/lsp-mode-setup)
+   (c-mode . lsp)
+   (c++-mode . lsp)
+   (python-mode . lsp)
+   )
+  :commands lsp
+  ;; :custom
+  ;; (lsp-auto-configure t)
+  ;; (lsp-enable-symbol-highlighting t)
   :config
   (lsp-enable-which-key-integration t)
   (setq lsp-log-io t)
+  ;; The path to lsp-mode needs to be added to load-path as well as the
+  ;; path to the `clients' subdirectory.
 
   ;; Activate lsp-mode
   )
@@ -41,6 +41,7 @@
  "l" 'lsp-workspace-show-log)
 
 (use-package lsp-ui
+  :after lsp-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'bottom)
@@ -58,6 +59,7 @@
   :after lsp)
 
 (use-package treesit-auto
+  :disabled t
   :demand t
   :custom
   (treesit-auto-install 'prompt)

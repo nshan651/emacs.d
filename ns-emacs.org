@@ -256,10 +256,10 @@ Keep it simple. I have this disabled by default.
       (let ((file-list
         '("evil-config.el"
           "theme-config.el"
+          "development-config.el"
           "ui-config.el"
           "org-config.el"
           "org-roam-config.el"
-          "development-config.el"
           "programming-languages-config.el"
           "terminal-config.el"
           "applications-config.el"
@@ -1358,47 +1358,47 @@ The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mo
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-    (defun ns/lsp-mode-setup ()
-      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-      (lsp-headerline-breadcrumb-mode))
+  (defun ns/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
-    (use-package lsp-mode
-      :ensure t
-      :defer t
-      :commands (lsp lsp-deferred)
-      :hook
-      (
-       ;;((c-mode c++-mode) . lsp)
-       (c-mode . lsp-deferred)
-       (c++-mode . lsp-deferred)
-       (python-mode . lsp-deferred)
-       (lsp-mode . ns/lsp-mode-setup)
-       )
-      :init
-      (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-      :custom
-      (lsp-auto-configure t)
-      (lsp-enable-symbol-highlighting t)
-      :config
-      (lsp-enable-which-key-integration t)
-      (setq lsp-log-io t)
+  (use-package lsp-mode
+    :ensure t
+    :init
+    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+    :hook
+    (
+     (lsp-mode . ns/lsp-mode-setup)
+     (c-mode . lsp)
+     (c++-mode . lsp)
+     (python-mode . lsp)
+     )
+    :commands lsp
+    ;; :custom
+    ;; (lsp-auto-configure t)
+    ;; (lsp-enable-symbol-highlighting t)
+    :config
+    (lsp-enable-which-key-integration t)
+    (setq lsp-log-io t)
+    ;; The path to lsp-mode needs to be added to load-path as well as the
+    ;; path to the `clients' subdirectory.
 
-      ;; Activate lsp-mode
-      )
+    ;; Activate lsp-mode
+    )
 
-    (ns/leader-m 'lsp-mode-map
-     "a" 'lsp-execute-code-action
-     "v" 'lsp-avy-lens
-     "n" 'lsp-describe-thing-at-point
-     "i" 'lsp-goto-implementation
-     "d" 'lsp-find-definition
-     "D" 'lsp-find-declaration
-     "t" 'lsp-find-type-definition
-     "x" 'lsp-find-references
-     "r" 'lsp-rename
-     "R" 'lsp-restart-workspace
-     "=" 'lsp-format-buffer
-     "l" 'lsp-workspace-show-log)
+  (ns/leader-m 'lsp-mode-map
+   "a" 'lsp-execute-code-action
+   "v" 'lsp-avy-lens
+   "n" 'lsp-describe-thing-at-point
+   "i" 'lsp-goto-implementation
+   "d" 'lsp-find-definition
+   "D" 'lsp-find-declaration
+   "t" 'lsp-find-type-definition
+   "x" 'lsp-find-references
+   "r" 'lsp-rename
+   "R" 'lsp-restart-workspace
+   "=" 'lsp-format-buffer
+   "l" 'lsp-workspace-show-log)
 #+end_src
 
 #+RESULTS:
@@ -1408,6 +1408,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package lsp-ui
+    :after lsp-mode
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom)
@@ -1448,11 +1449,14 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
     :after lsp)
 #+end_src
 
+#+RESULTS:
+
 ** Tree Sitter
-Tree sitter support is now built in to Emacs.
+Tree sitter support is now built in to Emacs. This seems to be breaking lsp-mode, so I've disabled this for now.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package treesit-auto
+    :disabled t
     :demand t
     :custom
     (treesit-auto-install 'prompt)
@@ -1462,7 +1466,6 @@ Tree sitter support is now built in to Emacs.
 #+end_src
 
 #+RESULTS:
-: t
 
 ** Debugging with dap-mode
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]].  You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
@@ -1657,15 +1660,14 @@ Forge allows use to work with varios git forges using the magit interface.
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package ccls
     ;; :hook ((c-mode c++-mode) . (lambda () (require 'ccls) (lsp-deferred)))
-    :hook
-    ((c-mode . lsp-deferred)
-     (c++-mode . lsp-deferred))
+    ;; :hook
+    ;; ((c-mode . lsp-deferred)
+    ;;  (c++-mode . lsp-deferred))
     :custom
     (ccls-executable "/usr/bin/ccls"))
 #+end_src
 
 #+RESULTS:
-| lsp | lsp-deferred |
 
 ** Common Lisp
 

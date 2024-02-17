@@ -1,8 +1,8 @@
 (use-package ccls
   ;; :hook ((c-mode c++-mode) . (lambda () (require 'ccls) (lsp-deferred)))
-  :hook
-  ((c-mode . lsp-deferred)
-   (c++-mode . lsp-deferred))
+  ;; :hook
+  ;; ((c-mode . lsp-deferred)
+  ;;  (c++-mode . lsp-deferred))
   :custom
   (ccls-executable "/usr/bin/ccls"))
 
