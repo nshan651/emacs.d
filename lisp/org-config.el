@@ -74,7 +74,8 @@
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
+        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")
+        (sequence "CONTACT(C)")))
 
 (setq org-refile-targets
       '(("archive.org" :maxlevel . 1)
@@ -87,6 +88,7 @@
         ("@errand" . ?E)
         ("@home" . ?H)
         ("@work" . ?W)
+        ("@investing" . ?I)
         ("agenda" . ?a)
         ("planning" . ?p)
         ("publish" . ?P)
@@ -95,6 +97,7 @@
         ("idea" . ?i)))
 
 ;; Configure custom agenda views
+;; More on agenda view commands at `https://emacsdocs.org/docs/org/Agenda-Commands'
 (setq org-agenda-custom-commands
       `(("A" "Daily agenda and top priority tasks"
          ((tags-todo "*"
@@ -135,6 +138,7 @@
                  (org-agenda-block-separator nil)
                  (org-agenda-overriding-header "\nProjects\n")))
           ))
+
         ("d" "Dashboard"
          ((agenda "" ((org-deadline-warning-days 7)))
           (tags-todo "+PRIORITY=\"A\""
@@ -145,19 +149,15 @@
                  (org-agenda-max-todos nil)))
           (todo "TODO"
                 ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
-                 (org-agenda-files '("~/org/agenda/todo.org"))
-                 (org-agenda-text-search-extra-files nil)))))
-
-        ("n" "Next Tasks"
-         ((agenda "" ((org-deadline-warning-days 7)))
-          (todo "NEXT"
-                ((org-agenda-overriding-header "Next Tasks")))))
-
-        ;; Low-effort next actions
-        ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-         ((org-agenda-overriding-header "Low Effort Tasks")
-          (org-agenda-max-todos 20)
-          (org-agenda-files org-agenda-files)))
+                 (org-agenda-files '("~/org/agenda/inbox.org"))
+                 (org-agenda-text-search-extra-files nil)))
+          (agenda "" ((org-agenda-span 14)
+                      (org-agenda-start-day "+7d")
+                      (org-deadline-warning-days 0)
+                      (org-agenda-block-separator nil)
+                      (org-agenda-entry-types '(:deadline :scheduled))
+                      (org-agenda-overriding-header "Upcoming Deadlines (+14d)")))
+          ))
         ))
 
 (setq org-capture-templates
@@ -167,6 +167,21 @@
         ("ts" "Clocked Entry Subtask" entry (clock)
          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
+        ;; Projects
+        ("p" "Projects")
+        ("pt" "Task" entry (file "~/org/agenda/projects.org")
+         "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+        ("ps" "Clocked Entry Subtask" entry (clock)
+         "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+        ("pr" "Pull Request" entry (file "~/org/agenda/projects.org")
+         "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+
+        ;; Birthdays
+        ("c" "Contacts" entry (file+headline "~/org/agenda/contacts.org" "Contacts")
+  "* CONTACT %^{Name}\n  :PROPERTIES:\n :DATE: %^{Specify birthday}t\n  :PHONE: %^{Phone number}\n  :END:\n  %?" :empty-lines 1)
+
+
+        ;; Journal Entries
         ("j" "Journal Entries")
         ("je" "General Entry" entry
          (file+olp+datetree "~/org/journal/journal.org")
@@ -229,6 +244,11 @@
   "ot"  '(org-todo-list :wk "todos")
   "oc"  '(org-capture t :wk "capture")
   "ox"  '(org-export-dispatch t :wk "export"))
+
+(general-def 'override
+  :prefix "C-c"
+  "a" '(org-agenda :wk "org agenda")
+  "c" '(org-capture :wk "org capture"))
 
 (with-eval-after-load 'org
   (org-babel-do-load-languages

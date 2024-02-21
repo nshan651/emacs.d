@@ -13,7 +13,7 @@ This is the first file that Emacs reads when starting up. It should contain code
 
 #+begin_src emacs-lisp :tangle "early-init.el"
   (defvar ns-emacs-tiling-window-manager-regexp
-    (regexp-opt '("bspwm" "herbstluftwm" "i3" "dwm"))
+    (regexp-opt '("bspwm" "i3" "dwm"))
     "Regular expression to  tiling window managers.
   See definition of `ns-emacs-with-desktop-session'.")
 
@@ -343,6 +343,19 @@ Automatically trim extraneous whitespaces.
   (ws-butler-global-mode 1))
 #+end_src
 
+
+** Clipboard
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+  (setq select-enable-clipboard t)
+  (setq x-select-enable-clipboard t)
+
+  (global-set-key (kbd "C-S-c") 'copy-region-as-kill)
+  (global-set-key (kbd "C-S-v") 'yank)
+#+end_src
+
+#+RESULTS:
+: yank
+
 * Keybindings
 All my keybindings are controlled by evil mode.
 
@@ -504,48 +517,56 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 
 #+RESULTS:
 
+** Mouse Settings
 * Theme Configuration
 ** Color Theme
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-    ;; modus-themes
-    (use-package modus-themes
-      :ensure t
-      :config
-      ;; Add all your customizations prior to loading the themes
-      ;;(setq modus-themes-italic-constructs t
-      ;;      modus-themes-bold-constructs nil)
+      ;; modus-themes
+      (use-package modus-themes
+        :ensure t
+        :config
+        ;; Add all your customizations prior to loading the themes
+        ;;(setq modus-themes-italic-constructs t
+        ;;      modus-themes-bold-constructs nil)
 
-      ;; Maybe define some palette overrides, such as by using our presets
-      ;(setq modus-themes-common-palette-overrides
-      ;      modus-themes-preset-overrides-intense)
+        ;; Maybe define some palette overrides, such as by using our presets
+        ;(setq modus-themes-common-palette-overrides
+        ;      modus-themes-preset-overrides-intense)
 
-      ;; Load the theme of your choice.
-      (load-theme 'modus-vivendi)
+        ;; Load the theme of your choice.
+        ;; (load-theme 'modus-vivendi)
 
-      (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+        ;; (define-key global-map (kbd "<f5>") #'modus-themes-toggle)
+       )
 
-    ;; ef-themes
-    (use-package ef-themes
-      :ensure t
-      :config
+      ;; ef-themes
+      (use-package ef-themes
+        :ensure t)
 
-      ;; Load the theme of choice
-      ;; (load-theme 'ef-winter)
-      ;; (load-theme 'ef-autumn)
-      ;(load-theme 'ef-dark)
-      ;; (load-theme 'ef-elea-dark)
-      )
+      ;; Doom Themes
+      (use-package doom-themes
+        :ensure t)
 
-    ;; Doom Themes
-    (use-package doom-themes
-      :ensure t
-      :config
-      ;; (load-theme 'doom-one)
-      )
+      (defun ns/toggle-theme (light-mode dark-mode)
+          "Toggle between light and dark mode variants."
+          ;; (interactive)
+          (if (eq dark-mode (car custom-enabled-themes))
+              (load-theme light-mode)
+            (load-theme dark-mode)))
+
+    ;; Set theme colors here
+    (defvar ns/lightmode 'ef-duo-light)
+    (defvar ns/darkmode 'ef-duo-dark)
+
+  (load-theme ns/lightmode)
+  (ns/toggle-theme ns/lightmode ns/darkmode)
+    (define-key global-map (kbd "<f5>") (lambda () (interactive)
+                                          (ns/toggle-theme ns/lightmode ns/darkmode)))
 #+end_src
 
 #+RESULTS:
+| lambda | nil | (interactive) | (ns/toggle-theme ns/lightmode ns/darkmode) |
 
 ** Font Configuration
 Set font details here.
@@ -999,7 +1020,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
        (setq org-todo-keywords
              '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-               (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")))
+               (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")
+               (sequence "CONTACT(C)")))
 
        (setq org-refile-targets
              '(("archive.org" :maxlevel . 1)
@@ -1012,6 +1034,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
                ("@errand" . ?E)
                ("@home" . ?H)
                ("@work" . ?W)
+               ("@investing" . ?I)
                ("agenda" . ?a)
                ("planning" . ?p)
                ("publish" . ?P)
@@ -1020,6 +1043,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
                ("idea" . ?i)))
 
        ;; Configure custom agenda views
+       ;; More on agenda view commands at `https://emacsdocs.org/docs/org/Agenda-Commands'
        (setq org-agenda-custom-commands
              `(("A" "Daily agenda and top priority tasks"
                 ((tags-todo "*"
@@ -1060,6 +1084,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
                         (org-agenda-block-separator nil)
                         (org-agenda-overriding-header "\nProjects\n")))
                  ))
+
                ("d" "Dashboard"
                 ((agenda "" ((org-deadline-warning-days 7)))
                  (tags-todo "+PRIORITY=\"A\""
@@ -1070,19 +1095,15 @@ This section contains the basic configuration for =org-mode= plus the configurat
                         (org-agenda-max-todos nil)))
                  (todo "TODO"
                        ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
-                        (org-agenda-files '("~/org/agenda/todo.org"))
-                        (org-agenda-text-search-extra-files nil)))))
-
-               ("n" "Next Tasks"
-                ((agenda "" ((org-deadline-warning-days 7)))
-                 (todo "NEXT"
-                       ((org-agenda-overriding-header "Next Tasks")))))
-
-               ;; Low-effort next actions
-               ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-                ((org-agenda-overriding-header "Low Effort Tasks")
-                 (org-agenda-max-todos 20)
-                 (org-agenda-files org-agenda-files)))
+                        (org-agenda-files '("~/org/agenda/inbox.org"))
+                        (org-agenda-text-search-extra-files nil)))
+                 (agenda "" ((org-agenda-span 14)
+                             (org-agenda-start-day "+7d")
+                             (org-deadline-warning-days 0)
+                             (org-agenda-block-separator nil)
+                             (org-agenda-entry-types '(:deadline :scheduled))
+                             (org-agenda-overriding-header "Upcoming Deadlines (+14d)")))
+                 ))
                ))
 
        (setq org-capture-templates
@@ -1092,6 +1113,21 @@ This section contains the basic configuration for =org-mode= plus the configurat
                ("ts" "Clocked Entry Subtask" entry (clock)
                 "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
+               ;; Projects
+               ("p" "Projects")
+               ("pt" "Task" entry (file "~/org/agenda/projects.org")
+                "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+               ("ps" "Clocked Entry Subtask" entry (clock)
+                "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+               ("pr" "Pull Request" entry (file "~/org/agenda/projects.org")
+                "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+
+               ;; Birthdays
+               ("c" "Contacts" entry (file+headline "~/org/agenda/contacts.org" "Contacts")
+         "* CONTACT %^{Name}\n  :PROPERTIES:\n :DATE: %^{Specify birthday}t\n  :PHONE: %^{Phone number}\n  :END:\n  %?" :empty-lines 1)
+
+
+               ;; Journal Entries
                ("j" "Journal Entries")
                ("je" "General Entry" entry
                 (file+olp+datetree "~/org/journal/journal.org")
@@ -1118,6 +1154,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 #+end_src
 
 #+RESULTS:
+| lambda | nil | (interactive) | (org-capture nil jj) |
 
 ** Nicer Heading Bullets
 org-bullets replaces the heading stars in org-mode buffers with nicer looking characters that you can control.
@@ -1151,29 +1188,34 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
 * Org Modules and Packages
 ** Evil Org
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-  (use-package evil-org
-    :ensure t
-    :after org
-    :hook (org-mode . (lambda () evil-org-mode))
-    :config
-    (require 'evil-org-agenda)
-    (evil-org-set-key-theme '(navigation todo insert textobjects additional))
-    (evil-org-agenda-set-keys))
+      (use-package evil-org
+        :ensure t
+        :after org
+        :hook (org-mode . (lambda () evil-org-mode))
+        :config
+        (require 'evil-org-agenda)
+        (evil-org-set-key-theme '(navigation todo insert textobjects additional))
+        (evil-org-agenda-set-keys))
 
-  (ns/leader-spc 'override
-    "o"   '(:ignore t :wk "org mode")
+      (ns/leader-spc 'override
+        "o"   '(:ignore t :wk "org mode")
 
-    "oi"  '(:ignore t :wk "insert")
-    "oil" '(org-insert-link :wk "insert link")
+        "oi"  '(:ignore t :wk "insert")
+        "oil" '(org-insert-link :wk "insert link")
 
-    "oo"  '(org-agenda :wk "open agenda")
+        "oo"  '(org-agenda :wk "open agenda")
 
-    "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
-    "os"  '(consult-org-roam-search :wk "search notes")
-    ;; "oa"  '(org-agenda :wk "status")
-    "ot"  '(org-todo-list :wk "todos")
-    "oc"  '(org-capture t :wk "capture")
-    "ox"  '(org-export-dispatch t :wk "export"))
+        "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
+        "os"  '(consult-org-roam-search :wk "search notes")
+        ;; "oa"  '(org-agenda :wk "status")
+        "ot"  '(org-todo-list :wk "todos")
+        "oc"  '(org-capture t :wk "capture")
+        "ox"  '(org-export-dispatch t :wk "export"))
+
+      (general-def 'override
+        :prefix "C-c"
+        "a" '(org-agenda :wk "org agenda")
+        "c" '(org-capture :wk "org capture"))
 #+end_src
 
 #+RESULTS:

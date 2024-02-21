@@ -1,5 +1,5 @@
 (defvar ns-emacs-tiling-window-manager-regexp
-  (regexp-opt '("bspwm" "herbstluftwm" "i3" "dwm"))
+  (regexp-opt '("bspwm" "i3" "dwm"))
   "Regular expression to  tiling window managers.
 See definition of `ns-emacs-with-desktop-session'.")
 

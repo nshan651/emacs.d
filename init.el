@@ -95,3 +95,9 @@
   :ensure t
   :config
   (ws-butler-global-mode 1))
+
+(setq select-enable-clipboard t)
+(setq x-select-enable-clipboard t)
+
+(global-set-key (kbd "C-S-c") 'copy-region-as-kill)
+(global-set-key (kbd "C-S-v") 'yank)

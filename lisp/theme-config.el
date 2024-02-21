@@ -1,38 +1,44 @@
 ;; modus-themes
-(use-package modus-themes
-  :ensure t
-  :config
-  ;; Add all your customizations prior to loading the themes
-  ;;(setq modus-themes-italic-constructs t
-  ;;      modus-themes-bold-constructs nil)
+    (use-package modus-themes
+      :ensure t
+      :config
+      ;; Add all your customizations prior to loading the themes
+      ;;(setq modus-themes-italic-constructs t
+      ;;      modus-themes-bold-constructs nil)
 
-  ;; Maybe define some palette overrides, such as by using our presets
-  ;(setq modus-themes-common-palette-overrides
-  ;      modus-themes-preset-overrides-intense)
+      ;; Maybe define some palette overrides, such as by using our presets
+      ;(setq modus-themes-common-palette-overrides
+      ;      modus-themes-preset-overrides-intense)
 
-  ;; Load the theme of your choice.
-  (load-theme 'modus-vivendi)
+      ;; Load the theme of your choice.
+      ;; (load-theme 'modus-vivendi)
 
-  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+      ;; (define-key global-map (kbd "<f5>") #'modus-themes-toggle)
+     )
 
-;; ef-themes
-(use-package ef-themes
-  :ensure t
-  :config
+    ;; ef-themes
+    (use-package ef-themes
+      :ensure t)
 
-  ;; Load the theme of choice
-  ;; (load-theme 'ef-winter)
-  ;; (load-theme 'ef-autumn)
-  ;(load-theme 'ef-dark)
-  ;; (load-theme 'ef-elea-dark)
-  )
+    ;; Doom Themes
+    (use-package doom-themes
+      :ensure t)
 
-;; Doom Themes
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; (load-theme 'doom-one)
-  )
+    (defun ns/toggle-theme (light-mode dark-mode)
+        "Toggle between light and dark mode variants."
+        ;; (interactive)
+        (if (eq dark-mode (car custom-enabled-themes))
+            (load-theme light-mode)
+          (load-theme dark-mode)))
+
+  ;; Set theme colors here
+  (defvar ns/lightmode 'ef-duo-light)
+  (defvar ns/darkmode 'ef-duo-dark)
+
+(load-theme ns/lightmode)
+(ns/toggle-theme ns/lightmode ns/darkmode)
+  (define-key global-map (kbd "<f5>") (lambda () (interactive)
+                                        (ns/toggle-theme ns/lightmode ns/darkmode)))
 
 ;; Set base font sizes
 (defvar efs/default-font-size 110)
