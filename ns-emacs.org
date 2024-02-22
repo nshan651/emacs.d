@@ -556,8 +556,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
             (load-theme dark-mode)))
 
     ;; Set theme colors here
-    (defvar ns/lightmode 'ef-duo-light)
-    (defvar ns/darkmode 'ef-duo-dark)
+    (defvar ns/lightmode 'modus-operandi)
+    (defvar ns/darkmode 'modus-vivendi)
 
   (load-theme ns/lightmode)
   (ns/toggle-theme ns/lightmode ns/darkmode)
@@ -1036,6 +1036,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
                ("@work" . ?W)
                ("@investing" . ?I)
                ("agenda" . ?a)
+               ("followup" . ?f)
                ("planning" . ?p)
                ("publish" . ?P)
                ("batch" . ?b)
@@ -1188,34 +1189,41 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
 * Org Modules and Packages
 ** Evil Org
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-      (use-package evil-org
-        :ensure t
-        :after org
-        :hook (org-mode . (lambda () evil-org-mode))
-        :config
-        (require 'evil-org-agenda)
-        (evil-org-set-key-theme '(navigation todo insert textobjects additional))
-        (evil-org-agenda-set-keys))
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-set-key-theme '(navigation todo insert textobjects additional))
+    (evil-org-agenda-set-keys))
 
-      (ns/leader-spc 'override
-        "o"   '(:ignore t :wk "org mode")
+  (ns/leader-spc 'override
+    "o"   '(:ignore t :wk "org mode")
 
-        "oi"  '(:ignore t :wk "insert")
-        "oil" '(org-insert-link :wk "insert link")
+    "oi"  '(:ignore t :wk "insert")
+    "oil" '(org-insert-link :wk "insert link")
 
-        "oo"  '(org-agenda :wk "open agenda")
+    "oo"  '(org-agenda :wk "open agenda")
 
-        "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
-        "os"  '(consult-org-roam-search :wk "search notes")
-        ;; "oa"  '(org-agenda :wk "status")
-        "ot"  '(org-todo-list :wk "todos")
-        "oc"  '(org-capture t :wk "capture")
-        "ox"  '(org-export-dispatch t :wk "export"))
+    "on"  '(org-toggle-narrow-to-subtree :wk "toggle narrow")
+    "os"  '(consult-org-roam-search :wk "search notes")
+    ;; "oa"  '(org-agenda :wk "status")
+    "ot"  '(org-todo-list :wk "todos")
+    "oc"  '(org-capture t :wk "capture")
+    "ox"  '(org-export-dispatch t :wk "export"))
 
-      (general-def 'override
-        :prefix "C-c"
-        "a" '(org-agenda :wk "org agenda")
-        "c" '(org-capture :wk "org capture"))
+  (defun ns/open-custom-agenda ()
+    "Open the custom agenda view."
+    (interactive)
+    (org-agenda nil "d"))
+
+  (general-def 'override
+    :prefix "C-c"
+    "a" '(org-agenda :wk "org agenda")
+    "c" '(org-capture :wk "org capture")
+    "d" '(ns/open-custom-agenda :wk "main agenda dashboard")
+    )
 #+end_src
 
 #+RESULTS:
@@ -1327,21 +1335,25 @@ Org roam allows you to create various capture templates.
   (setq org-roam-capture-templates
     '(("m" "main" plain
         "%?"
-        :if-new (file+head "main/${slug}.org"
-                            "#+title: ${title}\n")
+        :if-new
+        (file+head "main/${slug}.org"
+                   "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
         :immediate-finish t
         :unnarrowed t)
         ("r" "reference" plain "%?"
         :if-new
-        (file+head "reference/${title}.org" "#+title: ${title}\n")
+        (file+head "reference/${title}.org"
+                   "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
         :immediate-finish t
         :unnarrowed t)
         ("a" "article" plain "%?"
         :if-new
-        (file+head "articles/${title}.org" "#+title: ${title}\n#+filetags: :article:\n")
+        (file+head "articles/${title}.org"
+                   "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :article:\n")
         :immediate-finish t
         :unnarrowed t)))
 #+end_src
+
 *** Define the Type of a Node
 
 It can be useful to differentiate the different types of zettels at completion time.
@@ -1421,7 +1433,9 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     ;; (lsp-enable-symbol-highlighting t)
     :config
     (lsp-enable-which-key-integration t)
-    (setq lsp-log-io t)
+    (setq lsp-completion-enable t)
+    (setq lsp-completion-provider :capf)
+    ;; (setq lsp-log-io t)
     ;; The path to lsp-mode needs to be added to load-path as well as the
     ;; path to the `clients' subdirectory.
 
@@ -1666,6 +1680,36 @@ Forge allows use to work with varios git forges using the magit interface.
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
   (use-package forge
     :after 'magit)
+#+end_src
+
+#+RESULTS:
+
+** Flymake
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+    ;; (defun ns/flymake-cc-default ()
+    ;;   "Default compile command for C++ files without a Makefile."
+    ;;   (if buffer-file-name
+    ;;       (let (
+    ;;             (base-name  (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
+    ;;         (concat "g++ --std=c++23 -g -o "
+    ;;                 base-name
+    ;;                 " " base-name ".cpp"
+    ;;                 " && ./" base-name))
+    ;;         (message "Buffer is not visiting a file")))
+
+    ;; (use-package flymake
+    ;;   :ensure t
+    ;;   :hook (c++-mode . flymake-mode)
+    ;;   :custom
+    ;;   ;; Automatically continue without needing to hit Enter
+    ;;   (compilation-read-command nil)
+    ;;   :config
+    ;;   (setq-default compile-command '(ns/flymake-cc-default))
+    ;;   )
+
+    ;; (general-def '(normal insert visual)
+    ;;   :keymaps 'c++-mode-map
+    ;;   "C-c C-c" 'compile)
 #+end_src
 
 #+RESULTS:

@@ -19,7 +19,9 @@
   ;; (lsp-enable-symbol-highlighting t)
   :config
   (lsp-enable-which-key-integration t)
-  (setq lsp-log-io t)
+  (setq lsp-completion-enable t)
+  (setq lsp-completion-provider :capf)
+  ;; (setq lsp-log-io t)
   ;; The path to lsp-mode needs to be added to load-path as well as the
   ;; path to the `clients' subdirectory.
 
@@ -168,6 +170,31 @@
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 (use-package forge
   :after 'magit)
+
+;; (defun ns/flymake-cc-default ()
+;;   "Default compile command for C++ files without a Makefile."
+;;   (if buffer-file-name
+;;       (let (
+;;             (base-name  (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
+;;         (concat "g++ --std=c++23 -g -o "
+;;                 base-name
+;;                 " " base-name ".cpp"
+;;                 " && ./" base-name))
+;;         (message "Buffer is not visiting a file")))
+
+;; (use-package flymake
+;;   :ensure t
+;;   :hook (c++-mode . flymake-mode)
+;;   :custom
+;;   ;; Automatically continue without needing to hit Enter
+;;   (compilation-read-command nil)
+;;   :config
+;;   (setq-default compile-command '(ns/flymake-cc-default))
+;;   )
+
+;; (general-def '(normal insert visual)
+;;   :keymaps 'c++-mode-map
+;;   "C-c C-c" 'compile)
 
 (use-package rainbow-delimiters
   :ensure t

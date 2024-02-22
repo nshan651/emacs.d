@@ -32,8 +32,8 @@
           (load-theme dark-mode)))
 
   ;; Set theme colors here
-  (defvar ns/lightmode 'ef-duo-light)
-  (defvar ns/darkmode 'ef-duo-dark)
+  (defvar ns/lightmode 'modus-operandi)
+  (defvar ns/darkmode 'modus-vivendi)
 
 (load-theme ns/lightmode)
 (ns/toggle-theme ns/lightmode ns/darkmode)

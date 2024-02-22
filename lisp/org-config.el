@@ -90,6 +90,7 @@
         ("@work" . ?W)
         ("@investing" . ?I)
         ("agenda" . ?a)
+        ("followup" . ?f)
         ("planning" . ?p)
         ("publish" . ?P)
         ("batch" . ?b)
@@ -245,10 +246,17 @@
   "oc"  '(org-capture t :wk "capture")
   "ox"  '(org-export-dispatch t :wk "export"))
 
+(defun ns/open-custom-agenda ()
+  "Open the custom agenda view."
+  (interactive)
+  (org-agenda nil "d"))
+
 (general-def 'override
   :prefix "C-c"
   "a" '(org-agenda :wk "org agenda")
-  "c" '(org-capture :wk "org capture"))
+  "c" '(org-capture :wk "org capture")
+  "d" '(ns/open-custom-agenda :wk "main agenda dashboard")
+  )
 
 (with-eval-after-load 'org
   (org-babel-do-load-languages

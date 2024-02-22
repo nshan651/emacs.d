@@ -24,18 +24,21 @@
 (setq org-roam-capture-templates
   '(("m" "main" plain
       "%?"
-      :if-new (file+head "main/${slug}.org"
-                          "#+title: ${title}\n")
+      :if-new
+      (file+head "main/${slug}.org"
+                 "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
       :immediate-finish t
       :unnarrowed t)
       ("r" "reference" plain "%?"
       :if-new
-      (file+head "reference/${title}.org" "#+title: ${title}\n")
+      (file+head "reference/${title}.org"
+                 "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
       :immediate-finish t
       :unnarrowed t)
       ("a" "article" plain "%?"
       :if-new
-      (file+head "articles/${title}.org" "#+title: ${title}\n#+filetags: :article:\n")
+      (file+head "articles/${title}.org"
+                 "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :article:\n")
       :immediate-finish t
       :unnarrowed t)))
 
