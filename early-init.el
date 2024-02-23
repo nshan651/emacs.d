@@ -68,16 +68,17 @@ Simplified version of `add-to-list'."
       ;; move by logical lines rather than visual lines (better for macros)
       line-move-visual nil)
 
-;; Relative line numbers
 (column-number-mode)
 (global-display-line-numbers-mode t)
+;; Relative line numbers
+(menu-bar--display-line-numbers-mode-relative)
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
-		term-mode-hook
-		shell-mode-hook
-		treemacs-mode-hook
-		eshell-mode-hook))
+                term-mode-hook
+                shell-mode-hook
+                treemacs-mode-hook
+                eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; Revert Dired and other buffers

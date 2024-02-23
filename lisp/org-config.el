@@ -141,7 +141,14 @@
           ))
 
         ("d" "Dashboard"
-         ((agenda "" ((org-deadline-warning-days 7)))
+         ((agenda ""
+                  (
+                   (org-agenda-span 7)
+                   (org-deadline-warning-days 0)
+                   (org-scheduled-past-days 0)
+                   (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                   (org-agenda-format-date "%A %-e %B %Y")
+                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))))
           (tags-todo "+PRIORITY=\"A\""
                      ((org-agenda-overriding-header "High Priority")))
           (tags-todo "+followup" ((org-agenda-overriding-header "Needs Follow Up")))
@@ -156,6 +163,8 @@
                       (org-agenda-start-day "+7d")
                       (org-deadline-warning-days 0)
                       (org-agenda-block-separator nil)
+                      (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                      (org-agenda-format-date "%A %-e %B %Y")
                       (org-agenda-entry-types '(:deadline :scheduled))
                       (org-agenda-overriding-header "Upcoming Deadlines (+14d)")))
           ))
@@ -179,7 +188,7 @@
 
         ;; Birthdays
         ("c" "Contacts" entry (file+headline "~/org/agenda/contacts.org" "Contacts")
-  "* CONTACT %^{Name}\n  :PROPERTIES:\n :DATE: %^{Specify birthday}t\n  :PHONE: %^{Phone number}\n  :END:\n  %?" :empty-lines 1)
+         "* CONTACT %^{Name}\n  :PROPERTIES:\n :DATE: %^{Specify birthday}t\n  :PHONE: %^{Phone number}\n  :END:\n  %?" :empty-lines 1)
 
 
         ;; Journal Entries
