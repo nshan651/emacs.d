@@ -2,6 +2,9 @@
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
 
+(defun ns/prog-mode-setup ()
+  (display-fill-column-indicator-mode))
+
 (use-package lsp-mode
   :ensure t
   :init
@@ -9,6 +12,7 @@
   :hook
   (
    (lsp-mode . ns/lsp-mode-setup)
+   (prog-mode . ns/prog-mode-setup)
    (c-mode . lsp)
    (c++-mode . lsp)
    (python-mode . lsp)

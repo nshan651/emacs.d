@@ -40,15 +40,17 @@ Simplified version of `add-to-list'."
       inhibit-startup-echo-area-message user-login-name ; read the docstring
       inhibit-startup-buffer-menu t)
 
-    (set-fringe-mode 10)        ; Give some breathing room
+(set-fringe-mode 10) ; Give some breathing room
 
-    (menu-bar-mode -1)            ; Disable the menu bar
+(menu-bar-mode -1)   ; Disable the menu bar
 
 ;; Disable graphical elements
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
+;; Default for fill column should be 80 (not 70 like emacs would have it!!!)
+(setq-default fill-column 80)
 
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha '(100 . 90))

@@ -51,36 +51,38 @@ Here I am setting parameters for the size of the Emacs frame: the first as well 
 These are general frame settngs. Notice the frame-resize-pixelwise and frame-inhibit-implied-resize: by default Emacs will resize the frame if you adjust the font size, which I never want.
 
 #+begin_src emacs-lisp :tangle "early-init.el"
-(setq frame-resize-pixelwise t
-      frame-inhibit-implied-resize t
-      frame-title-format '("%b")
-      ring-bell-function 'ignore
-      use-dialog-box t ; only for mouse events, which I seldom use
-      use-file-dialog nil
-      use-short-answers t
-      inhibit-splash-screen t
-      inhibit-startup-screen t
-      inhibit-startup-message t
-      initial-scratch-message nil
-      inhibit-x-resources t
-      inhibit-startup-echo-area-message user-login-name ; read the docstring
-      inhibit-startup-buffer-menu t)
+  (setq frame-resize-pixelwise t
+        frame-inhibit-implied-resize t
+        frame-title-format '("%b")
+        ring-bell-function 'ignore
+        use-dialog-box t ; only for mouse events, which I seldom use
+        use-file-dialog nil
+        use-short-answers t
+        inhibit-splash-screen t
+        inhibit-startup-screen t
+        inhibit-startup-message t
+        initial-scratch-message nil
+        inhibit-x-resources t
+        inhibit-startup-echo-area-message user-login-name ; read the docstring
+        inhibit-startup-buffer-menu t)
 
-    (set-fringe-mode 10)        ; Give some breathing room
+  (set-fringe-mode 10) ; Give some breathing room
 
-    (menu-bar-mode -1)            ; Disable the menu bar
+  (menu-bar-mode -1)   ; Disable the menu bar
 
-;; Disable graphical elements
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(tooltip-mode -1)
+  ;; Disable graphical elements
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  ;; Default for fill column should be 80 (not 70 like emacs would have it!!!)
+  (setq-default fill-column 80)
 
-;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(100 . 90))
-(add-to-list 'default-frame-alist `(alpha . (100 . 100)))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+  ;; Set frame transparency
+  (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
+  (add-to-list 'default-frame-alist `(alpha . (100 . 100)))
+  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
 
 ** Improve scrolling
@@ -346,7 +348,6 @@ Automatically trim extraneous whitespaces.
   :config
   (ws-butler-global-mode 1))
 #+end_src
-
 
 ** Clipboard
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
@@ -1430,6 +1431,9 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
 
+  (defun ns/prog-mode-setup ()
+    (display-fill-column-indicator-mode))
+
   (use-package lsp-mode
     :ensure t
     :init
@@ -1437,6 +1441,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     :hook
     (
      (lsp-mode . ns/lsp-mode-setup)
+     (prog-mode . ns/prog-mode-setup)
      (c-mode . lsp)
      (c++-mode . lsp)
      (python-mode . lsp)
@@ -1800,14 +1805,13 @@ There are a number of other language servers for Python so if you find that =pyl
     :hook (python-mode . lsp-deferred)
     :custom
     (lsp-pyls-server-command '("/home/nick/.local/lib/python3.10/site-packages/pyls
-"))
+  "))
     ;; NOTE: Set these if Python 3 is called "python3" on your system!
     ;; (python-shell-interpreter "python3")
     ;; (dap-python-executable "python3")
     (dap-python-debugger 'debugpy)
-    ;; :config
-    ;; (require 'dap-python)
-    )
+    :config
+    (setq-default python-indent-offset 4))
 #+end_src
 
 #+RESULTS:
