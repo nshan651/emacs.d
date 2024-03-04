@@ -529,7 +529,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
       ;; modus-themes
       (use-package modus-themes
         :ensure t
-        :config
+        ;; :config
         ;; Add all your customizations prior to loading the themes
         ;;(setq modus-themes-italic-constructs t
         ;;      modus-themes-bold-constructs nil)
@@ -552,25 +552,26 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
       (use-package doom-themes
         :ensure t)
 
-      (defun ns/toggle-theme (light-mode dark-mode)
-          "Toggle between light and dark mode variants."
-          ;; (interactive)
-          (if (eq dark-mode (car custom-enabled-themes))
-              (load-theme light-mode)
-            (load-theme dark-mode)))
+    ;; Set theme colors
+    (defvar ns/default-theme 'leuven)
+    (defvar ns/alt-theme 'doom-Iosvkem)
+    ;; Load default theme
+  (load-theme ns/default-theme)
 
-    ;; Set theme colors here
-    (defvar ns/lightmode 'modus-operandi)
-    (defvar ns/darkmode 'modus-vivendi)
+    (defun ns/toggle-theme (default-theme alt-theme)
+      "Toggle between light and dark mode variants."
+      (interactive)
+      (if (eq default-theme (car custom-enabled-themes))
+          (load-theme alt-theme)
+        (load-theme default-theme)))
 
-  (load-theme ns/lightmode)
-  (ns/toggle-theme ns/lightmode ns/darkmode)
+    ;; Binding to toggle between default and alt theme, inspired by 'modus-themes-toggle`
     (define-key global-map (kbd "<f5>") (lambda () (interactive)
-                                          (ns/toggle-theme ns/lightmode ns/darkmode)))
+                                          (ns/toggle-theme ns/default-theme  ns/alt-theme)))
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (ns/toggle-theme ns/lightmode ns/darkmode) |
+| lambda | nil | (interactive) | (ns/toggle-theme ns/default-theme ns/alt-theme) |
 
 ** Font Configuration
 Set font details here.

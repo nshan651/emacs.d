@@ -30,11 +30,12 @@ snippets/
 org-roam.db
 *.sqlite
 
-# 
+# Misc files
 history
 projects
 bookmarks
 projectile-bookmarks.eld
+tramp
 
 # Misc hidden files
 .last-package-update-day
