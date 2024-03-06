@@ -27,6 +27,9 @@ This is the first file that Emacs reads when starting up. It should contain code
        ,@body))
 #+end_src
 
+#+RESULTS:
+: ns-emacs-with-desktop-session
+
 ** Set frame parameters
 
 Here I am setting parameters for the size of the Emacs frame: the first as well as any future one. In a tiling window manager, these parameters are not relevant, since all windows are forcibly made to fit into rectangles (tiles) that fill up the entire screen. So I use the ns-emacs-with-desktop-session macro that I described above to set these parameters only when I am in a regular desktop environment (The early-init.el macro to run code only in a Desktop Environment).
