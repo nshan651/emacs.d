@@ -26,7 +26,7 @@
 
   ;; Set theme colors
   (defvar ns/default-theme 'leuven)
-  (defvar ns/alt-theme 'doom-Iosvkem)
+  (defvar ns/alt-theme 'doom-one)
   ;; Load default theme
 (load-theme ns/default-theme)
 
