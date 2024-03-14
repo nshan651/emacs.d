@@ -53,7 +53,7 @@ Simplified version of `add-to-list'."
 (setq-default fill-column 80)
 
 ;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(100 . 90))
+(set-frame-parameter (selected-frame) 'alpha '(100. 100))
 (add-to-list 'default-frame-alist `(alpha . (100 . 100)))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))

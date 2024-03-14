@@ -1,45 +1,47 @@
 ;; modus-themes
-    (use-package modus-themes
-      :ensure t
-      ;; :config
-      ;; Add all your customizations prior to loading the themes
-      ;;(setq modus-themes-italic-constructs t
-      ;;      modus-themes-bold-constructs nil)
+(use-package modus-themes
+  :ensure t)
 
-      ;; Maybe define some palette overrides, such as by using our presets
-      ;(setq modus-themes-common-palette-overrides
-      ;      modus-themes-preset-overrides-intense)
+;; ef-themes
+(use-package ef-themes
+  :ensure t)
 
-      ;; Load the theme of your choice.
-      ;; (load-theme 'modus-vivendi)
+;; Doom Themes
+(use-package doom-themes
+  :ensure t)
 
-      ;; (define-key global-map (kbd "<f5>") #'modus-themes-toggle)
-     )
+;; Set theme colors
+(defvar ns/default-theme 'doom-material-dark)
+(defvar ns/alt-theme 'leuven)
 
-    ;; ef-themes
-    (use-package ef-themes
-      :ensure t)
-
-    ;; Doom Themes
-    (use-package doom-themes
-      :ensure t)
-
-  ;; Set theme colors
-  (defvar ns/default-theme 'leuven)
-  (defvar ns/alt-theme 'doom-one)
-  ;; Load default theme
+;; Load default theme
+;; doom-material-dark
 (load-theme ns/default-theme)
 
-  (defun ns/toggle-theme (default-theme alt-theme)
-    "Toggle between light and dark mode variants."
-    (interactive)
-    (if (eq default-theme (car custom-enabled-themes))
+(defun ns/toggle-theme (default-theme alt-theme)
+  "Toggle between light and dark mode variants."
+  (interactive)
+  (let ((current-theme (car custom-enabled-themes)))
+    ;; Disable current theme to remove vestigial highlights.
+    (disable-theme current-theme)
+    (if (eq default-theme current-theme)
         (load-theme alt-theme)
-      (load-theme default-theme)))
+      (load-theme default-theme))))
 
-  ;; Binding to toggle between default and alt theme, inspired by 'modus-themes-toggle`
-  (define-key global-map (kbd "<f5>") (lambda () (interactive)
-                                        (ns/toggle-theme ns/default-theme  ns/alt-theme)))
+;; Binding to toggle between default and alt theme, inspired by 'modus-themes-toggle`
+(define-key global-map (kbd "<f5>") (lambda () (interactive)
+                                      (ns/toggle-theme ns/default-theme  ns/alt-theme)))
+
+(defun ns/toggle-transparency ()
+  "Toggle transparency of Emacs frame."
+  (interactive)
+  (if (equal (car (frame-parameter (selected-frame) 'alpha)) 100)
+      (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+    (set-frame-parameter (selected-frame) 'alpha '(100 . 100))))
+
+;; Binding to toggle between default and alt theme, inspired by 'modus-themes-toggle`
+(define-key global-map (kbd "<f4>") (lambda () (interactive)
+                                      (ns/toggle-transparency)))
 
 ;; Set base font sizes
 (defvar efs/default-font-size 110)
