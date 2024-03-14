@@ -89,7 +89,7 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
 #+end_src
 
 #+RESULTS:
-: ((alpha 100 . 100) (fullscreen . maximized) (alpha 90 . 90) (left-fringe . 10) (right-fringe . 10) (vertical-scroll-bars))
+: ((fullscreen . maximized) (alpha 100 . 100) (left-fringe . 10) (right-fringe . 10) (vertical-scroll-bars))
 
 ** Improve scrolling
 
@@ -529,6 +529,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 #+RESULTS:
 
 ** Mouse Settings
+
 * Theme Configuration
 ** Color Theme
 
@@ -546,7 +547,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
     :ensure t)
 
   ;; Set theme colors
-  (defvar ns/default-theme 'doom-material-dark)
+  (defvar ns/default-theme 'doom-badger)
   (defvar ns/alt-theme 'leuven)
 
   ;; Load default theme
@@ -613,6 +614,8 @@ Set font details here.
     ;; but you can use any other Nerd Font if you want
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
 #+end_src
+
+#+RESULTS:
 
 ** Modeline
 I use doom modeline.

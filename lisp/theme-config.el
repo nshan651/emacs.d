@@ -11,7 +11,7 @@
   :ensure t)
 
 ;; Set theme colors
-(defvar ns/default-theme 'doom-material-dark)
+(defvar ns/default-theme 'doom-badger)
 (defvar ns/alt-theme 'leuven)
 
 ;; Load default theme
