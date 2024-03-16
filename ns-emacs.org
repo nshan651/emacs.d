@@ -78,6 +78,7 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
   (tooltip-mode -1)
+
   ;; Default for fill column should be 80 (not 70 like emacs would have it!!!)
   (setq-default fill-column 80)
 
@@ -604,7 +605,8 @@ Set font details here.
   (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
 
   ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height
+                      efs/default-variable-font-size :weight 'regular)
 
   ;; Nerd icon fonts
   (use-package nerd-icons
@@ -977,8 +979,8 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
       (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    ;;(set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
+    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    ;; (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
     (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -991,13 +993,16 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
     (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 #+end_src
 
+#+RESULTS:
+: efs/org-font-setup
+
 ** Basic Org Config
 This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (defun ns/org-mode-setup ()
     (org-indent-mode)
-    (variable-pitch-mode 1)
+    ;; (variable-pitch-mode)
     (visual-line-mode 1))
 
   (use-package org
@@ -1031,6 +1036,9 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (efs/org-font-setup))
      #+end_src
+
+     #+RESULTS:
+     | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
 
 ** Org Agenda
 
@@ -1212,6 +1220,9 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
   (use-package visual-fill-column
     :hook (org-mode . efs/org-mode-visual-fill))
  #+end_src
+
+ #+RESULTS:
+ | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
 
 ** Auto-show Markup Symbols
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes

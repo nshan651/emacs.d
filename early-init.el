@@ -49,6 +49,7 @@ Simplified version of `add-to-list'."
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
+
 ;; Default for fill column should be 80 (not 70 like emacs would have it!!!)
 (setq-default fill-column 80)
 

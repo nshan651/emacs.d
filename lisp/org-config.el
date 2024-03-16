@@ -16,7 +16,7 @@
     (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
   ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  ;;(set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
   (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
@@ -31,7 +31,7 @@
 
 (defun ns/org-mode-setup ()
   (org-indent-mode)
-  (variable-pitch-mode 1)
+  ;; (variable-pitch-mode)
   (visual-line-mode 1))
 
 (use-package org

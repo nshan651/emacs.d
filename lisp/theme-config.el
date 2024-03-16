@@ -53,7 +53,8 @@
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height
+                    efs/default-variable-font-size :weight 'regular)
 
 ;; Nerd icon fonts
 (use-package nerd-icons
