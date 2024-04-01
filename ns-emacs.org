@@ -89,9 +89,6 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
 
-#+RESULTS:
-: ((fullscreen . maximized) (alpha 100 . 100) (left-fringe . 10) (right-fringe . 10) (vertical-scroll-bars))
-
 ** Improve scrolling
 
 #+begin_src emacs-lisp :tangle "early-init.el"
@@ -1002,6 +999,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (defun ns/org-mode-setup ()
     (org-indent-mode)
+    (flyspell-mode)
     ;; (variable-pitch-mode)
     (visual-line-mode 1))
 
