@@ -27,9 +27,6 @@ This is the first file that Emacs reads when starting up. It should contain code
        ,@body))
 #+end_src
 
-#+RESULTS:
-: ns-emacs-with-desktop-session
-
 ** Set frame parameters
 
 Here I am setting parameters for the size of the Emacs frame: the first as well as any future one. In a tiling window manager, these parameters are not relevant, since all windows are forcibly made to fit into rectangles (tiles) that fill up the entire screen. So I use the ns-emacs-with-desktop-session macro that I described above to set these parameters only when I am in a regular desktop environment (The early-init.el macro to run code only in a Desktop Environment).
@@ -1035,8 +1032,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (efs/org-font-setup))
      #+end_src
 
-     #+RESULTS:
-     | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
 
 ** Org Agenda
 
@@ -1363,7 +1358,7 @@ You can add more =src= block templates below by copying one of the lines and cha
     "n"  '(:ignore t :wk "org node selection")
     "nl" '(org-roam-buffer-toggle :wk "org roam buffer toggle")
     "nf" '(org-roam-node-find :wk "org roam buffer find")
-    "ng" '(org-roam-graph :wk "org roam graph")
+    ;; "ng" '(org-roam-graph :wk "org roam graph")
     "ni" '(org-roam-node-insert :wk "org roam insert")
     "nc" '(org-roam-capture :wk "org roam capture")
     "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
@@ -1378,7 +1373,7 @@ Org roam allows you to create various capture templates.
     '(("m" "main" plain
         "%?"
         :if-new
-        (file+head "main/${slug}.org"
+        (file+head "main/%<%Y%m%d%H%M%S>-${slug}.org"
                    "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
         :immediate-finish t
         :unnarrowed t)
@@ -1395,6 +1390,9 @@ Org roam allows you to create various capture templates.
         :immediate-finish t
         :unnarrowed t)))
 #+end_src
+
+#+RESULTS:
+| m | main | plain | %? | :if-new | (file+head main/%<%Y%m%d%H%M%S>-${slug}.org #+title: ${title} |
 
 *** Define the Type of a Node
 
@@ -1440,7 +1438,12 @@ It can be useful to differentiate the different types of zettels at completion t
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
+
+  (ns/leader-spc
+    "ng" '(org-roam-ui-mode :wk "org roam ui graph"))
 #+end_src
+
+#+RESULTS:
 
 * Development
 

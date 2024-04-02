@@ -16,7 +16,7 @@
   "n"  '(:ignore t :wk "org node selection")
   "nl" '(org-roam-buffer-toggle :wk "org roam buffer toggle")
   "nf" '(org-roam-node-find :wk "org roam buffer find")
-  "ng" '(org-roam-graph :wk "org roam graph")
+  ;; "ng" '(org-roam-graph :wk "org roam graph")
   "ni" '(org-roam-node-insert :wk "org roam insert")
   "nc" '(org-roam-capture :wk "org roam capture")
   "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
@@ -25,7 +25,7 @@
   '(("m" "main" plain
       "%?"
       :if-new
-      (file+head "main/${slug}.org"
+      (file+head "main/%<%Y%m%d%H%M%S>-${slug}.org"
                  "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
       :immediate-finish t
       :unnarrowed t)
@@ -70,3 +70,6 @@
         org-roam-ui-follow t
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
+
+(ns/leader-spc
+  "ng" '(org-roam-ui-mode :wk "org roam ui graph"))
