@@ -1789,6 +1789,9 @@ Forge allows use to work with varios git forges using the magit interface.
     (require 'smartparens-config))
 #+end_src
 
+#+RESULTS:
+: t
+
 * Programming Languages
 ** C/C++
 
@@ -1805,12 +1808,17 @@ Forge allows use to work with varios git forges using the magit interface.
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   ;; Load SLY
   (require 'sly)
-
   ;; Set the Common Lisp implementation to SBCL
-  (setq inferior-lisp-program "sbcl")
+  (setq inferior-lisp-program "/usr/bin/sbcl")
 
   (add-to-list 'sly-contribs 'sly-asdf 'append)
+
+  ;; Enable history searching
+  (general-def '(normal insert)
+    "C-t" 'isearch-backward)
 #+end_src
+
+#+RESULTS:
 
 ** Python
 We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.

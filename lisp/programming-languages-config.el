@@ -1,18 +1,17 @@
 (use-package ccls
-  ;; :hook ((c-mode c++-mode) . (lambda () (require 'ccls) (lsp-deferred)))
-  ;; :hook
-  ;; ((c-mode . lsp-deferred)
-  ;;  (c++-mode . lsp-deferred))
   :custom
   (ccls-executable "/usr/bin/ccls"))
 
 ;; Load SLY
 (require 'sly)
-
 ;; Set the Common Lisp implementation to SBCL
-(setq inferior-lisp-program "sbcl")
+(setq inferior-lisp-program "/usr/bin/sbcl")
 
 (add-to-list 'sly-contribs 'sly-asdf 'append)
+
+;; Enable history searching
+(general-def '(normal insert)
+  "C-t" 'isearch-backward)
 
 (use-package python-mode
   :ensure t
