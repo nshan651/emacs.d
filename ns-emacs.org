@@ -2000,6 +2000,16 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
   ;;           (elfeed-make-tagger :feed-url "youtube\\.com"
   ;; :add '(video youtube)))
 #+end_src
+** Ox-Hugo
+Website publishing.
+
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+(use-package ox-hugo
+  :ensure t
+  :after ox)
+#+end_src
+
+#+RESULTS:
 
 * Window Management
 
