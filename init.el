@@ -101,4 +101,3 @@
 
 (global-set-key (kbd "C-S-c") 'copy-region-as-kill)
 (global-set-key (kbd "C-S-v") 'yank)
-(put 'eshell 'disabled nil)

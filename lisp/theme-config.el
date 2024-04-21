@@ -68,5 +68,8 @@
   :ensure t
   :init (doom-modeline-mode 1))
 
+;; Add some additional UI to the modeline
+(display-time-mode 1)
+
 ;; (setq-default tab-width 2)
 ;; (setq-default evil-shift-width tab-width)
