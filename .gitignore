@@ -1,0 +1,51 @@
+# Dirs to ignore
+auto-save-list/
+elpa/
+transient/
+var/
+.cache/
+eshell/
+multisession/
+persist/
+request/
+transient/
+
+# Other random dirs that somehow end up here
+games/
+tree-sitter/
+undo-foo-session/
+url/
+snippets/
+
+# Compiled
+*.elc
+
+# Packaging
+.cask
+
+# Backup files
+*~
+*#
+
+# Undo-tree save-files
+*.~undo-tree
+
+# DB files
+*.db
+org-roam.db
+*.sqlite
+
+# Misc files
+history
+projects
+bookmarks
+projectile-bookmarks.eld
+tramp
+org-caldav*
+projectile-bookmarks*
+forge-database*
+
+# Misc hidden files
+.last-package-update-day
+.lsp-session-v1
+.org-id-locations
