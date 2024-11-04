@@ -15,6 +15,14 @@
    "C-c C-c" 'sly-overlay-eval-defun
    "C-t" 'isearch-backward)
 
+(use-package geiser
+  :ensure t
+  :config
+  (setq geiser-active-implementations '(guile)))
+
+(use-package geiser-guile
+  :ensure t)
+
 (use-package python-mode
   :ensure t
   :hook (python-mode . lsp-deferred)

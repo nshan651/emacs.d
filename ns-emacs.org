@@ -543,7 +543,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
     :ensure t)
 
   ;; Set theme colors
-  (defvar ns/default-theme 'modus-vivendi-tinted)
+  (defvar ns/default-theme 'doom-one)
   (defvar ns/alt-theme 'leuven)
 
   ;; Load default theme
@@ -1454,54 +1454,53 @@ The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mo
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-  (defun ns/lsp-mode-setup ()
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
+    (defun ns/lsp-mode-setup ()
+      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+      (lsp-headerline-breadcrumb-mode))
 
-  (defun ns/prog-mode-setup ()
-    (display-fill-column-indicator-mode))
+    (defun ns/prog-mode-setup ()
+      (display-fill-column-indicator-mode))
 
-  (use-package lsp-mode
-    :ensure t
-    :init
-    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-    :hook
-    (
-     (lsp-mode . ns/lsp-mode-setup)
-     (prog-mode . ns/prog-mode-setup)
-     (c-mode . lsp)
-     (c++-mode . lsp)
-     (python-mode . lsp)
-     (csharp-mode . lsp)
-     )
-    :commands lsp
-    ;; :custom
-    ;; (lsp-auto-configure t)
-    ;; (lsp-enable-symbol-highlighting t)
-    :config
-    (lsp-enable-which-key-integration t)
-    (setq lsp-completion-enable t)
-    (setq lsp-completion-provider :capf)
-    ;; (setq lsp-log-io t)
-    ;; The path to lsp-mode needs to be added to load-path as well as the
-    ;; path to the `clients' subdirectory.
+    (use-package lsp-mode
+      :ensure t
+      :init
+      (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+      :hook
+      ((lsp-mode . ns/lsp-mode-setup)
+       (prog-mode . ns/prog-mode-setup)
+       (c-mode . lsp)
+       (c++-mode . lsp)
+       (csharp-mode . lsp)
+       (python-mode . lsp)
+       (scheme-mode . lsp))
+      :commands lsp
+      ;; :custom
+      ;; (lsp-auto-configure t)
+      ;; (lsp-enable-symbol-highlighting t)
+      :config
+      (lsp-enable-which-key-integration t)
+      (setq lsp-completion-enable t)
+      (setq lsp-completion-provider :capf)
+      ;; (setq lsp-log-io t)
+      ;; The path to lsp-mode needs to be added to load-path as well as the
+      ;; path to the `clients' subdirectory.
 
-    ;; Activate lsp-mode
-    )
+      ;; Activate lsp-mode
+      )
 
-  (ns/leader-m 'lsp-mode-map
-   "a" 'lsp-execute-code-action
-   "v" 'lsp-avy-lens
-   "n" 'lsp-describe-thing-at-point
-   ;; "i" 'lsp-goto-implementation
-   "d" 'lsp-find-definition
-   "D" 'lsp-find-declaration
-   "t" 'lsp-find-type-definition
-   "x" 'lsp-find-references
-   "r" 'lsp-rename
-   "R" 'lsp-restart-workspace
-   "=" 'lsp-format-buffer
-   "l" 'lsp-workspace-show-log)
+    (ns/leader-m 'lsp-mode-map
+     "a" 'lsp-execute-code-action
+     "v" 'lsp-avy-lens
+     "n" 'lsp-describe-thing-at-point
+     ;; "i" 'lsp-goto-implementation
+     "d" 'lsp-find-definition
+     "D" 'lsp-find-declaration
+     "t" 'lsp-find-type-definition
+     "x" 'lsp-find-references
+     "r" 'lsp-rename
+     "R" 'lsp-restart-workspace
+     "=" 'lsp-format-buffer
+     "l" 'lsp-workspace-show-log)
 #+end_src
 
 #+RESULTS:
@@ -1821,6 +1820,18 @@ Forge allows use to work with varios git forges using the magit interface.
 #+end_src
 
 #+RESULTS:
+
+** Guile
+Setup for guile scheme development.
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp
+  (use-package geiser
+    :ensure t
+    :config
+    (setq geiser-active-implementations '(guile)))
+
+  (use-package geiser-guile
+    :ensure t)
+#+end_src
 
 ** Python
 We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.

@@ -10,14 +10,13 @@
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :hook
-  (
-   (lsp-mode . ns/lsp-mode-setup)
+  ((lsp-mode . ns/lsp-mode-setup)
    (prog-mode . ns/prog-mode-setup)
    (c-mode . lsp)
    (c++-mode . lsp)
-   (python-mode . lsp)
    (csharp-mode . lsp)
-   )
+   (python-mode . lsp)
+   (scheme-mode . lsp))
   :commands lsp
   ;; :custom
   ;; (lsp-auto-configure t)

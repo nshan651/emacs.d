@@ -11,7 +11,7 @@
   :ensure t)
 
 ;; Set theme colors
-(defvar ns/default-theme 'modus-vivendi-tinted)
+(defvar ns/default-theme 'doom-one)
 (defvar ns/alt-theme 'leuven)
 
 ;; Load default theme
