@@ -1471,8 +1471,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
        (c-mode . lsp)
        (c++-mode . lsp)
        (csharp-mode . lsp)
-       (python-mode . lsp)
-       (scheme-mode . lsp))
+       (python-mode . lsp))
       :commands lsp
       ;; :custom
       ;; (lsp-auto-configure t)
@@ -1805,17 +1804,11 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   ;; Load SLY
-  (require 'sly)
+  ;; (require 'sly)
   ;; Set the Common Lisp implementation to SBCL
-  (setq inferior-lisp-program "/usr/bin/sbcl")
+  ;; (setq inferior-lisp-program "/usr/bin/sbcl")
 
-  (add-to-list 'sly-contribs 'sly-asdf 'append)
-
-  ;; Enable history searching
-  (general-def '(normal insert)
-     :keymaps 'sly-mode-map
-     "C-c C-c" 'sly-overlay-eval-defun
-     "C-t" 'isearch-backward)
+  ;; (add-to-list 'sly-contribs 'sly-asdf 'append)
 
 #+end_src
 

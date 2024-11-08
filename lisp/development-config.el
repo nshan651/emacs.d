@@ -15,8 +15,7 @@
    (c-mode . lsp)
    (c++-mode . lsp)
    (csharp-mode . lsp)
-   (python-mode . lsp)
-   (scheme-mode . lsp))
+   (python-mode . lsp))
   :commands lsp
   ;; :custom
   ;; (lsp-auto-configure t)

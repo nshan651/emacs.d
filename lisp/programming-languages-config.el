@@ -3,17 +3,11 @@
   (ccls-executable "/usr/bin/ccls"))
 
 ;; Load SLY
-(require 'sly)
+;; (require 'sly)
 ;; Set the Common Lisp implementation to SBCL
-(setq inferior-lisp-program "/usr/bin/sbcl")
+;; (setq inferior-lisp-program "/usr/bin/sbcl")
 
-(add-to-list 'sly-contribs 'sly-asdf 'append)
-
-;; Enable history searching
-(general-def '(normal insert)
-   :keymaps 'sly-mode-map
-   "C-c C-c" 'sly-overlay-eval-defun
-   "C-t" 'isearch-backward)
+;; (add-to-list 'sly-contribs 'sly-asdf 'append)
 
 (use-package geiser
   :ensure t
