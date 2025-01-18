@@ -9,6 +9,11 @@
 
 ;; (add-to-list 'sly-contribs 'sly-asdf 'append)
 
+(use-package go-mode
+  :ensure t
+  :hook
+  (go-mode . lsp-deferred))
+
 (use-package geiser
   :ensure t
   :config
@@ -34,3 +39,8 @@
 ;;   :after python-mode
 ;;   :config
 ;;   (pyvenv-mode 1))
+
+(use-package rust-mode
+  :ensure t
+  :hook
+  (rust-mode . lsp-deferred))

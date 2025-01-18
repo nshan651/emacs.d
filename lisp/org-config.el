@@ -36,18 +36,21 @@
   (visual-line-mode 1))
 
 (use-package org
+  :ensure nil ; Built-in to emacs, do not install.
   :commands (org-capture org-agenda)
   :hook
   (org-mode . ns/org-mode-setup)
+  :custom
+  (org-M-RET-may-split-line '((default . nil)))
+  (org-insert-heading-respect-content t)
+  (org-log-done 'time)
+  (org-log-into-drawer t)
   :config
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t
         org-src-fontify-natively t
         org-fontify-quote-and-verse-blocks t
-        ;; org-src-tab-acts-natively t
-        ;;org-edit-src-content-indentation 2
         org-hide-block-startup nil
-        ;;org-src-preserve-indentation nil
         org-startup-folded 'content
         org-cycle-separator-lines 2
         org-capture-bookmark nil)

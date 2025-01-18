@@ -1007,18 +1007,21 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (visual-line-mode 1))
 
   (use-package org
+    :ensure nil ; Built-in to emacs, do not install.
     :commands (org-capture org-agenda)
     :hook
     (org-mode . ns/org-mode-setup)
+    :custom
+    (org-M-RET-may-split-line '((default . nil)))
+    (org-insert-heading-respect-content t)
+    (org-log-done 'time)
+    (org-log-into-drawer t)
     :config
     (setq org-ellipsis " ▾"
           org-hide-emphasis-markers t
           org-src-fontify-natively t
           org-fontify-quote-and-verse-blocks t
-          ;; org-src-tab-acts-natively t
-          ;;org-edit-src-content-indentation 2
           org-hide-block-startup nil
-          ;;org-src-preserve-indentation nil
           org-startup-folded 'content
           org-cycle-separator-lines 2
           org-capture-bookmark nil)
@@ -1037,6 +1040,9 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (efs/org-font-setup))
      #+end_src
+
+     #+RESULTS:
+     | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
 
 ** Org Agenda
 
@@ -1454,52 +1460,54 @@ The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mo
 The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-    (defun ns/lsp-mode-setup ()
-      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-      (lsp-headerline-breadcrumb-mode))
+  (defun ns/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
-    (defun ns/prog-mode-setup ()
-      (display-fill-column-indicator-mode))
+  (defun ns/prog-mode-setup ()
+    (display-fill-column-indicator-mode))
 
-    (use-package lsp-mode
-      :ensure t
-      :init
-      (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-      :hook
-      ((lsp-mode . ns/lsp-mode-setup)
-       (prog-mode . ns/prog-mode-setup)
-       (c-mode . lsp)
-       (c++-mode . lsp)
-       (csharp-mode . lsp)
-       (python-mode . lsp))
-      :commands lsp
-      ;; :custom
-      ;; (lsp-auto-configure t)
-      ;; (lsp-enable-symbol-highlighting t)
-      :config
-      (lsp-enable-which-key-integration t)
-      (setq lsp-completion-enable t)
-      (setq lsp-completion-provider :capf)
-      ;; (setq lsp-log-io t)
-      ;; The path to lsp-mode needs to be added to load-path as well as the
-      ;; path to the `clients' subdirectory.
+  (use-package lsp-mode
+    :ensure t
+    :init
+    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+    :hook
+    ((lsp-mode . ns/lsp-mode-setup)
+     (prog-mode . ns/prog-mode-setup)
+     (c-mode . lsp)
+     (c++-mode . lsp)
+     (csharp-mode . lsp)
+     (go-mode . lsp)
+     (python-mode . lsp)
+     (rust-mode . lsp))
+    :commands lsp
+    ;; :custom
+    ;; (lsp-auto-configure t)
+    ;; (lsp-enable-symbol-highlighting t)
+    :config
+    (lsp-enable-which-key-integration t)
+    (setq lsp-completion-enable t)
+    (setq lsp-completion-provider :capf)
+    ;; (setq lsp-log-io t)
+    ;; The path to lsp-mode needs to be added to load-path as well as the
+    ;; path to the `clients' subdirectory.
 
-      ;; Activate lsp-mode
-      )
+    ;; Activate lsp-mode
+    )
 
-    (ns/leader-m 'lsp-mode-map
-     "a" 'lsp-execute-code-action
-     "v" 'lsp-avy-lens
-     "n" 'lsp-describe-thing-at-point
-     ;; "i" 'lsp-goto-implementation
-     "d" 'lsp-find-definition
-     "D" 'lsp-find-declaration
-     "t" 'lsp-find-type-definition
-     "x" 'lsp-find-references
-     "r" 'lsp-rename
-     "R" 'lsp-restart-workspace
-     "=" 'lsp-format-buffer
-     "l" 'lsp-workspace-show-log)
+  (ns/leader-m 'lsp-mode-map
+   "a" 'lsp-execute-code-action
+   "v" 'lsp-avy-lens
+   "n" 'lsp-describe-thing-at-point
+   ;; "i" 'lsp-goto-implementation
+   "d" 'lsp-find-definition
+   "D" 'lsp-find-declaration
+   "t" 'lsp-find-type-definition
+   "x" 'lsp-find-references
+   "r" 'lsp-rename
+   "R" 'lsp-restart-workspace
+   "=" 'lsp-format-buffer
+   "l" 'lsp-workspace-show-log)
 #+end_src
 
 #+RESULTS:
@@ -1712,7 +1720,7 @@ A better ~yas-insert-snippet~.
     "gj " '(magit-pull  :wk "git pull")
     "gc " '(magit-commit :wk "git commit")
     "ga " '(magit-stage :wk "git add")
-    )
+    "gi " '(magit-init :wk "git init"))
 #+end_src
 
 #+RESULTS:
@@ -1814,6 +1822,17 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+RESULTS:
 
+** Go
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  (use-package go-mode
+    :ensure t
+    :hook
+    (go-mode . lsp-deferred))
+#+end_src
+
+#+RESULTS:
+| lsp-deferred | doom-modeline-env-setup-go |
+
 ** Guile
 Setup for guile scheme development.
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp
@@ -1870,6 +1889,17 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 
 #+RESULTS:
 : t
+
+** Rust
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  (use-package rust-mode
+    :ensure t
+    :hook
+    (rust-mode . lsp-deferred))
+#+end_src
+
+#+RESULTS:
+| lsp-deferred | lsp | doom-modeline-env-setup-rust |
 
 * Terminals
 ** term-mode

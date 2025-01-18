@@ -15,7 +15,9 @@
    (c-mode . lsp)
    (c++-mode . lsp)
    (csharp-mode . lsp)
-   (python-mode . lsp))
+   (go-mode . lsp)
+   (python-mode . lsp)
+   (rust-mode . lsp))
   :commands lsp
   ;; :custom
   ;; (lsp-auto-configure t)
@@ -169,7 +171,7 @@
   "gj " '(magit-pull  :wk "git pull")
   "gc " '(magit-commit :wk "git commit")
   "ga " '(magit-stage :wk "git add")
-  )
+  "gi " '(magit-init :wk "git init"))
 
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
