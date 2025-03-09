@@ -72,12 +72,10 @@
 ;; Open the agenda file as the only window
 (setq org-agenda-window-setup 'only-window)
 (setq org-agenda-files
-      '("~/org/agenda/todo.org"       ;; General unsorted todo items.
-        "~/org/agenda/inbox.org"      ;; TBD!
-        "~/org/agenda/contacts.org"   ;; Contacts list.
-        "~/org/agenda/recurrent.org"  ;; Recurring events.
-        "~/org/agenda/projects.org")
-      )
+      '("~/org/agenda/todo.org"       ; General unsorted todo items.
+        "~/org/agenda/inbox.org"      ; TBD!
+        "~/org/agenda/contacts.org"   ; Contacts list.
+        "~/org/agenda/projects.org"))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")

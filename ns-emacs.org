@@ -1050,12 +1050,10 @@ This section contains the basic configuration for =org-mode= plus the configurat
   ;; Open the agenda file as the only window
   (setq org-agenda-window-setup 'only-window)
   (setq org-agenda-files
-        '("~/org/agenda/todo.org"       ;; General unsorted todo items.
-          "~/org/agenda/inbox.org"      ;; TBD!
-          "~/org/agenda/contacts.org"   ;; Contacts list.
-          "~/org/agenda/recurrent.org"  ;; Recurring events.
-          "~/org/agenda/projects.org")
-        )
+        '("~/org/agenda/todo.org"       ; General unsorted todo items.
+          "~/org/agenda/inbox.org"      ; TBD!
+          "~/org/agenda/contacts.org"   ; Contacts list.
+          "~/org/agenda/projects.org"))
 
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
@@ -1527,7 +1525,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     )
 #+end_src
 
-
 *** consult-lsp
 LSP integration with consult.
 
@@ -1581,15 +1578,13 @@ Tree sitter support is now built in to Emacs. This seems to be breaking lsp-mode
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package dap-mode
-    :disabled t
-    :commands dap-debug
-    :init
+    :ensure t
+    :after lsp-mode
     :config
+    (dap-mode 1)
     (dap-ui-mode 1)
-    (dap-mode 1))
+    (dap-tooltip-mode 1))
 #+end_src
-
-#+RESULTS:
 
 ** Company Mode
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
@@ -2036,6 +2031,27 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
   ;;           (elfeed-make-tagger :feed-url "youtube\\.com"
   ;; :add '(video youtube)))
 #+end_src
+** IRC
+=rcirc= is an IRC client for Emacs.
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  (use-package rcirc
+    :ensure nil
+    :custom
+    (rcirc-default-nick "nshan651")
+    (rcirc-default-user-name "nshan651")
+    (rcirc-default-full-name "ns")
+    (rcirc-server-alist `(("irc.libera.chat"
+  			 :channels ("#emacs" "#guix")
+                           :port 6697
+                           :encryption tls)))
+    (rcirc-prompt "%t> ")
+    (rcirc-timeout-seconds most-positive-fixnum)
+
+    (rcirc-reconnect-delay 5)
+    (rcirc-fill-column 90)
+    (rcirc-track-ignore-server-buffer-flag t))
+  #+end_src
+
 ** Ox-hugo
 Website publishing.
 
@@ -2082,6 +2098,12 @@ Calendar syncing using the =caldav= protocol.
 #+end_src
 
 #+RESULTS:
+** Guix
+The Gnu Guix interface.
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  (use-package guix
+    :ensure t)
+#+end_src
 
 * Window Management
 

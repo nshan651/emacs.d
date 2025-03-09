@@ -6,6 +6,24 @@
 ;;           (elfeed-make-tagger :feed-url "youtube\\.com"
 ;; :add '(video youtube)))
 
+(use-package rcirc
+  :ensure nil
+  :custom
+  (rcirc-default-nick "nshan651")
+  (rcirc-default-user-name "nshan651")
+  (rcirc-default-full-name "ns")
+  (rcirc-server-alist `(("irc.libera.chat"
+			 :channels ("#emacs" "#guix")
+                         :port 6697
+                         :encryption tls)))
+                         ;; :user-name "nshan651/irc.libera.chat@emacs"
+  (rcirc-prompt "%t> ")
+  (rcirc-timeout-seconds most-positive-fixnum)
+
+  (rcirc-reconnect-delay 5)
+  (rcirc-fill-column 90)
+  (rcirc-track-ignore-server-buffer-flag t))
+
 (use-package ox-hugo
   :ensure t
   :after ox)
@@ -40,3 +58,6 @@
   (org-icalendar-use-scheduled '(event-if-todo event-if-not-todo todo-start))
   (org-icalendar-with-timestamps t)
 )
+
+(use-package guix
+  :ensure t)
