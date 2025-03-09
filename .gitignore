@@ -12,8 +12,9 @@ transient/
 
 # Other random dirs that somehow end up here
 games/
+eln-cache/
 tree-sitter/
-undo-foo-session/
+undo-fu-session/
 url/
 snippets/
 
