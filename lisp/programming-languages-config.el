@@ -1,6 +1,6 @@
 (use-package ccls
   :custom
-  (ccls-executable "/usr/bin/ccls"))
+  (ccls-executable "ccls"))
 
 ;; Load SLY
 ;; (require 'sly)
@@ -10,20 +10,16 @@
 ;; (add-to-list 'sly-contribs 'sly-asdf 'append)
 
 (use-package go-mode
-  :ensure t
   :hook
   (go-mode . lsp-deferred))
 
 (use-package geiser
-  :ensure t
   :config
   (setq geiser-active-implementations '(guile)))
 
-(use-package geiser-guile
-  :ensure t)
+(use-package geiser-guile)
 
 (use-package python-mode
-  :ensure t
   :hook (python-mode . lsp-deferred)
   :custom
   (lsp-pyls-server-command '("/home/nick/.local/lib/python3.10/site-packages/pyls
@@ -41,6 +37,5 @@
 ;;   (pyvenv-mode 1))
 
 (use-package rust-mode
-  :ensure t
   :hook
   (rust-mode . lsp-deferred))

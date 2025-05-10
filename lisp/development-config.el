@@ -6,7 +6,6 @@
   (display-fill-column-indicator-mode))
 
 (use-package lsp-mode
-  :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :hook
@@ -48,7 +47,6 @@
  "l" 'lsp-workspace-show-log)
 
 (use-package lsp-ui
-  :ensure t
   :after lsp-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
@@ -77,7 +75,6 @@
   (global-treesit-auto-mode))
 
 (use-package dap-mode
-  :ensure t
   :after lsp-mode
   :config
   (dap-mode 1)
@@ -153,7 +150,6 @@
 ;;   :config (counsel-projectile-mode))
 
 (use-package magit
-  :ensure t
   :commands magit-status
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -191,7 +187,6 @@
 ;;         (message "Buffer is not visiting a file")))
 
 ;; (use-package flymake
-;;   :ensure t
 ;;   :hook (c++-mode . flymake-mode)
 ;;   :custom
 ;;   ;; Automatically continue without needing to hit Enter
@@ -205,14 +200,12 @@
 ;;   "C-c C-c" 'compile)
 
 (use-package rainbow-delimiters
-  :ensure t
   :hook
   (prog-mode . rainbow-delimiters-mode)
   (org-mode . rainbow-delimiters-mode)
   (lisp-mode . rainbow-delimiters-mode))
 
 (use-package smartparens
-  :ensure smartparens
   ;; :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
   :init
   (smartparens-global-mode)

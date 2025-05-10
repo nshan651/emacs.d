@@ -7,7 +7,6 @@
 ;; :add '(video youtube)))
 
 (use-package rcirc
-  :ensure nil
   :custom
   (rcirc-default-nick "nshan651")
   (rcirc-default-user-name "nshan651")
@@ -16,7 +15,6 @@
 			 :channels ("#emacs" "#guix")
                          :port 6697
                          :encryption tls)))
-                         ;; :user-name "nshan651/irc.libera.chat@emacs"
   (rcirc-prompt "%t> ")
   (rcirc-timeout-seconds most-positive-fixnum)
 
@@ -25,11 +23,9 @@
   (rcirc-track-ignore-server-buffer-flag t))
 
 (use-package ox-hugo
-  :ensure t
   :after ox)
 
 (use-package org-caldav
-  :ensure t
   :custom
   ;; URL of the caldav server
   (org-caldav-url
@@ -59,5 +55,4 @@
   (org-icalendar-with-timestamps t)
 )
 
-(use-package guix
-  :ensure t)
+;; (use-package guix)

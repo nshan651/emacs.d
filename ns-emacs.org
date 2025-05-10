@@ -24,9 +24,6 @@ This is the first file that Emacs reads when starting up. It should contain code
        ,@body))
 #+end_src
 
-#+RESULTS:
-: ns-emacs-with-desktop-session
-
 ** Set frame parameters
 Here I am setting parameters for the size of the Emacs frame: the first as well as any future one. In a tiling window manager, these parameters are not relevant, since all windows are forcibly made to fit into rectangles (tiles) that fill up the entire screen. So I use the ns-emacs-with-desktop-session macro that I described above to set these parameters only when I am in a regular desktop environment (The early-init.el macro to run code only in a Desktop Environment).
 
@@ -307,7 +304,6 @@ Provides asynchronous bytecode compilation and various other actions.
 
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package async
-    :ensure t
     :defer t
     :init
     (dired-async-mode 1))
@@ -339,7 +335,6 @@ Automatically trim extraneous whitespaces.
 
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
 (use-package ws-butler
-  :ensure t
   :config
   (ws-butler-global-mode 1))
 #+end_src
@@ -369,7 +364,6 @@ Load my custom keybindings.
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
   (use-package evil
-    :ensure t
     :init
     (setq evil-want-integration t)
     (setq evil-want-keybinding nil)
@@ -531,16 +525,13 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   ;; modus-themes
-  (use-package modus-themes
-    :ensure t)
+  (use-package modus-themes)
 
   ;; ef-themes
-  (use-package ef-themes
-    :ensure t)
+  (use-package ef-themes)
 
   ;; Doom Themes
-  (use-package doom-themes
-    :ensure t)
+  (use-package doom-themes)
 
   ;; Set theme colors
   (defvar ns/default-theme 'doom-one)
@@ -619,7 +610,6 @@ I use doom modeline.
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (use-package doom-modeline
-    :ensure t
     :init (doom-modeline-mode 1))
 
   ;; Add some additional UI elements
@@ -844,7 +834,6 @@ Linear undo while maintaining all history.
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package orderless
-    :ensure t
     :custom
     (completion-styles '(orderless))
     (completion-category-overrides '((file (styles . (partial-completion))))))
@@ -856,7 +845,6 @@ Linear undo while maintaining all history.
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package embark
-    :ensure t
     :init
     ;; Optionally replace the key help with a completing-read interface
     (setq prefix-help-command #'embark-prefix-help-command)
@@ -873,7 +861,6 @@ Linear undo while maintaining all history.
 
   ;; Consult users will also want the embark-consult package.
   (use-package embark-consult
-    :ensure t ; only need to install it, embark loads it after consult if found
     :hook
     (embark-collect-mode . consult-preview-at-point-mode))
 
@@ -979,8 +966,8 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
       (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    ;; (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
+    ;; (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
     (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -1209,7 +1196,6 @@ org-bullets replaces the heading stars in org-mode buffers with nicer looking ch
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (use-package org-bullets
-    :ensure t
     :hook (org-mode . org-bullets-mode)
     :custom
     (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
@@ -1228,9 +1214,6 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
     :hook (org-mode . efs/org-mode-visual-fill))
  #+end_src
 
- #+RESULTS:
- | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
-
 ** Auto-show Markup Symbols
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (use-package org-appear
@@ -1241,7 +1224,6 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
 ** Evil Org
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (use-package evil-org
-    :ensure t
     :after org
     :hook (org-mode . (lambda () evil-org-mode))
     :config
@@ -1327,7 +1309,6 @@ You can add more =src= block templates below by copying one of the lines and cha
 ** Org Journal
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
    (use-package org-journal
-     :ensure t
      :custom
      (org-journal-dir "~/org/journal/")
      )
@@ -1341,17 +1322,19 @@ You can add more =src= block templates below by copying one of the lines and cha
 
 #+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (use-package org-roam
-    :ensure t
     :custom
     (org-roam-directory (file-truename "~/org"))
     (org-roam-dailies-directory "~/org/journal")
     (org-roam-completion-everywhere t)
-    :config
+    (org-roam-db-autosync-mode)
+    ;; :config
+    ;; (org-roam-db-autosync-mode)
+
     ;; If you're using a vertical completion framework, you might want a more informative completion interface
     ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    (org-roam-db-autosync-mode)
     ;; If using org-roam-protocol
-    (require 'org-roam-protocol))
+    ;; (require 'org-roam-protocol)
+    )
 
   ;; Keybindings
   (ns/leader-spc
@@ -1364,6 +1347,8 @@ You can add more =src= block templates below by copying one of the lines and cha
     "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
 
 #+end_src
+
+#+RESULTS:
 
 ** Org Roam Capture Templates
 Org roam allows you to create various capture templates.
@@ -1431,7 +1416,6 @@ It can be useful to differentiate the different types of zettels at completion t
     :after org-roam)
 
   (use-package org-roam-ui
-    :ensure t
     :after org-roam
     :config
     (setq org-roam-ui-sync-theme t
@@ -1466,7 +1450,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (display-fill-column-indicator-mode))
 
   (use-package lsp-mode
-    :ensure t
     :init
     (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
     :hook
@@ -1515,7 +1498,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package lsp-ui
-    :ensure t
     :after lsp-mode
     :hook (lsp-mode . lsp-ui-mode)
     :custom
@@ -1578,7 +1560,6 @@ Tree sitter support is now built in to Emacs. This seems to be breaking lsp-mode
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package dap-mode
-    :ensure t
     :after lsp-mode
     :config
     (dap-mode 1)
@@ -1697,7 +1678,6 @@ A better ~yas-insert-snippet~.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package magit
-    :ensure t
     :commands magit-status
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -1747,7 +1727,6 @@ Forge allows use to work with varios git forges using the magit interface.
     ;;         (message "Buffer is not visiting a file")))
 
     ;; (use-package flymake
-    ;;   :ensure t
     ;;   :hook (c++-mode . flymake-mode)
     ;;   :custom
     ;;   ;; Automatically continue without needing to hit Enter
@@ -1768,7 +1747,6 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package rainbow-delimiters
-    :ensure t
     :hook
     (prog-mode . rainbow-delimiters-mode)
     (org-mode . rainbow-delimiters-mode)
@@ -1780,7 +1758,6 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package smartparens
-    :ensure smartparens
     ;; :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
     :init
     (smartparens-global-mode)
@@ -1798,7 +1775,7 @@ Forge allows use to work with varios git forges using the magit interface.
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package ccls
     :custom
-    (ccls-executable "/usr/bin/ccls"))
+    (ccls-executable "ccls"))
 #+end_src
 
 #+RESULTS:
@@ -1820,7 +1797,6 @@ Forge allows use to work with varios git forges using the magit interface.
 ** Go
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package go-mode
-    :ensure t
     :hook
     (go-mode . lsp-deferred))
 #+end_src
@@ -1832,12 +1808,10 @@ Forge allows use to work with varios git forges using the magit interface.
 Setup for guile scheme development.
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp
   (use-package geiser
-    :ensure t
     :config
     (setq geiser-active-implementations '(guile)))
 
-  (use-package geiser-guile
-    :ensure t)
+  (use-package geiser-guile)
 #+end_src
 
 ** Python
@@ -1855,7 +1829,6 @@ There are a number of other language servers for Python so if you find that =pyl
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package python-mode
-    :ensure t
     :hook (python-mode . lsp-deferred)
     :custom
     (lsp-pyls-server-command '("/home/nick/.local/lib/python3.10/site-packages/pyls
@@ -1869,7 +1842,6 @@ There are a number of other language servers for Python so if you find that =pyl
 #+end_src
 
 #+RESULTS:
-| lsp-deferred | evil-collection-python-set-evil-shift-width | doom-modeline-env-setup-python |
 
 You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
 
@@ -1888,7 +1860,6 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 ** Rust
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package rust-mode
-    :ensure t
     :hook
     (rust-mode . lsp-deferred))
 #+end_src
@@ -2035,7 +2006,6 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 =rcirc= is an IRC client for Emacs.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package rcirc
-    :ensure nil
     :custom
     (rcirc-default-nick "nshan651")
     (rcirc-default-user-name "nshan651")
@@ -2057,7 +2027,6 @@ Website publishing.
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
 (use-package ox-hugo
-  :ensure t
   :after ox)
 #+end_src
 
@@ -2066,7 +2035,6 @@ Website publishing.
 Calendar syncing using the =caldav= protocol.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package org-caldav
-    :ensure t
     :custom
     ;; URL of the caldav server
     (org-caldav-url
@@ -2101,8 +2069,7 @@ Calendar syncing using the =caldav= protocol.
 ** Guix
 The Gnu Guix interface.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
-  (use-package guix
-    :ensure t)
+  ;; (use-package guix)
 #+end_src
 
 * Window Management
@@ -2110,7 +2077,6 @@ The Gnu Guix interface.
 ** Perspective
 #+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
   (use-package perspective
-    :ensure t
     :custom
     (persp-initial-frame-name "main")
     (persp-mode-prefix-key (kbd "C-a"))
@@ -2143,7 +2109,6 @@ The Gnu Guix interface.
 ** Popper
 #+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
   (use-package popper
-    :ensure t
     :init
     (setq popper-reference-buffers
           '("\\*\\*Messages"
@@ -2243,8 +2208,9 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
   (use-package dired-single
     :commands (dired dired-jump))
 
-  (use-package all-the-icons-dired
-    :hook (dired-mode . all-the-icons-dired-mode))
+  ;; TODO: FIX
+  ;; (use-package all-the-icons-dired
+  ;;   :hook (dired-mode . all-the-icons-dired-mode))
 
   (use-package dired-open
     :commands (dired dired-jump)
@@ -2254,10 +2220,11 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
     (setq dired-open-extensions '(("png" . "feh")
                                   ("mkv" . "mpv"))))
 
-  (use-package dired-hide-dotfiles
-    :hook (dired-mode . dired-hide-dotfiles-mode)
-    :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "H" 'dired-hide-dotfiles-mode))
+  ;; TODO: FIX
+  ;; (use-package dired-hide-dotfiles
+  ;;   :hook (dired-mode . dired-hide-dotfiles-mode)
+  ;;   :config
+  ;;   (evil-collection-define-key 'normal 'dired-mode-map
+  ;;     "H" 'dired-hide-dotfiles-mode))
 
 #+end_src

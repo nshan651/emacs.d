@@ -76,7 +76,6 @@
         ("melpa" . 1)))
 
 (use-package async
-  :ensure t
   :defer t
   :init
   (dired-async-mode 1))
@@ -92,7 +91,6 @@
   (repeat-mode +1))
 
 (use-package ws-butler
-  :ensure t
   :config
   (ws-butler-global-mode 1))
 

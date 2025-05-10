@@ -1,14 +1,11 @@
 ;; modus-themes
-(use-package modus-themes
-  :ensure t)
+(use-package modus-themes)
 
 ;; ef-themes
-(use-package ef-themes
-  :ensure t)
+(use-package ef-themes)
 
 ;; Doom Themes
-(use-package doom-themes
-  :ensure t)
+(use-package doom-themes)
 
 ;; Set theme colors
 (defvar ns/default-theme 'doom-one)
@@ -65,7 +62,6 @@
   (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
 (use-package doom-modeline
-  :ensure t
   :init (doom-modeline-mode 1))
 
 ;; Add some additional UI elements

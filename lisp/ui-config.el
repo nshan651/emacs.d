@@ -176,13 +176,11 @@ folder, otherwise delete a character backward"
 (general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
 
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(orderless))
   (completion-category-overrides '((file (styles . (partial-completion))))))
 
 (use-package embark
-  :ensure t
   :init
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -199,7 +197,6 @@ folder, otherwise delete a character backward"
 
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
-  :ensure t ; only need to install it, embark loads it after consult if found
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 

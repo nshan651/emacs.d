@@ -1,5 +1,4 @@
 (use-package perspective
-  :ensure t
   :custom
   (persp-initial-frame-name "main")
   (persp-mode-prefix-key (kbd "C-a"))
@@ -28,7 +27,6 @@
 )
 
 (use-package popper
-  :ensure t
   :init
   (setq popper-reference-buffers
         '("\\*\\*Messages"

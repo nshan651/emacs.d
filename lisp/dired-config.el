@@ -11,8 +11,9 @@
 (use-package dired-single
   :commands (dired dired-jump))
 
-(use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
+;; TODO: FIX
+;; (use-package all-the-icons-dired
+;;   :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package dired-open
   :commands (dired dired-jump)
@@ -22,8 +23,9 @@
   (setq dired-open-extensions '(("png" . "feh")
                                 ("mkv" . "mpv"))))
 
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
+;; TODO: FIX
+;; (use-package dired-hide-dotfiles
+;;   :hook (dired-mode . dired-hide-dotfiles-mode)
+;;   :config
+;;   (evil-collection-define-key 'normal 'dired-mode-map
+;;     "H" 'dired-hide-dotfiles-mode))
