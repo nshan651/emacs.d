@@ -1,7 +1,7 @@
 (use-package org-roam
   :custom
-  (org-roam-directory (file-truename "~/org"))
-  (org-roam-dailies-directory "~/org/journal")
+  (org-roam-directory (file-truename "~/ark/org"))
+  (org-roam-dailies-directory "~/ark/org/journal")
   (org-roam-completion-everywhere t)
   (org-roam-db-autosync-mode)
   ;; :config

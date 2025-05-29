@@ -35,7 +35,7 @@
   (org-caldav-calendar-id "personal")
 
   ;; Org filename where new entries from calendar stored
-  (org-caldav-inbox "~/org/agenda/todo.org")
+  (org-caldav-inbox "~/ark/org/agenda/todo.org")
 
   ;; Additional Org files to check for calendar events
   (org-caldav-files nil)

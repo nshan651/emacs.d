@@ -72,10 +72,10 @@
 ;; Open the agenda file as the only window
 (setq org-agenda-window-setup 'only-window)
 (setq org-agenda-files
-      '("~/org/agenda/todo.org"       ; General unsorted todo items.
-        "~/org/agenda/inbox.org"      ; TBD!
-        "~/org/agenda/contacts.org"   ; Contacts list.
-        "~/org/agenda/projects.org"))
+      '("~/ark/org/agenda/todo.org"       ; General unsorted todo items.
+        "~/ark/org/agenda/inbox.org"      ; TBD!
+        "~/ark/org/agenda/contacts.org"   ; Contacts list.
+        "~/ark/org/agenda/projects.org"))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
@@ -162,7 +162,7 @@
                  (org-agenda-max-todos nil)))
           (todo "TODO"
                 ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
-                 (org-agenda-files '("~/org/agenda/inbox.org"))
+                 (org-agenda-files '("~/ark/org/agenda/inbox.org"))
                  (org-agenda-text-search-extra-files nil)))
           (agenda "" ((org-agenda-span 14)
                       (org-agenda-start-day "+7d")
@@ -177,42 +177,42 @@
 
 (setq org-capture-templates
       `(("t" "Tasks")
-        ("tt" "Task" entry (file "~/org/agenda/todo.org")
+        ("tt" "Task" entry (file "~/ark/org/agenda/todo.org")
          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
         ("ts" "Clocked Entry Subtask" entry (clock)
          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("tr" "Recurring Task" entry (file "~/org/agenda/recurrent.org")
+        ("tr" "Recurring Task" entry (file "~/ark/org/agenda/recurrent.org")
          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
         ;; Projects
         ("p" "Projects")
-        ("pt" "Task" entry (file "~/org/agenda/projects.org")
+        ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
          "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
         ("ps" "Clocked Entry Subtask" entry (clock)
          "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("pr" "Pull Request" entry (file "~/org/agenda/projects.org")
+        ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
          "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
 
         ;; Contacts
-        ("c" "Contacts" entry (file "~/org/agenda/contacts.org")
+        ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
          "* CONTACT %^{Name}\n:PROPERTIES:\n:DATE: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
 
         ;; Journal Entries
         ("j" "Journal Entries")
         ("je" "General Entry" entry
-         (file+olp+datetree "~/org/journal/journal.org")
+         (file+olp+datetree "~/ark/org/journal/journal.org")
          "\n* %<%I:%M %p> - %^{Title} \n\n%?\n\n"
          :tree-type week
          :clock-in :clock-resume
          :empty-lines 1)
         ("jt" "Task Entry" entry
-         (file+olp+datetree "~/org/journal/journal.org")
+         (file+olp+datetree "~/ark/org/journal/journal.org")
          "\n* %<%I:%M %p> - Task Notes: %a\n\n%?\n\n"
          :tree-type week
          :clock-in :clock-resume
          :empty-lines 1)
         ("jj" "Journal" entry
-         (file+olp+datetree "~/org/journal/journal.org")
+         (file+olp+datetree "~/ark/org/journal/journal.org")
          "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
          :tree-type week
          :clock-in :clock-resume
@@ -294,7 +294,6 @@
                      ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
                      ("vim" . "src vim")
                      ("py"  . "src python")
-                     ("cs"  . "src csharp")
                      ;; Leetcode snippet
                      ("leet" .
                       "src C++ :includes <iostream> :flags -I./src/util -std=c++20 :tangle src/ .cpp")
@@ -305,5 +304,5 @@
 
 (use-package org-journal
   :custom
-  (org-journal-dir "~/org/journal/")
+  (org-journal-dir "~/ark/org/journal/")
   )
