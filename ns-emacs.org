@@ -534,12 +534,12 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (use-package doom-themes)
 
   ;; Set theme colors
-  (defvar ns/default-theme 'doom-one)
-  (defvar ns/alt-theme 'leuven)
+  (defvar ns/default-theme nil)
+  (defvar ns/alt-theme 'doom-one)
 
   ;; Load default theme
-  ;; doom-material-dark
-  (load-theme ns/default-theme)
+  (when ns/default-theme
+    (load-theme ns/default-theme))
 
   (defun ns/toggle-theme (default-theme alt-theme)
     "Toggle between light and dark mode variants."
@@ -557,7 +557,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (ns/toggle-theme ns/default-theme ns/alt-theme) |
+: #[nil ((ns/toggle-theme ns/default-theme ns/alt-theme)) nil nil nil nil]
 
 ** Transparency
 
@@ -1508,7 +1508,12 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (lsp-ui-doc-delay 0.0)
     (lsp-ui-sideline-show-code-actions nil)
     )
+
+  (ns/leader-m 'lsp-mode-map
+   "i" 'lsp-ui-doc-glance)
 #+end_src
+
+#+RESULTS:
 
 *** consult-lsp
 LSP integration with consult.

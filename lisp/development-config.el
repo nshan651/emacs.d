@@ -55,6 +55,9 @@
   (lsp-ui-sideline-show-code-actions nil)
   )
 
+(ns/leader-m 'lsp-mode-map
+ "i" 'lsp-ui-doc-glance)
+
 (use-package consult-lsp
   :after lsp-mode
   :general

@@ -8,12 +8,12 @@
 (use-package doom-themes)
 
 ;; Set theme colors
-(defvar ns/default-theme 'doom-one)
-(defvar ns/alt-theme 'leuven)
+(defvar ns/default-theme nil)
+(defvar ns/alt-theme 'doom-one)
 
 ;; Load default theme
-;; doom-material-dark
-(load-theme ns/default-theme)
+(when ns/default-theme
+  (load-theme ns/default-theme))
 
 (defun ns/toggle-theme (default-theme alt-theme)
   "Toggle between light and dark mode variants."
