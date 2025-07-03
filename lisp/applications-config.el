@@ -56,3 +56,16 @@
 )
 
 ;; (use-package guix)
+
+(use-package gptel
+  :custom
+  (gptel-default-mode 'org-mode)
+  (gptel-model 'llama3.2:latest)
+  :config
+  (setq gptel-backend (gptel-make-ollama "shodan"
+                   :host "shodan.local:11434"
+                   :stream t
+                   :models '(gemma3:1b
+                             gemma3:latest
+                             llama3.2:latest
+                             phi4-mini:latest))))
