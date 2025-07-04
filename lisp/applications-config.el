@@ -63,9 +63,20 @@
   (gptel-model 'llama3.2:latest)
   :config
   (setq gptel-backend (gptel-make-ollama "shodan"
-                   :host "shodan.local:11434"
+                   :host "shodan:11434" ;; Or use shodan.local for mDNS.
                    :stream t
                    :models '(gemma3:1b
                              gemma3:latest
                              llama3.2:latest
                              phi4-mini:latest))))
+
+(ns/leader-spc
+  "g"  '(:ignore t :wk "gptel")
+  "gg" '(gptel-mode :wk "gptel mode")
+  "gp" '(gptel :wk "gptel prompt")
+  "gr" '(gptel-rewrite :wk "gptel rewrite")
+  "gs" '(gptel-send :wk "gptel send")
+  "gm" '(gptel-menu :wk "gptel menu")
+  "ga" '(gptel-add :wk "gptel add")
+  "ga" '(gptel-add-file :wk "gptel add file")
+  )

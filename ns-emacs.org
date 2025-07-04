@@ -534,8 +534,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (use-package doom-themes)
 
   ;; Set theme colors
-  (defvar ns/default-theme nil)
-  (defvar ns/alt-theme 'doom-one)
+  (defvar ns/default-theme 'modus-vivendi)
+  (defvar ns/alt-theme nil)
 
   ;; Load default theme
   (when ns/default-theme
@@ -2079,7 +2079,7 @@ The Gnu Guix interface.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   ;; (use-package guix)
 #+end_src
-** gptel
+** GPTel
 A simple llm interface for emacs.
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
@@ -2089,17 +2089,31 @@ A simple llm interface for emacs.
     (gptel-model 'llama3.2:latest)
     :config
     (setq gptel-backend (gptel-make-ollama "shodan"
-                     :host "shodan.local:11434"
+                     :host "shodan:11434" ;; Or use shodan.local for mDNS.
                      :stream t
                      :models '(gemma3:1b
                                gemma3:latest
                                llama3.2:latest
                                phi4-mini:latest))))
+
+  (ns/leader-spc
+    "g"  '(:ignore t :wk "gptel")
+    "gg" '(gptel-mode :wk "gptel mode")
+    "gp" '(gptel :wk "gptel prompt")
+    "gr" '(gptel-rewrite :wk "gptel rewrite")
+    "gs" '(gptel-send :wk "gptel send")
+    "gm" '(gptel-menu :wk "gptel menu")
+    "ga" '(gptel-add :wk "gptel add")
+    "ga" '(gptel-add-file :wk "gptel add file")
+    )
+
 #+end_src
+
+#+RESULTS:
 
 You can use the following query to ensure that Ollama is online and serving:
 #+begin_src sh
-  curl http://shodan.local:11434/api/generate -d '{
+  curl http://shodan:11434/api/generate -d '{
     "model": "llama3.2",
     "prompt":"Why is the sky blue?"
   }'

@@ -8,8 +8,8 @@
 (use-package doom-themes)
 
 ;; Set theme colors
-(defvar ns/default-theme nil)
-(defvar ns/alt-theme 'doom-one)
+(defvar ns/default-theme 'modus-vivendi)
+(defvar ns/alt-theme nil)
 
 ;; Load default theme
 (when ns/default-theme
