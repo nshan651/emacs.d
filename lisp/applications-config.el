@@ -68,15 +68,29 @@
                    :models '(gemma3:1b
                              gemma3:latest
                              llama3.2:latest
-                             phi4-mini:latest))))
+                             phi4-mini:latest)))
 
+  ;; Configure system prompts.
+  (gptel-make-preset "Incremental Reasoning"
+    :system-message "Let's think step by step to assure we arrive at the correct answer."
+    :backend "shodan")
+
+  (gptel-make-preset "Job Applications"
+    :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
+    :backend "shodan"
+    :pre (lambda ()
+		  (gptel-context-add-file "~/git/interviews/anon.org"))
+    )
+  )
+
+;; Define keyboard shortcuts.
 (ns/leader-spc
   "g"  '(:ignore t :wk "gptel")
+  "gb" '(gptel-abort :wk "gptel abort")
   "gg" '(gptel-mode :wk "gptel mode")
   "gp" '(gptel :wk "gptel prompt")
   "gr" '(gptel-rewrite :wk "gptel rewrite")
   "gs" '(gptel-send :wk "gptel send")
   "gm" '(gptel-menu :wk "gptel menu")
   "ga" '(gptel-add :wk "gptel add")
-  "ga" '(gptel-add-file :wk "gptel add file")
-  )
+  "gf" '(gptel-add-file :wk "gptel add file"))

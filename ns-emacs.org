@@ -395,7 +395,7 @@ General is the best method that I've found for organizing keybindings.
     :config
     ;; Create definer keys to map keys with
     (general-create-definer ns/leader-spc
-      :states 'normal
+      :states '(normal visual)
       :keymaps 'override
       :prefix "SPC")
     (general-create-definer ns/leader-t
@@ -420,6 +420,9 @@ General is the best method that I've found for organizing keybindings.
       :states 'normal
       :prefix ","))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Basic Keybindings
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
@@ -534,8 +537,9 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (use-package doom-themes)
 
   ;; Set theme colors
-  (defvar ns/default-theme 'modus-vivendi)
-  (defvar ns/alt-theme nil)
+  (defvar ns/default-theme 'doom-one)
+  ;; (defvar ns/alt-theme nil)
+  (defvar ns/alt-theme 'leuven)
 
   ;; Load default theme
   (when ns/default-theme
@@ -621,11 +625,10 @@ I use doom modeline.
 
 ** Tab Widths
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-  ;; (setq-default tab-width 2)
-  ;; (setq-default evil-shift-width tab-width)
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (setq-default c-basic-offset 4)
 #+end_src
-
-#+RESULTS:
 
 * UI Enhancements
 Some UI enhancements that supercharge Emacs.
@@ -1313,11 +1316,23 @@ You can add more =src= block templates below by copying one of the lines and cha
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
    (use-package org-journal
      :custom
-     (org-journal-dir "~/ark/org/journal/")
-     )
+     (org-journal-dir "~/ark/org/journal/"))
+
+   (ns/leader-spc 'override
+     "oj"  '(:ignore t :wk "org journal")
+     "ojn" '(org-journal-new-entry :wk "new journal entry")
+     "ojs" '(org-journal-search-forever :wk "search journal"))
+
+ #+end_src
+
+** Org Drill
+Org drill is a spaced repetition algorithm that uses org files as sources of "facts" to be memorized. The =Anki= application took heavy inspiration from this package.
+ #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+   (use-package org-drill)
  #+end_src
 
  #+RESULTS:
+ : t
 
 * Org Roam
 ** Org Roam Config
@@ -1873,7 +1888,7 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 #+end_src
 
 #+RESULTS:
-| lsp-deferred | lsp | doom-modeline-env-setup-rust |
+| rust-maybe-initialize-buffer-project | lsp-deferred | lsp | doom-modeline-env-setup-rust |
 
 * Terminals
 ** term-mode
@@ -2094,30 +2109,59 @@ A simple llm interface for emacs.
                      :models '(gemma3:1b
                                gemma3:latest
                                llama3.2:latest
-                               phi4-mini:latest))))
+                               phi4-mini:latest)))
 
+    ;; Configure system prompts.
+    (gptel-make-preset "Incremental Reasoning"
+      :system-message "Let's think step by step to assure we arrive at the correct answer."
+      :backend "shodan")
+
+    (gptel-make-preset "Job Applications"
+      :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
+      :backend "shodan"
+      :pre (lambda ()
+  		  (gptel-context-add-file "~/git/interviews/anon.org"))
+      )
+    )
+
+  ;; Define keyboard shortcuts.
   (ns/leader-spc
     "g"  '(:ignore t :wk "gptel")
+    "gb" '(gptel-abort :wk "gptel abort")
     "gg" '(gptel-mode :wk "gptel mode")
     "gp" '(gptel :wk "gptel prompt")
     "gr" '(gptel-rewrite :wk "gptel rewrite")
     "gs" '(gptel-send :wk "gptel send")
     "gm" '(gptel-menu :wk "gptel menu")
     "ga" '(gptel-add :wk "gptel add")
-    "ga" '(gptel-add-file :wk "gptel add file")
-    )
-
+    "gf" '(gptel-add-file :wk "gptel add file"))
 #+end_src
 
-#+RESULTS:
+** Setup Instructions
+We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:
 
-You can use the following query to ensure that Ollama is online and serving:
 #+begin_src sh
-  curl http://shodan:11434/api/generate -d '{
+  [Unit]
+  After=network-online.target avahi-daemon.service
+  Wants=network-online.target avahi-daemon.service
+
+  [Service]
+  Environment="OLLAMA_HOST=0.0.0.0"
+#+end_src
+
+Allow port =11434= on your operating system's firewall. Then, use the following curl command on another device to ensure that you can reach the host:
+
+#+begin_src sh
+  # Replace with `localhost` if on the Ollama server.
+  curl http://shodan:11434/api/chat -d '{
     "model": "llama3.2",
-    "prompt":"Why is the sky blue?"
+    "messages": [
+      { "role": "user", "content": "why is the sky blue?" }
+    ]
   }'
 #+end_src
+#+RESULTS:
+
 
 * Window Management
 

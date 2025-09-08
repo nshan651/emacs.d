@@ -305,5 +305,11 @@
 
 (use-package org-journal
   :custom
-  (org-journal-dir "~/ark/org/journal/")
-  )
+  (org-journal-dir "~/ark/org/journal/"))
+
+(ns/leader-spc 'override
+  "oj"  '(:ignore t :wk "org journal")
+  "ojn" '(org-journal-new-entry :wk "new journal entry")
+  "ojs" '(org-journal-search-forever :wk "search journal"))
+
+(use-package org-drill)

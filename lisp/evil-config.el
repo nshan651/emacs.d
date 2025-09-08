@@ -25,7 +25,7 @@
   :config
   ;; Create definer keys to map keys with
   (general-create-definer ns/leader-spc
-    :states 'normal
+    :states '(normal visual)
     :keymaps 'override
     :prefix "SPC")
   (general-create-definer ns/leader-t

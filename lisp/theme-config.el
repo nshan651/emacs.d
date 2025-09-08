@@ -8,8 +8,9 @@
 (use-package doom-themes)
 
 ;; Set theme colors
-(defvar ns/default-theme 'modus-vivendi)
-(defvar ns/alt-theme nil)
+(defvar ns/default-theme 'doom-one)
+;; (defvar ns/alt-theme nil)
+(defvar ns/alt-theme 'leuven)
 
 ;; Load default theme
 (when ns/default-theme
@@ -67,5 +68,6 @@
 ;; Add some additional UI elements
 (display-time-mode 1)
 
-;; (setq-default tab-width 2)
-;; (setq-default evil-shift-width tab-width)
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq-default c-basic-offset 4)
