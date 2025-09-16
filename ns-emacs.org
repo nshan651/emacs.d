@@ -100,7 +100,6 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
 #+RESULTS:
 
 ** Line Numbering
-
 #+begin_src emacs-lisp :tangle "early-init.el"
   (column-number-mode)
   (global-display-line-numbers-mode t)
@@ -125,7 +124,7 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
 #+RESULTS:
 : t
 
-** Garabage collection
+** Garbage collection
 Here we maximize the GC threshold to make Emacs boot a bit faster.
 
 #+begin_src emacs-lisp :tangle "early-init.el"
@@ -190,7 +189,6 @@ Finally, I like to call my default frame home. This is because I use my beframe 
 #+end_src
 
 ** Make native compilation silent
-
 #+begin_src emacs-lisp :tangle "init.el"
 ;; Make native compilation silent and prune its cache.
 (when (native-comp-available-p)
@@ -223,15 +221,7 @@ Some Emacs commands are disabled by default. This means that Emacs will produce 
 (mapc
  (lambda (command)
    (put command 'disabled t))
- '(eshell project-eshell overwrite-mode iconify-frame diary))
-#+end_src
-
-** Start with the =*scratch*= buffer
-Keep it simple. I have this disabled by default.
-
-#+begin_src emacs-lisp :tangle "init.el"
-;; Always start with *scratch*
-;;(setq initial-buffer-choice t)
+ '(project-eshell overwrite-mode iconify-frame diary))
 #+end_src
 
 ** Pre-load package configs in =lisp= directory
@@ -266,20 +256,15 @@ Keep it simple. I have this disabled by default.
 
   (ns/load-lisp-config file-list))
 
-  ;;Also load my `org-templates.el' and `feed.el'
-  ;; (load (locate-user-emacs-file "etc/org-templates.el"))
+  ;; Also load `feed.el'.
   (load (locate-user-emacs-file "etc/feed.el"))
 #+end_src
 
-#+RESULTS:
-: t
-
-** Package Setup
+** Package setup
 Setup package archives for =package.el=.
 
 #+begin_src emacs-lisp :tangle "init.el"
-  ;;;; Packages
-
+  ;; Packages
   (require 'package)
 
   (setq package-vc-register-as-project nil) ; Emacs 30
@@ -311,7 +296,6 @@ Provides asynchronous bytecode compilation and various other actions.
 
 *** Savehist
 Persist history over Emacs restarts. Vertico sorts by history position.
-
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package savehist
     :init
@@ -322,7 +306,6 @@ Persist history over Emacs restarts. Vertico sorts by history position.
 #+RESULTS:
 
 *** Repeat
-
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package repeat
     :defer 10
@@ -542,8 +525,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (defvar ns/alt-theme 'leuven)
 
   ;; Load default theme
-  (when ns/default-theme
-    (load-theme ns/default-theme))
+  ;; (when ns/default-theme
+  ;;   (load-theme ns/default-theme))
 
   (defun ns/toggle-theme (default-theme alt-theme)
     "Toggle between light and dark mode variants."
@@ -559,9 +542,12 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (define-key global-map (kbd "<f5>") (lambda () (interactive)
                                         (ns/toggle-theme ns/default-theme  ns/alt-theme)))
 #+end_src
-
-#+RESULTS:
-: #[nil ((ns/toggle-theme ns/default-theme ns/alt-theme)) nil nil nil nil]
+** Custom theme
+My custom color themes, inspired by https://news.ycombinator.com.
+#+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+  (load-theme 'ns-dark t)
+#+end_src
 
 ** Transparency
 
@@ -577,9 +563,6 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
     (define-key global-map (kbd "<f4>") (lambda () (interactive)
                                           (ns/toggle-transparency)))
 #+end_src
-
-#+RESULTS:
-| lambda | nil | (interactive) | (ns/toggle-transparency) |
 
 ** Font Configuration
 Set font details here.
@@ -2095,7 +2078,7 @@ The Gnu Guix interface.
   ;; (use-package guix)
 #+end_src
 ** GPTel
-A simple llm interface for emacs.
+A simple llm interface for emacs. Currently, I am using [[https://github.com/ollama/ollama][Ollama]] as a backend.
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package gptel
@@ -2120,7 +2103,7 @@ A simple llm interface for emacs.
       :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
       :backend "shodan"
       :pre (lambda ()
-  		  (gptel-context-add-file "~/git/interviews/anon.org"))
+  		  (gptel-context-add-file "~/git/interviews/resume.org"))
       )
     )
 

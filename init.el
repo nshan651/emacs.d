@@ -20,10 +20,7 @@
 (mapc
  (lambda (command)
    (put command 'disabled t))
- '(eshell project-eshell overwrite-mode iconify-frame diary))
-
-;; Always start with *scratch*
-;;(setq initial-buffer-choice t)
+ '(project-eshell overwrite-mode iconify-frame diary))
 
 ;; Load my lisp package config paths
 (mapc
@@ -54,12 +51,10 @@
 
 (ns/load-lisp-config file-list))
 
-;;Also load my `org-templates.el' and `feed.el'
-;; (load (locate-user-emacs-file "etc/org-templates.el"))
+;; Also load `feed.el'.
 (load (locate-user-emacs-file "etc/feed.el"))
 
-;;;; Packages
-
+;; Packages
 (require 'package)
 
 (setq package-vc-register-as-project nil) ; Emacs 30

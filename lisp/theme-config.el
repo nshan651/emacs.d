@@ -13,8 +13,8 @@
 (defvar ns/alt-theme 'leuven)
 
 ;; Load default theme
-(when ns/default-theme
-  (load-theme ns/default-theme))
+;; (when ns/default-theme
+;;   (load-theme ns/default-theme))
 
 (defun ns/toggle-theme (default-theme alt-theme)
   "Toggle between light and dark mode variants."
@@ -29,6 +29,15 @@
 ;; Binding to toggle between default and alt theme, inspired by 'modus-themes-toggle`
 (define-key global-map (kbd "<f5>") (lambda () (interactive)
                                       (ns/toggle-theme ns/default-theme  ns/alt-theme)))
+
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+(load-theme 'ns-dark t)
+
+;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;;(load-theme 'ns-dark t)
+
+;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;;(load-theme 'posimacs-dark t)
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."

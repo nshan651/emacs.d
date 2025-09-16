@@ -1,0 +1,371 @@
+;;; ns-dark-theme.el --- Ns dark theme -*- no-byte-compile: t; lexical-binding: t-*-
+(require 'doom-themes)
+
+;;; Commentary:
+;; I copied this theme at some point.  I find them rather difficult to maintain.
+;; It works, but every single fix is just 1:1 and not really fitting into any
+;; scheme of more abstract description.
+
+;;; Code:
+
+;;; Variables
+(defgroup ns-dark-theme nil
+  "Options for doom-themes."
+  :group 'doom-themes)
+
+(defcustom ns-dark-padded-modeline doom-themes-padded-modeline
+  "If non-nil, adds a 4px padding to the mode-line.
+Can be an integer to
+determine the exact padding."
+  :group 'ns-dark-theme
+  :type '(or integer boolean))
+
+;;; Theme definition
+(def-doom-theme
+ ns-dark
+ "A dark theme inspired by Acario dark, but with positive vibes"
+
+;;;; Colors
+ ;; name        default   256         16
+ (
+  (bg         '("#1d1d1d" "color-233" "black"        ))
+  (bg-alt     '("#040408" "color-232" "brightblack"  ))
+  (widget     '("#1F2133" "color-232" "brightblack"  ))
+  (base0      '("#0F1019" "color-234" "black"        ))
+  (base1      '("#121212" "color-233" "brightblack"  ))
+  (base2      '("#28233B" "color-236" "brightblack"  ))
+  (base3      '("#464A56" "color-240" "brightblack"  ))
+  (base4      '("#585C6C" "color-60"  "brightblack"  ))
+  (base5      '("#767676" "color-243" "brightblack"  ))
+  (base6      '("#959EA5" "color-109" "white"        ))
+  (base7      '("#B2B2B2" "color-249" "white"        ))
+  (base8      '("#D0D0D0" "color-252" "brightwhite"  ))
+  (fg         '("#CEDBE5" "color-152" "brightwhite"  ))
+  (fg-alt     '("#E5F4FF" "color-195" "brightwhite"  ))
+
+  (grey       base5)
+
+  (tooltip-bg '("#12141F" "color-017" "brightblack"  ))
+  (tooltip-hl '("#1B1E2E" "color-018" "white"        ))
+
+  (red        '("#FF293A" "color-167" "red"          ))
+  (neon       '("#F43E87" "color-207" "brightmagenta"))
+  (sub-neon   '("#CC1F64" "color-207" "brightmagenta"))
+
+  ;; (lneon      '("#FF599C" "color-170" "brightmagenta"))
+  (lneon      '("#ff6600" "color-170" "brightmagenta"))
+  (dneon      '("#330D1C" "color-052" "brightblack"  ))
+  (ddneon     '("#2E0214" "color-052" "brightblack"  ))
+  (green      '("#6EC248" "color-113" "green"        ))
+  (lime       '("#33DB12" "color-46"  "lightgreen"   ))
+  (llime      '("#4FFF9B" "color-48"  "lightgreen"   ))
+  (sub-lime   '("#1fCC6A" "color-48"  "lightgreen"   ))
+  (dlime      '("#061A02" "color-22"  "brightblack"  ))
+  (ddlime     '("#051402" "color-22"  "brightblack"  ))
+
+  (yellow     '("#FFD000" "color-179" "brightyellow" ))
+  (blue       '("#51A2E0" "color-117" "blue"         ))
+  (spark      '("#0A71BF" "color-117" "blue"         ))
+  (dark-spark '("#0D446E" "color-75"  "blue"         ))
+  (sub-spark  '("#0260A8" "color-117" "blue"         ))
+  ;; "#010F0E"
+  (hl-line    '("#002847" "color-75"  "blue"         ))
+  (ml-spark   '("#65ABE0" "color-75"  "brightblue"   ))
+  (light-spark'("#90BDE0" "color-75"  "brightblue"   ))
+  (light-shock'("#FF7C4D" "color-202" "yellow"       ))
+  (shock      '("#FF6933" "color-202" "yellow"       ))
+  (dark-shock '("#D95221" "color-202" "yellow"       ))
+  (cyan       '("#36D8BD" "color-79"  "cyan"         ))
+  (raw        '("#B272C4" "color-134" "magenta"      ))
+  (chill      '("#0CC74A" "color-121" "green"        ))
+  (sub-chill  '("#00B33C" "color-121" "green"        ))
+  (ill        '("#1D823E" "color-29"  "green"        ))
+
+  ;; (orange     '("#D85F00" "color-166" "yellow"       ))
+  (orange     '("#ff6600" "color-166" "yellow"       ))
+  (teal       '("#2D9574" "color-29"  "brightcyan"   ))
+  (magenta    '("#8041D8" "color-98"  "magenta"      ))
+  (match2     '("#8845E6" "color-98"  "magenta"      ))
+  (dmatch2    '("#0F081A" "color-17"  "magenta"      ))
+  (violet     '("#AB11D8" "color-128" "magenta"      ))
+
+  (bg-hl      '("#010F1A" "color-19"  "brightblack"  ))
+  (alt-hl     '("#592512" "color-19"  "brightblack"  ))
+  (bg-blue    '("#0C213E" "color-17"  "brightblack"  ))
+  (dark-blue  bg-blue)
+  (bg-cyan    '("#092D27" "color-23"  "brightblack"  ))
+  (dark-cyan  bg-cyan)
+
+;;;; face categories -- required for all themes
+  (highlight      magenta)
+  (vertical-bar   widget)
+  (selection      bg-hl)
+  (builtin        blue)
+  (comments       grey)
+  (doc-comments    raw)
+  ;; (constants      shock)
+  (constants      "#f38630")
+  (functions      yellow)
+  ;; (keywords       lneon)
+  (keywords       "#ffa927")
+  (methods        cyan)
+  (operators      blue)
+  (type           blue)
+  (strings        raw)
+  (variables      (doom-lighten cyan 0.4))
+  (numbers        orange)
+  (region         base2)
+  (error          red)
+  (warning        orange)
+  (success        lime)
+  (vc-modified    yellow)
+  (vc-added       lime)
+  (vc-deleted     red)
+
+;;;; custom categories
+  (hidden bg)
+  (-modeline-bright nil)
+  ;; (-modeline-pad
+  ;;  (when ns-dark-padded-modeline
+  ;;    (if (integerp ns-dark-padded-modeline) ns-dark-padded-modeline 4)))
+  (-modeline-pad 4)
+  (modeline-fg     nil)
+  (modeline-fg-alt base7)
+
+  ;; (modeline-bg
+  ;;  (if -modeline-bright
+  ;;      (doom-blend blue bg-alt 0.35)
+  ;;    `(,(car base2) ,@(cdr base0))))
+  (modeline-bg lneon)
+  (modeline-bg-l
+   (if -modeline-bright
+       modeline-bg
+     `(,(car base3) ,@(cdr base1))))
+  (modeline-bg-inactive   (doom-darken bg 0.20))
+  (modeline-bg-inactive-l `(,(doom-darken (car bg-alt) 0.2) ,@(cdr base0))))
+
+;;;; --- extra faces ------------------------
+ ((elscreen-tab-other-screen-face :background bg-blue :foreground fg-alt)
+  (evil-goggles-default-face :inherit 'region :background (doom-blend region bg 0.5))
+
+;;;;; hl-fill-column-face
+  (hl-fill-column-face :background bg-alt :foreground fg-alt)
+
+;;;;; line-number
+  ((line-number &override) :foreground base4)
+  ((line-number-current-line &override) :foreground "#f38630" :bold bold)
+
+;;;;; selections
+  (hl-line :background hl-line :extend t)
+  ;; (cursor :background lime)
+  (cursor :background "#ffa927")
+  (secondary-selection :background alt-hl)
+  (dslide-babel-success-highlight :background "#002B22" :extend t)
+  (dslide-babel-fail-highlight :background "#450A01" :extend t)
+
+;;;;; comments and doc
+  (font-lock-comment-face
+   :inherit 'fixed-pitch-serif
+   :slant 'italic
+   :foreground comments
+   :background 'unspecified)
+  (font-lock-doc-face
+   :inherit 'font-lock-comment-face
+   :foreground (or doc-comments 'unspecified))
+  (help-key-binding :inherit 'fixed-pitch
+                    :foreground neon
+                    :box nil
+                    :background nil
+                    :weight 'bold)
+
+;;;;; Flycheck
+  (flycheck-popup-tip-face :background bg-blue :foreground fg-alt)
+  (flycheck-posframe-info-face :background bg-blue :foreground fg-alt)
+  (flycheck-posframe-warning-face :inherit 'warning)
+  (flycheck-posframe-error-face :inherit 'error)
+
+;;;;; Magit
+  (magit-blame-culprit :foreground yellow)
+  (magit-blame-header :foreground green)
+  (magit-blame-sha1 :foreground yellow)
+  (magit-blame-subject :foreground yellow)
+  (magit-blame-time :foreground green)
+  (magit-blame-name :foreground yellow)
+  (magit-blame-heading :foreground green)
+  (magit-blame-hash :foreground yellow)
+  (magit-blame-summary :foreground yellow)
+  (magit-blame-date :foreground green)
+  (magit-log-date :foreground fg-alt)
+  (magit-log-graph :foreground fg-alt)
+  (magit-reflog-amend :foreground shock)
+  (magit-reflog-other :foreground cyan)
+  (magit-reflog-rebase :foreground shock)
+  (magit-reflog-remote :foreground cyan)
+  (magit-reflog-reset :foreground neon)
+  (magit-branch :foreground shock :weight 'bold)
+  (magit-branch-current :foreground blue :weight 'bold :box t)
+  (magit-branch-local :foreground blue :weight 'bold)
+  (magit-branch-remote :foreground orange :weight 'bold)
+  (magit-diff-file-header :foreground blue)
+  (magit-diff-file-heading :foreground spark :weight 'light)
+  (magit-diff-file-heading-highlight :foreground blue :weight 'bold)
+  (magit-diff-file-heading-selection :foreground blue :weight 'bold :background base1)
+  (magit-diff-hunk-heading :foreground spark :weight 'light)
+  (magit-diff-hunk-heading-highlight :foreground spark :weight 'bold)
+  (magit-diff-hunk-heading-selection :inherit 'selection :weight 'bold)
+  (magit-diff-added :foreground green :weight 'light :background ddlime)
+  (magit-diff-removed :foreground neon :weight 'light :background ddneon)
+  (magit-diff-context :foreground fg :weight 'light)
+  (magit-diff-added-highlight :foreground green :weight 'bold :background dlime)
+  (magit-diff-removed-highlight :foreground neon :weight 'bold :background dneon)
+  (magit-diff-context-highlight :foreground fg :weight 'bold)
+  (magit-diff-base :foreground fg :weight 'light)
+  (magit-diff-base-highlight :foreground fg :weight 'bold)
+  (magit-diff-lines-boundary :background fg :foreground base2)
+  (magit-diff-lines-heading :background fg :foreground base2)
+  (magit-hash :foreground yellow)
+  (magit-item-highlight :background grey)
+  (magit-log-author :foreground yellow)
+  (magit-log-head-label-head :background spark :foreground bg-alt :weight 'bold)
+  (magit-log-head-label-local :background neon :foreground bg-alt :weight 'bold)
+  (magit-log-head-label-remote :background green :foreground bg-alt :weight 'bold)
+  (magit-log-head-label-tags :background shock :foreground bg-alt :weight 'bold)
+  (magit-log-head-label-wip :background cyan :foreground bg-alt :weight 'bold)
+  (magit-log-sha1 :foreground green)
+  (magit-process-ng :foreground orange :weight 'bold)
+  (magit-process-ok :foreground yellow :weight 'bold)
+  (magit-section-heading :foreground neon)
+  (magit-section-highlight :weight 'bold)
+  (section-heading-selection :foreground neon :weight 'bold)
+  (magit-section-title :background bg-alt :foreground neon :weight 'bold)
+  (magit-cherry-equivalent :foreground shock)
+  (magit-cherry-unmatched :foreground cyan)
+  (magit-reflog-checkout :foreground blue)
+  (magit-reflog-cherry-pick :foreground green)
+  (magit-bisect-bad :foreground neon)
+  (magit-bisect-good :foreground green)
+  (magit-bisect-skip :foreground fg)
+  (magit-diff-conflict-heading :foreground fg)
+  (magit-dimmed :foreground base8)
+  (magithub-ci-no-status :foreground grey)
+  (magithub-issue-number :foreground fg)
+  (magithub-notification-reason :foreground fg)
+
+;;;;; Modeline, Solaire modeline and Doom modeline
+  (mode-line
+   :background modeline-bg :foreground (or modeline-fg 'unspecified)
+   :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg)))
+  (mode-line-inactive
+   :background modeline-bg-inactive :foreground modeline-fg-alt
+   :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive)))
+  (mode-line-emphasis
+   :foreground (if -modeline-bright base8 highlight))
+
+  (doom-modeline-bar :background (if -modeline-bright modeline-bg highlight))
+  (doom-modeline-buffer-file :inherit 'mode-line-buffer-id :weight 'bold)
+  (doom-modeline-buffer-path :inherit 'mode-line-emphasis :weight 'bold)
+  (doom-modeline-buffer-project-root :foreground green :weight 'bold)
+
+  (header-line :inherit 'mode-line :background bg)
+
+  (solaire-mode-line-face
+   :inherit 'mode-line
+   :background modeline-bg-l
+   :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-l)))
+  (solaire-mode-line-inactive-face
+   :inherit 'mode-line-inactive
+   :background modeline-bg-inactive-l
+   :box (if -modeline-pad `(:line-width ,-modeline-pad :color
+                                        ,modeline-bg-inactive-l)))
+
+;;;;; whitespace
+  (whitespace-indentation :inherit 'default)
+  (whitespace-big-indent :inherit 'default)
+
+;;; Keycast
+  (keycast-key :weight 'bold :foreground base0 :background lime)
+  (keycast-command :weight 'bold :foreground lime)
+
+;;;;; tooltips for company & lsp ui
+  (company-tooltip :background "#000000")
+  (internal-border :background spark)
+  (company-tooltip-selection :background light-spark :foreground bg
+                             :distant-foreground spark :weight 'normal)
+  (company-tooltip-common :distant-foreground dmatch2 :foreground match2)
+  (company-tooltip-common-selection :inherit 'ivy-current-match)
+  (tooltips :background "#000000")
+  (lsp-ui-doc-background :background tooltip-bg)
+
+;;;;; lsp-mode and lsp-ui-mode
+  (lsp-ui-peek-highlight :foreground yellow)
+  (lsp-ui-sideline-symbol-info :foreground (doom-blend comments bg 0.85)
+                               :background bg-alt)
+
+;;;;; info
+  (info-colors-ref-item-other :foreground "#CF4444")
+
+;;;; --- major-mode faces -------------------
+;;;;; css-mode / scss-mode
+  (css-proprietary-property :foreground orange)
+  (css-property             :foreground green)
+  (css-selector             :foreground blue)
+
+;;;; --- dashboard --------------------------
+  (dashboard-banner-logo-title :foreground lime :height 128)
+  (widget-button :inherit 'fixed-pitch) ; dashboard-items-face
+
+;;;;; markdown-mode
+  (markdown-markup-face :foreground base5)
+  (markdown-header-face :inherit 'bold :foreground neon)
+  ((markdown-code-face &override) :background (doom-lighten tooltip-bg 0.05))
+;;;;; ediff-mode
+  (ediff-odd-diff-A :distant-foreground "#FFFFFF" :background "#00291B")
+  (ediff-even-diff-A :distant-foreground "#FFFFFF" :background "#3D0136")
+  ;; B and C inherit A
+
+;;;;; diff-mode
+
+  (diff-removed :foreground "#FF293A" :background "#320000")
+  (diff-added :foreground "#6EC248" :background "#00291E")
+
+;;;;;;; org-mode
+  ((org-quote &override) :background base1)
+  ((org-done &override) :foreground llime)
+  ((org-todo &override) :foreground shock)
+
+  (org-level-1 :inherit 'org-level-8 :foreground "#ffd2a7" :weight 'bold :height 1.48)
+  (org-level-2 :inherit 'org-level-8 :foreground "#c6c5fe" :weight 'bold :height 1.32)
+  (org-level-3 :inherit 'org-level-8 :foreground ml-spark :weight 'bold :height 1.24)
+  (org-level-4 :inherit 'org-level-8 :foreground neon :weight 'bold :height 1.16)
+  (org-level-5 :inherit 'org-level-8 :foreground dark-shock :weight 'bold :height 1.08)
+  (org-level-6 :inherit 'org-level-8 :foreground sub-neon :weight 'bold :height 1.04)
+  (org-level-7 :inherit 'org-level-8 :foreground sub-spark :weight 'bold :height 1.00)
+  (org-level-8 :inherit 'variable-pitch :foreground violet :weight 'bold :height 1.00)
+
+  (org-archived :foreground "#302733")
+
+  (org-verbatim :inherit 'fixed-pitch :foreground "#fffaaa" :weight 'bold)
+
+  (org-document-title :inherit 'org-level-1 :weight 'bold
+                      :height 1.48 :foreground light-spark)
+
+  ;; (org-block :inherit 'fixed-pitch :background "#000000")
+  (org-block :inherit 'fixed-pitch :background "#161a1f")
+  (org-code :foreground cyan :background bg)
+  (org-block-begin-line :inherit 'org-block :height 0.6 :foreground grey)
+  (org-link :inherit 'default :underline t :foreground orange)
+  (pulse-highlight-start-face :background "#001A24")
+
+  (org-hide :foreground hidden))
+
+
+;;;; --- extra variables ---------------------
+ ;; ()
+ )
+
+;;; ns-dark-theme.el ends here
+
+;; Local Variables:
+;; flycheck-disabled-checkers: (emacs-lisp)
+;; eval: (jinx-mode -1)
+;; End:

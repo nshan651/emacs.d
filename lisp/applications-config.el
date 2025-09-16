@@ -79,7 +79,7 @@
     :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
     :backend "shodan"
     :pre (lambda ()
-		  (gptel-context-add-file "~/git/interviews/anon.org"))
+		  (gptel-context-add-file "~/git/interviews/resume.org"))
     )
   )
 
