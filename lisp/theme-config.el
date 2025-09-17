@@ -30,14 +30,14 @@
 (define-key global-map (kbd "<f5>") (lambda () (interactive)
                                       (ns/toggle-theme ns/default-theme  ns/alt-theme)))
 
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'ns-dark t)
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;; (load-theme 'ns-dark t)
+;; (load-theme 'posimacs-dark t)
 
-;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-;;(load-theme 'ns-dark t)
-
-;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-;;(load-theme 'posimacs-dark t)
+(load-theme 'doom-one)
+(set-face-attribute 'default nil :background "#1d1d1d")
+;; (custom-set-faces!
+;;   '(default :background "#1d1d1d"))
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."

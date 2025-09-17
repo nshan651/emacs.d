@@ -1,4 +1,5 @@
 ;;; ns-dark-theme.el --- Ns dark theme -*- no-byte-compile: t; lexical-binding: t-*-
+;;; My custom color themes, inspired by https://news.ycombinator.com.
 (require 'doom-themes)
 
 ;;; Commentary:

@@ -437,6 +437,7 @@ These are basic keybindings that aren't tied to any particular package (except e
     "l"           'windmove-right
     "k"          'windmove-up
     "j"           'windmove-down)
+
   ;; Window resizing
   ;; "C-h"        (lambda () (interactive) (shrink-window-horizontally 21))
   ;; "C-l"         (lambda () (interactive) (enlarge-window-horizontally 21))
@@ -545,12 +546,14 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 ** Custom theme
 My custom color themes, inspired by https://news.ycombinator.com.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-  (load-theme 'ns-dark t)
+  ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+  ;; (load-theme 'ns-dark t)
+
+  (load-theme 'doom-one)
+  (set-face-attribute 'default nil :background "#1d1d1d")
 #+end_src
 
 ** Transparency
-
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
     (defun ns/toggle-transparency ()
       "Toggle transparency of Emacs frame."

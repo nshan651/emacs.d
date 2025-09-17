@@ -43,11 +43,7 @@ determine the exact padding."
 ;;;; Colors
  ;; name        default   256         16
  (
-  ;; (bg         '("#01060F" "color-233" "black"        ))
-
-  ;;(bg         '("#161616" "color-233" "black"        ))
-  (bg         '("#1a1c1b" "color-233" "black"        ))
-  ;;(bg         '("#1b1c1d" "color-233" "black"        ))
+  (bg         '("#1d1d1d" "color-233" "black"        ))
 
   (bg-alt     '("#040408" "color-232" "brightblack"  ))
   (widget     '("#1F2133" "color-232" "brightblack"  ))
@@ -349,24 +345,23 @@ determine the exact padding."
   ((org-done &override) :foreground llime)
   ((org-todo &override) :foreground shock)
 
-  (org-level-1 :inherit 'org-level-8 :foreground chill :weight 'bold :height 1.64)
-  (org-level-2 :inherit 'org-level-8 :foreground ml-spark :weight 'bold :height 1.48)
-  (org-level-3 :inherit 'org-level-8 :foreground neon :weight 'bold :height 1.32)
-  (org-level-4 :inherit 'org-level-8 :foreground raw :weight 'bold :height 1.24)
-  (org-level-5 :inherit 'org-level-8 :foreground dark-shock :weight 'bold :height 1.16)
-  (org-level-6 :inherit 'org-level-8 :foreground sub-neon :weight 'bold :height 1.08)
-  (org-level-7 :inherit 'org-level-8 :foreground sub-spark :weight 'bold :height 1.04)
+  (org-level-1 :inherit 'org-level-8 :foreground chill :weight 'bold :height 1.48)
+  (org-level-2 :inherit 'org-level-8 :foreground ml-spark :weight 'bold :height 1.32)
+  (org-level-3 :inherit 'org-level-8 :foreground neon :weight 'bold :height 1.24)
+  (org-level-4 :inherit 'org-level-8 :foreground raw :weight 'bold :height 1.16)
+  (org-level-5 :inherit 'org-level-8 :foreground dark-shock :weight 'bold :height 1.08)
+  (org-level-6 :inherit 'org-level-8 :foreground sub-neon :weight 'bold :height 1.04)
+  (org-level-7 :inherit 'org-level-8 :foreground sub-spark :weight 'bold :height 1.00)
   (org-level-8 :inherit 'variable-pitch :foreground violet :weight 'bold
                :height 1.00)
   (org-archived :foreground "#302733")
 
-  (org-verbatim :inherit 'fixed-pitch :foreground grey :weight 'bold)
+  (org-verbatim :inherit 'fixed-pitch :foreground "#fffaaa" :weight 'bold)
 
   (org-document-title :inherit 'org-level-1 :weight 'bold
-                      :height 1.42 :foreground light-spark)
+                      :height 1.48 :foreground light-spark)
 
-  ;;(org-block :inherit 'fixed-pitch :background "#000000")
-  (org-block :inherit 'fixed-pitch :background "#161616")
+  (org-block :inherit 'fixed-pitch :background "#181818")
   (org-code :foreground "#D85F00" :background bg)
   (org-block-begin-line :inherit 'org-block :height 0.6 :foreground grey)
   (org-link :inherit 'default :underline t :foreground orange)

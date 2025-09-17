@@ -76,6 +76,7 @@
   "l"           'windmove-right
   "k"          'windmove-up
   "j"           'windmove-down)
+
 ;; Window resizing
 ;; "C-h"        (lambda () (interactive) (shrink-window-horizontally 21))
 ;; "C-l"         (lambda () (interactive) (enlarge-window-horizontally 21))
