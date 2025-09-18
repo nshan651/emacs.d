@@ -32,12 +32,11 @@
 
 ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 ;; (load-theme 'ns-dark t)
-;; (load-theme 'posimacs-dark t)
 
-(load-theme 'doom-one)
-(set-face-attribute 'default nil :background "#1d1d1d")
-;; (custom-set-faces!
-;;   '(default :background "#1d1d1d"))
+(load-theme 'modus-vivendi)
+(set-face-attribute 'default nil :background "#1f1f1f")
+(with-eval-after-load 'org
+  (set-face-attribute 'org-block nil :background "#181818"))
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."

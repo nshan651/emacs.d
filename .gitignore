@@ -35,6 +35,7 @@ snippets/
 *.db
 org-roam.db
 *.sqlite
+*.eld
 
 # Misc files
 history

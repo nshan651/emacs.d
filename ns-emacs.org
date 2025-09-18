@@ -549,9 +549,13 @@ My custom color themes, inspired by https://news.ycombinator.com.
   ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
   ;; (load-theme 'ns-dark t)
 
-  (load-theme 'doom-one)
-  (set-face-attribute 'default nil :background "#1d1d1d")
+  (load-theme 'modus-vivendi)
+  (set-face-attribute 'default nil :background "#1f1f1f")
+  (with-eval-after-load 'org
+    (set-face-attribute 'org-block nil :background "#181818"))
 #+end_src
+
+#+RESULTS:
 
 ** Transparency
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
