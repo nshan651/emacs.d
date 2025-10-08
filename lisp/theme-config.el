@@ -36,7 +36,10 @@
 (load-theme 'modus-vivendi)
 (set-face-attribute 'default nil :background "#1f1f1f")
 (with-eval-after-load 'org
-  (set-face-attribute 'org-block nil :background "#181818"))
+  (set-face-attribute 'org-block nil :background "#181818")
+  (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
+  (set-face-attribute 'org-code nil :foreground "#ff599c")
+  )
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."

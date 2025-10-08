@@ -546,13 +546,16 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 ** Custom theme
 My custom color themes, inspired by https://news.ycombinator.com.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-  ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-  ;; (load-theme 'ns-dark t)
+    ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+    ;; (load-theme 'ns-dark t)
 
-  (load-theme 'modus-vivendi)
-  (set-face-attribute 'default nil :background "#1f1f1f")
-  (with-eval-after-load 'org
-    (set-face-attribute 'org-block nil :background "#181818"))
+    (load-theme 'modus-vivendi)
+    (set-face-attribute 'default nil :background "#1f1f1f")
+    (with-eval-after-load 'org
+      (set-face-attribute 'org-block nil :background "#181818")
+      (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
+      (set-face-attribute 'org-code nil :foreground "#ff599c")
+      )
 #+end_src
 
 #+RESULTS:
@@ -1289,6 +1292,7 @@ You can add more =src= block templates below by copying one of the lines and cha
                         ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
                         ("vim" . "src vim")
                         ("py"  . "src python")
+                        ("rs"  . "src rust")
                         ("cs"  . "src csharp")
                         ;; Leetcode snippet
                         ("leet" .
@@ -2091,14 +2095,18 @@ A simple llm interface for emacs. Currently, I am using [[https://github.com/oll
   (use-package gptel
     :custom
     (gptel-default-mode 'org-mode)
-    (gptel-model 'llama3.2:latest)
+    (gptel-model 'qwen3:1.7b-ns)
     :config
     (setq gptel-backend (gptel-make-ollama "shodan"
                      :host "shodan:11434" ;; Or use shodan.local for mDNS.
                      :stream t
-                     :models '(gemma3:1b
+                     :models '(deepseek-r1:1.5b-ns
+                               gemma3:1b
                                gemma3:latest
                                llama3.2:latest
+                               llama3.2-ns
+                               qwen3:1.7b-ns
+                               qwen3:4b-ns
                                phi4-mini:latest)))
 
     ;; Configure system prompts.

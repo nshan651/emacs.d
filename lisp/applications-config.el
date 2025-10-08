@@ -60,14 +60,18 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  (gptel-model 'llama3.2:latest)
+  (gptel-model 'qwen3:1.7b-ns)
   :config
   (setq gptel-backend (gptel-make-ollama "shodan"
                    :host "shodan:11434" ;; Or use shodan.local for mDNS.
                    :stream t
-                   :models '(gemma3:1b
+                   :models '(deepseek-r1:1.5b-ns
+                             gemma3:1b
                              gemma3:latest
                              llama3.2:latest
+                             llama3.2-ns
+                             qwen3:1.7b-ns
+                             qwen3:4b-ns
                              phi4-mini:latest)))
 
   ;; Configure system prompts.

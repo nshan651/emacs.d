@@ -294,6 +294,7 @@
                      ("ini" . "src emacs-lisp :tangle \"init.el\" :mkdirp yes")
                      ("vim" . "src vim")
                      ("py"  . "src python")
+                     ("rs"  . "src rust")
                      ("cs"  . "src csharp")
                      ;; Leetcode snippet
                      ("leet" .
