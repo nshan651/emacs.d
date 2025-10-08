@@ -71,6 +71,7 @@
                              llama3.2:latest
                              llama3.2-ns
                              qwen3:1.7b-ns
+                             qwen3:1.7b
                              qwen3:4b-ns
                              phi4-mini:latest)))
 
@@ -79,11 +80,11 @@
     :system-message "Let's think step by step to assure we arrive at the correct answer."
     :backend "shodan")
 
-  (gptel-make-preset "Job Applications"
+  (gptel-make-preset 'resume
     :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
     :backend "shodan"
     :pre (lambda ()
-		  (gptel-context-add-file "~/git/interviews/resume.org"))
+		  (gptel-add-file "~/git/interviews/resume.org"))
     )
   )
 

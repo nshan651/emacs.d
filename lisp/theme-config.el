@@ -30,16 +30,16 @@
 (define-key global-map (kbd "<f5>") (lambda () (interactive)
                                       (ns/toggle-theme ns/default-theme  ns/alt-theme)))
 
-;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-;; (load-theme 'ns-dark t)
-
 (load-theme 'modus-vivendi)
 (set-face-attribute 'default nil :background "#1f1f1f")
 (with-eval-after-load 'org
-  (set-face-attribute 'org-block nil :background "#181818")
+  (set-face-attribute 'org-block nil :background "#2b2b2b")
   (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
-  (set-face-attribute 'org-code nil :foreground "#ff599c")
-  )
+  (set-face-attribute 'org-code nil :foreground ";; #ff599c"))
+
+(with-eval-after-load 'gptel
+  (set-face-attribute 'gptel-rewrite-highlight-face nil
+                      :background "#413847"))
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."
