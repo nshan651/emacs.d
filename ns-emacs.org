@@ -97,8 +97,6 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
         line-move-visual nil)
 #+end_src
 
-#+RESULTS:
-
 ** Line Numbering
 #+begin_src emacs-lisp :tangle "early-init.el"
   (column-number-mode)
@@ -120,9 +118,6 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
   ;; Revert buffers when the underlying file has changed
   (global-auto-revert-mode 1)
 #+end_src
-
-#+RESULTS:
-: t
 
 ** Garbage collection
 Here we maximize the GC threshold to make Emacs boot a bit faster.
@@ -302,9 +297,6 @@ Persist history over Emacs restarts. Vertico sorts by history position.
     (setq history-length 25)
     (savehist-mode t))
 #+end_src
-
-#+RESULTS:
-
 *** Repeat
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package repeat
@@ -331,9 +323,19 @@ Automatically trim extraneous whitespaces.
   (global-set-key (kbd "C-S-v") 'yank)
 #+end_src
 
-#+RESULTS:
-: yank
-
+** Auth Source
+Auth source is a built in way to manage secrets in Emacs. For now I'm just using this along with =password-sore= to manage API keys.
+#+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
+  (use-package auth-source-pass
+    :custom
+    (auth-source-pass-filename
+     (expand-file-name
+      "password-store/apikeys"
+      (or (getenv "XDG_DATA_HOME")
+          (expand-file-name "~/.local/share"))))
+    :init
+    (auth-source-pass-enable))
+#+end_src
 * Keybindings
 All my keybindings are controlled by evil mode.
 
@@ -403,10 +405,6 @@ General is the best method that I've found for organizing keybindings.
       :states 'normal
       :prefix ","))
 #+end_src
-
-#+RESULTS:
-: t
-
 ** Basic Keybindings
 These are basic keybindings that aren't tied to any particular package (except evil). I chose to group most of my keybindings by package. Personally, I find this approach makes it easier to find what I need.
 
@@ -492,9 +490,6 @@ These are basic keybindings that aren't tied to any particular package (except e
     "c" 'compile
     "r" 'recompile)
 #+end_src
-
-#+RESULTS:
-
 *** Commenting
 Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
 
@@ -502,9 +497,6 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   (use-package evil-nerd-commenter
     :general ("M-/" 'evilnc-comment-or-uncomment-lines))
 #+end_src
-
-#+RESULTS:
-
 ** Mouse Settings
 
 * Theme Configuration
@@ -549,17 +541,16 @@ My custom color theme is a minor modification of =modus-vivendi=.
   (load-theme 'modus-vivendi)
   (set-face-attribute 'default nil :background "#1f1f1f")
   (with-eval-after-load 'org
-    (set-face-attribute 'org-block nil :background "#2b2b2b")
+    (set-face-attribute 'org-block nil :inherit nil :background "#2b2b2b")
     (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
     (set-face-attribute 'org-code nil :foreground ";; #ff599c"))
 
-  (with-eval-after-load 'gptel
+  (with-eval-after-load 'gptel-rewrite
     (set-face-attribute 'gptel-rewrite-highlight-face nil
-                        :background "#413847"))
+                        :inherit 'default
+                        :background "#413847"
+                        :extend t))
 #+end_src
-
-#+RESULTS:
-
 ** Transparency
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
     (defun ns/toggle-transparency ()
@@ -599,9 +590,6 @@ Set font details here.
     ;; but you can use any other Nerd Font if you want
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
 #+end_src
-
-#+RESULTS:
-
 ** Modeline
 I use doom modeline.
 
@@ -612,9 +600,6 @@ I use doom modeline.
   ;; Add some additional UI elements
   (display-time-mode 1)
 #+end_src
-
-#+RESULTS:
-: t
 
 ** Tab Widths
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
@@ -640,8 +625,6 @@ Linear undo while maintaining all history.
   (use-package undo-fu-session
     :init (undo-fu-session-global-mode))
 #+end_src
-
-#+RESULTS:
 
 ** Which Key
 [[https://github.com/justbur/emacs-which-key][which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
@@ -823,9 +806,6 @@ Linear undo while maintaining all history.
   (general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
 
 #+end_src
-
-#+RESULTS:
-
 ** Orderless
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
@@ -834,9 +814,6 @@ Linear undo while maintaining all history.
     (completion-styles '(orderless))
     (completion-category-overrides '((file (styles . (partial-completion))))))
 #+end_src
-
-#+RESULTS:
-
 ** Embark
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
@@ -866,8 +843,6 @@ Linear undo while maintaining all history.
     "C-h B" 'embark-bindings)
 #+end_src
 
-#+RESULTS:
-
 ** Marginalia
 The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia annotations to the minibuffer completions.
 
@@ -879,9 +854,6 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     :config
     (marginalia-mode))
 #+end_src
-
-#+RESULTS:
-: marginalia-cycle
 
 ** Corfu
 [[https://github.com/minad/corfu][Corfu]] enhances in-buffer completion with a small completion popup.
@@ -904,9 +876,6 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     :init
     (setq tab-always-indent 'complete))
 #+end_src
-
-
-#+RESULTS:
 
 ** Helpful
 [[https://github.com/Wilfred/helpful][Helpful]] adds a lot of very helpful (get it?) information to Emacs' =describe-= command buffers.  For example, if you use =describe-function=, you will not only get the documentation about the function, you will also see the source code of the function and where it gets used in other places in the Emacs configuration.
@@ -976,9 +945,6 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
     (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
 #+end_src
 
-#+RESULTS:
-: efs/org-font-setup
-
 ** Basic Org Config
 This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.
 
@@ -1023,9 +989,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (efs/org-font-setup))
      #+end_src
-
-     #+RESULTS:
-     | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (lambda nil evil-org-mode) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-appear-mode | efs/org-mode-visual-fill | org-bullets-mode | ns/org-mode-setup | rainbow-delimiters-mode | (lambda nil (display-line-numbers-mode 0)) |
 
 ** Org Agenda
 
@@ -1184,9 +1147,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
 #+end_src
 
-#+RESULTS:
-| lambda | nil | (interactive) | (org-capture nil jj) |
-
 ** Nicer Heading Bullets
 org-bullets replaces the heading stars in org-mode buffers with nicer looking characters that you can control.
 
@@ -1255,8 +1215,6 @@ We use visual-fill-column to center org-mode buffers for a more pleasing writing
     )
 #+end_src
 
-#+RESULTS:
-
 ** Babel
 To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
 
@@ -1274,9 +1232,6 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
   ;; Disable execution confirmations
   (setq org-confirm-babel-evaluate nil)
 #+end_src
-
-#+RESULTS:
-
 ** Structure Templates
 Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
 
@@ -1303,9 +1258,6 @@ You can add more =src= block templates below by copying one of the lines and cha
          (push template org-structure-template-alist))))
 #+end_src
 
-#+RESULTS:
-: t
-
 ** Org Journal
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
    (use-package org-journal
@@ -1324,9 +1276,6 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
    (use-package org-drill)
  #+end_src
-
- #+RESULTS:
- : t
 
 * Org Roam
 ** Org Roam Config
@@ -1359,9 +1308,6 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
     "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
 
 #+end_src
-
-#+RESULTS:
-
 ** Org Roam Capture Templates
 Org roam allows you to create various capture templates.
 
@@ -1387,10 +1333,6 @@ Org roam allows you to create various capture templates.
         :immediate-finish t
         :unnarrowed t)))
 #+end_src
-
-#+RESULTS:
-| m | main | plain | %? | :if-new | (file+head main/%<%Y%m%d%H%M%S>-${slug}.org #+title: ${title} |
-
 *** Define the Type of a Node
 
 It can be useful to differentiate the different types of zettels at completion time.
@@ -1409,9 +1351,6 @@ It can be useful to differentiate the different types of zettels at completion t
         (error "")))
     )
 #+end_src
-
-#+RESULTS:
-: org-roam-node-type
 
 *** Modifying Display Template to Show Node Type
 
@@ -1439,9 +1378,6 @@ It can be useful to differentiate the different types of zettels at completion t
   (ns/leader-spc
     "ng" '(org-roam-ui-mode :wk "org roam ui graph"))
 #+end_src
-
-#+RESULTS:
-
 * Development
 
 ** LSP
@@ -1503,8 +1439,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
    "l" 'lsp-workspace-show-log)
 #+end_src
 
-#+RESULTS:
-
 *** lsp-ui
 [[https://emacs-lsp.github.io/lsp-ui/][lsp-ui]] is a set of UI enhancements built on top of =lsp-mode= which make Emacs feel even more like an IDE.  Check out the screenshots on the =lsp-ui= homepage (linked at the beginning of this paragraph) to see examples of what it can do.
 
@@ -1521,9 +1455,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
   (ns/leader-m 'lsp-mode-map
    "i" 'lsp-ui-doc-glance)
 #+end_src
-
-#+RESULTS:
-
 *** consult-lsp
 LSP integration with consult.
 
@@ -1535,8 +1466,6 @@ LSP integration with consult.
       "y" 'consult-lsp-symbols
       "e" 'consult-lsp-diagnostics))
 #+end_src
-
-#+RESULTS:
 
 *** lsp-treemacs
 [[https://github.com/emacs-lsp/lsp-treemacs][lsp-treemacs]] provides nice tree views for different aspects of your code like symbols in a file, references of a symbol, or diagnostic messages (errors and warnings) that are found in your code.
@@ -1553,9 +1482,6 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
   (use-package lsp-treemacs
     :after lsp)
 #+end_src
-
-#+RESULTS:
-
 ** Tree Sitter
 Tree sitter support is now built in to Emacs. This seems to be breaking lsp-mode, so I've disabled this for now.
 
@@ -1569,8 +1495,6 @@ Tree sitter support is now built in to Emacs. This seems to be breaking lsp-mode
     (treesit-auto-add-to-auto-mode-alist 'all)
     (global-treesit-auto-mode))
 #+end_src
-
-#+RESULTS:
 
 ** Debugging with dap-mode
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]].  You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
@@ -1613,9 +1537,6 @@ TRAMP (Transparent remote access, multiple protocols) allows users to edit remot
   (setq tramp-default-method "ssh")
 #+end_src
 
-#+RESULTS:
-: ssh
-
 ** Yasnippet
 A template system for Emacs.
 
@@ -1633,8 +1554,6 @@ A template system for Emacs.
     (general-def 'insert yas-minor-mode-map
       "<C-i>" #'yas-expand))
 #+end_src
-
-#+RESULTS:
 
 *** Extra Snippets
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
@@ -1654,8 +1573,6 @@ A better ~yas-insert-snippet~.
     :disabled t
     :general ('insert "C-<tab>" #'consult-yasnippet))
 #+end_src
-
-#+RESULTS:
 
 ** Projectile
 [[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
@@ -1688,7 +1605,6 @@ A better ~yas-insert-snippet~.
   ;;   :config (counsel-projectile-mode))
 #+end_src
 
-#+RESULTS:
 
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
@@ -1715,7 +1631,6 @@ A better ~yas-insert-snippet~.
     "gi " '(magit-init :wk "git init"))
 #+end_src
 
-#+RESULTS:
 
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
@@ -1727,8 +1642,6 @@ Forge allows use to work with varios git forges using the magit interface.
   (use-package forge
     :after 'magit)
 #+end_src
-
-#+RESULTS:
 
 ** Flymake
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
@@ -1757,8 +1670,6 @@ Forge allows use to work with varios git forges using the magit interface.
     ;;   "C-c C-c" 'compile)
 #+end_src
 
-#+RESULTS:
-
 ** Rainbow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
 
@@ -1783,9 +1694,6 @@ Forge allows use to work with varios git forges using the magit interface.
     (require 'smartparens-config))
 #+end_src
 
-#+RESULTS:
-: t
-
 * Programming Languages
 ** C/C++
 
@@ -1794,8 +1702,6 @@ Forge allows use to work with varios git forges using the magit interface.
     :custom
     (ccls-executable "ccls"))
 #+end_src
-
-#+RESULTS:
 
 ** Common Lisp
 
@@ -1809,17 +1715,12 @@ Forge allows use to work with varios git forges using the magit interface.
 
 #+end_src
 
-#+RESULTS:
-
 ** Go
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package go-mode
     :hook
     (go-mode . lsp-deferred))
 #+end_src
-
-#+RESULTS:
-| lsp-deferred | doom-modeline-env-setup-go |
 
 ** Guile
 Setup for guile scheme development.
@@ -1858,8 +1759,6 @@ There are a number of other language servers for Python so if you find that =pyl
     (setq-default python-indent-offset 4))
 #+end_src
 
-#+RESULTS:
-
 You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
@@ -1871,18 +1770,12 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
 
 #+end_src
 
-#+RESULTS:
-: t
-
 ** Rust
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package rust-mode
     :hook
     (rust-mode . lsp-deferred))
 #+end_src
-
-#+RESULTS:
-| rust-maybe-initialize-buffer-project | lsp-deferred | lsp | doom-modeline-env-setup-rust |
 
 * Terminals
 ** term-mode
@@ -2046,8 +1939,6 @@ Website publishing.
 (use-package ox-hugo
   :after ox)
 #+end_src
-
-#+RESULTS:
 ** Org-caldav
 Calendar syncing using the =caldav= protocol.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
@@ -2081,8 +1972,6 @@ Calendar syncing using the =caldav= protocol.
     (org-icalendar-with-timestamps t)
   )
 #+end_src
-
-#+RESULTS:
 ** Guix
 The Gnu Guix interface.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
@@ -2097,18 +1986,61 @@ A simple llm interface for emacs. Currently, I am using [[https://github.com/oll
     (gptel-default-mode 'org-mode)
     (gptel-model 'qwen3:1.7b-ns)
     :config
-    (setq gptel-backend (gptel-make-ollama "shodan"
-                     :host "shodan:11434" ;; Or use shodan.local for mDNS.
-                     :stream t
-                     :models '(deepseek-r1:1.5b-ns
-                               gemma3:1b
-                               gemma3:latest
-                               llama3.2:latest
-                               llama3.2-ns
-                               qwen3:1.7b-ns
-                               qwen3:1.7b
-                               qwen3:4b-ns
-                               phi4-mini:latest)))
+
+    ;; Set up model backends.
+    (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
+                                    :host "shodan:11434" ;; Or use shodan.local for mDNS.
+                                    :stream t
+                                    :models '(deepseek-r1:1.5b-ns
+                                              gemma3:1b
+                                              gemma3:latest
+                                              llama3.2:latest
+                                              llama3.2-ns
+                                              qwen3:1.7b-ns
+                                              qwen3:1.7b
+                                              qwen3:4b-ns)))
+
+    (setq ns/gptel-openrouter-backend
+          (gptel-make-openai "openrouter"
+            :host "openrouter.ai"
+            :endpoint "/api/v1/chat/completions"
+            :stream t
+            :key (lambda () (auth-source-pass-get 'secret "openrouter/key"))
+            :models '(deepseek/deepseek-chat-v3.1:free
+                      openai/gpt-oss-20b:free
+                      qwen/qwen3-coder:free
+                      moonshotai/kimi-k2:free
+                      )))
+
+    (setq ns/gptel-groq-backend
+          (gptel-make-openai "groq"
+            :host "api.groq.com"
+            :endpoint "/openai/v1/chat/completions"
+            :stream t
+            :key (lambda () (auth-source-pass-get 'secret "groq/key"))
+            :models '(openai/gpt-oss-120b
+                      moonshotai/kimi-k2-instruct
+                      llama-3.1-70b-versatile
+                      qwen/qwen3-32b
+                      openai/gpt-oss-20b)))
+
+    (setq ns/gptel-gemini-backend
+          (gptel-make-gemini "gemini"
+            :stream t
+            :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
+            :models '(gemini-2.0-flash-lite
+                      gemini-2.5-flash
+                      (gemini-2.5-pro-latest
+                       :description
+                       "Complex reasoning tasks, problem solving and data extraction"
+                       :capabilities (tool json)
+                       :mime-types
+                       ("image/jpeg" "image/png" "image/webp" "image/heic")))))
+
+
+    ;; Set the defualt model backend.
+    ;; (setq gptel-backend ns/gptel-ollama-backend)
+    (setq gptel-backend ns/gptel-gemini-backend)
 
     ;; Configure system prompts.
     (gptel-make-preset "Incremental Reasoning"
@@ -2116,12 +2048,25 @@ A simple llm interface for emacs. Currently, I am using [[https://github.com/oll
       :backend "shodan")
 
     (gptel-make-preset 'resume
-      :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
+      :system-message "Use the following resume to answer interview questions in a thoughtful way."
       :backend "shodan"
-      :pre (lambda ()
-  		  (gptel-add-file "~/git/interviews/resume.org"))
-      )
+      :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
     )
+
+  (defun ns/gptel-select-backend ()
+    "Select a gptel backend and update `gptel-backend`."
+    (interactive)
+    (let* ((backends '(("shodan" . ns/gptel-ollama-backend)
+                       ("openrouter" . ns/gptel-openrouter-backend)
+                       ("groq" . ns/gptel-groq-backend)
+                       ("gemini" . ns/gptel-gemini-backend)
+                       ))
+           (choice (completing-read "Select gptel backend: " (mapcar #'car backends)))
+           (backend (cdr (assoc choice backends))))
+      (when backend
+        (setq gptel-backend (symbol-value backend))
+        (message "gptel backend set to: %s" choice))))
+
 
   ;; Define keyboard shortcuts.
   (ns/leader-spc
@@ -2159,8 +2104,6 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
     ]
   }'
 #+end_src
-#+RESULTS:
-
 
 * Window Management
 
@@ -2194,7 +2137,6 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
     "C-l"  '(persp-state-load :wk "load all persps from a file")
   )
  #+end_src
- #+RESULTS:
 
 ** Popper
 #+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
@@ -2215,8 +2157,6 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
     "C-M-`" '(popper-toggle-type :wk "change current buffer's toggle type"))
 
 #+end_src
-
-#+RESULTS:
 
 * File Management
 ** Dired

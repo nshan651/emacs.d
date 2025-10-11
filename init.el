@@ -94,3 +94,13 @@
 
 (global-set-key (kbd "C-S-c") 'copy-region-as-kill)
 (global-set-key (kbd "C-S-v") 'yank)
+
+(use-package auth-source-pass
+  :custom
+  (auth-source-pass-filename
+   (expand-file-name
+    "password-store/apikeys"
+    (or (getenv "XDG_DATA_HOME")
+        (expand-file-name "~/.local/share"))))
+  :init
+  (auth-source-pass-enable))

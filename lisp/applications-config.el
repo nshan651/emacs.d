@@ -62,18 +62,61 @@
   (gptel-default-mode 'org-mode)
   (gptel-model 'qwen3:1.7b-ns)
   :config
-  (setq gptel-backend (gptel-make-ollama "shodan"
-                   :host "shodan:11434" ;; Or use shodan.local for mDNS.
-                   :stream t
-                   :models '(deepseek-r1:1.5b-ns
-                             gemma3:1b
-                             gemma3:latest
-                             llama3.2:latest
-                             llama3.2-ns
-                             qwen3:1.7b-ns
-                             qwen3:1.7b
-                             qwen3:4b-ns
-                             phi4-mini:latest)))
+
+  ;; Set up model backends.
+  (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
+                                  :host "shodan:11434" ;; Or use shodan.local for mDNS.
+                                  :stream t
+                                  :models '(deepseek-r1:1.5b-ns
+                                            gemma3:1b
+                                            gemma3:latest
+                                            llama3.2:latest
+                                            llama3.2-ns
+                                            qwen3:1.7b-ns
+                                            qwen3:1.7b
+                                            qwen3:4b-ns)))
+
+  (setq ns/gptel-openrouter-backend
+        (gptel-make-openai "openrouter"
+          :host "openrouter.ai"
+          :endpoint "/api/v1/chat/completions"
+          :stream t
+          :key (lambda () (auth-source-pass-get 'secret "openrouter/key"))
+          :models '(deepseek/deepseek-chat-v3.1:free
+                    openai/gpt-oss-20b:free
+                    qwen/qwen3-coder:free
+                    moonshotai/kimi-k2:free
+                    )))
+
+  (setq ns/gptel-groq-backend
+        (gptel-make-openai "groq"
+          :host "api.groq.com"
+          :endpoint "/openai/v1/chat/completions"
+          :stream t
+          :key (lambda () (auth-source-pass-get 'secret "groq/key"))
+          :models '(openai/gpt-oss-120b
+                    moonshotai/kimi-k2-instruct
+                    llama-3.1-70b-versatile
+                    qwen/qwen3-32b
+                    openai/gpt-oss-20b)))
+
+  (setq ns/gptel-gemini-backend
+        (gptel-make-gemini "gemini"
+          :stream t
+          :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
+          :models '(gemini-2.0-flash-lite
+                    gemini-2.5-flash
+                    (gemini-2.5-pro-latest
+                     :description
+                     "Complex reasoning tasks, problem solving and data extraction"
+                     :capabilities (tool json)
+                     :mime-types
+                     ("image/jpeg" "image/png" "image/webp" "image/heic")))))
+
+
+  ;; Set the defualt model backend.
+  ;; (setq gptel-backend ns/gptel-ollama-backend)
+  (setq gptel-backend ns/gptel-gemini-backend)
 
   ;; Configure system prompts.
   (gptel-make-preset "Incremental Reasoning"
@@ -81,12 +124,25 @@
     :backend "shodan")
 
   (gptel-make-preset 'resume
-    :system-message "You are a junior software engineer with 2 years of professional experience. Use the following resume to answer interview questions in a thoughtful way."
+    :system-message "Use the following resume to answer interview questions in a thoughtful way."
     :backend "shodan"
-    :pre (lambda ()
-		  (gptel-add-file "~/git/interviews/resume.org"))
-    )
+    :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
   )
+
+(defun ns/gptel-select-backend ()
+  "Select a gptel backend and update `gptel-backend`."
+  (interactive)
+  (let* ((backends '(("shodan" . ns/gptel-ollama-backend)
+                     ("openrouter" . ns/gptel-openrouter-backend)
+                     ("groq" . ns/gptel-groq-backend)
+                     ("gemini" . ns/gptel-gemini-backend)
+                     ))
+         (choice (completing-read "Select gptel backend: " (mapcar #'car backends)))
+         (backend (cdr (assoc choice backends))))
+    (when backend
+      (setq gptel-backend (symbol-value backend))
+      (message "gptel backend set to: %s" choice))))
+
 
 ;; Define keyboard shortcuts.
 (ns/leader-spc
