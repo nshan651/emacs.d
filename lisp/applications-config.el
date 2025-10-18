@@ -115,13 +115,26 @@
 
 
   ;; Set the defualt model backend.
-  ;; (setq gptel-backend ns/gptel-ollama-backend)
   (setq gptel-backend ns/gptel-gemini-backend)
 
   ;; Configure system prompts.
   (gptel-make-preset "Incremental Reasoning"
     :system-message "Let's think step by step to assure we arrive at the correct answer."
     :backend "shodan")
+
+  (gptel-make-preset 'proofreader
+    :description "Preset for proofreading tasks."
+    :backend "gemini"
+    :model 'gemini-2.0-flash
+    :tools '("read_buffer" "spell_check" "grammar_check")
+    :temperature 0.7
+    :use-context 'system)
+
+  (gptel-make-preset 'websearch
+    :description  "gemini with basic web search capability."
+    :backend      "gemini"
+    :model        'gemini-2.5-flash
+    :tools        '("search_web" "read_url" "get_youtube_meta"))
 
   (gptel-make-preset 'resume
     :system-message "Use the following resume to answer interview questions in a thoughtful way."

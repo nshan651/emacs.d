@@ -540,10 +540,12 @@ My custom color theme is a minor modification of =modus-vivendi=.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (load-theme 'modus-vivendi)
   (set-face-attribute 'default nil :background "#1f1f1f")
+
   (with-eval-after-load 'org
-    (set-face-attribute 'org-block nil :inherit nil :background "#2b2b2b")
+    (set-face-attribute 'org-block nil :background "#2b2b2b")
     (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
-    (set-face-attribute 'org-code nil :foreground ";; #ff599c"))
+    (set-face-attribute 'org-code nil :foreground "#ff599c"))
+
 
   (with-eval-after-load 'gptel-rewrite
     (set-face-attribute 'gptel-rewrite-highlight-face nil
@@ -551,6 +553,9 @@ My custom color theme is a minor modification of =modus-vivendi=.
                         :background "#413847"
                         :extend t))
 #+end_src
+
+#+RESULTS:
+
 ** Transparency
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
     (defun ns/toggle-transparency ()
@@ -931,7 +936,6 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
       (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    ;; (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
     (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
@@ -1232,6 +1236,7 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
   ;; Disable execution confirmations
   (setq org-confirm-babel-evaluate nil)
 #+end_src
+
 ** Structure Templates
 Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
 
@@ -1524,9 +1529,6 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.0))
-
-  (use-package company-box
-    :hook (company-mode . company-box-mode))
 #+end_src
 
 ** TRAMP Mode
@@ -1605,7 +1607,6 @@ A better ~yas-insert-snippet~.
   ;;   :config (counsel-projectile-mode))
 #+end_src
 
-
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 
@@ -1630,7 +1631,6 @@ A better ~yas-insert-snippet~.
     "ga " '(magit-stage :wk "git add")
     "gi " '(magit-init :wk "git init"))
 #+end_src
-
 
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
@@ -1693,6 +1693,7 @@ Forge allows use to work with varios git forges using the magit interface.
     ;; load default config
     (require 'smartparens-config))
 #+end_src
+
 
 * Programming Languages
 ** C/C++
@@ -1978,7 +1979,7 @@ The Gnu Guix interface.
   ;; (use-package guix)
 #+end_src
 ** GPTel
-A simple llm interface for emacs. Currently, I am using [[https://github.com/ollama/ollama][Ollama]] as a backend.
+[[https://github.com/karthink/gptel][gptel]] is a simple llm interface for emacs. I have multiple backends to choose from, including [[https://github.com/ollama/ollama][Ollama]], openrouter, groq, and gemini.
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package gptel
@@ -2039,13 +2040,26 @@ A simple llm interface for emacs. Currently, I am using [[https://github.com/oll
 
 
     ;; Set the defualt model backend.
-    ;; (setq gptel-backend ns/gptel-ollama-backend)
     (setq gptel-backend ns/gptel-gemini-backend)
 
     ;; Configure system prompts.
     (gptel-make-preset "Incremental Reasoning"
       :system-message "Let's think step by step to assure we arrive at the correct answer."
       :backend "shodan")
+
+    (gptel-make-preset 'proofreader
+      :description "Preset for proofreading tasks."
+      :backend "gemini"
+      :model 'gemini-2.0-flash
+      :tools '("read_buffer" "spell_check" "grammar_check")
+      :temperature 0.7
+      :use-context 'system)
+
+    (gptel-make-preset 'websearch
+      :description  "gemini with basic web search capability."
+      :backend      "gemini"
+      :model        'gemini-2.5-flash
+      :tools        '("search_web" "read_url" "get_youtube_meta"))
 
     (gptel-make-preset 'resume
       :system-message "Use the following resume to answer interview questions in a thoughtful way."
@@ -2080,6 +2094,8 @@ A simple llm interface for emacs. Currently, I am using [[https://github.com/oll
     "ga" '(gptel-add :wk "gptel add")
     "gf" '(gptel-add-file :wk "gptel add file"))
 #+end_src
+
+#+RESULTS:
 
 ** Setup Instructions
 We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:

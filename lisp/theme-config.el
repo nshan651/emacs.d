@@ -32,10 +32,12 @@
 
 (load-theme 'modus-vivendi)
 (set-face-attribute 'default nil :background "#1f1f1f")
+
 (with-eval-after-load 'org
-  (set-face-attribute 'org-block nil :inherit nil :background "#2b2b2b")
+  (set-face-attribute 'org-block nil :background "#2b2b2b")
   (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
-  (set-face-attribute 'org-code nil :foreground ";; #ff599c"))
+  (set-face-attribute 'org-code nil :foreground "#ff599c"))
+
 
 (with-eval-after-load 'gptel-rewrite
   (set-face-attribute 'gptel-rewrite-highlight-face nil
