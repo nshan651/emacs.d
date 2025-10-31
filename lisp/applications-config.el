@@ -104,8 +104,8 @@
         (gptel-make-gemini "gemini"
           :stream t
           :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
-          :models '(gemini-2.0-flash-lite
-                    gemini-2.5-flash
+          :models '(gemini-2.5-flash
+                    gemini-2.0-flash-lite
                     (gemini-2.5-pro-latest
                      :description
                      "Complex reasoning tasks, problem solving and data extraction"

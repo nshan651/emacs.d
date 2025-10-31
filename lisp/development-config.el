@@ -6,6 +6,7 @@
   (display-fill-column-indicator-mode))
 
 (use-package lsp-mode
+  :disabled t
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :hook
@@ -25,11 +26,6 @@
   (lsp-enable-which-key-integration t)
   (setq lsp-completion-enable t)
   (setq lsp-completion-provider :capf)
-  ;; (setq lsp-log-io t)
-  ;; The path to lsp-mode needs to be added to load-path as well as the
-  ;; path to the `clients' subdirectory.
-
-  ;; Activate lsp-mode
   )
 
 (ns/leader-m 'lsp-mode-map
@@ -47,6 +43,7 @@
  "l" 'lsp-workspace-show-log)
 
 (use-package lsp-ui
+  :disabled t
   :after lsp-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
@@ -59,11 +56,46 @@
  "i" 'lsp-ui-doc-glance)
 
 (use-package consult-lsp
+  :disabled t
   :after lsp-mode
   :general
   (ns/leader-m 'lsp-mode-map
     "y" 'consult-lsp-symbols
     "e" 'consult-lsp-diagnostics))
+
+(use-package eglot
+  :hook ((c-mode
+          c++-mode
+          csharp-mode
+          go-mode
+          python-mode
+          rust-mode) . eglot-ensure)
+  :config
+  ;; Use headerline breadcrumbs (like your ns/lsp-mode-setup)
+  (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
+  (setq eglot-stay-out-of '(flymake))
+  (add-hook 'eglot-managed-mode-hook #'eglot-inlay-hints-mode)
+  ;; Optional: improve eldoc display
+  (setq eldoc-echo-area-use-multiline-p t)
+  (setq eglot-events-buffer-size 0)
+  (setq eglot-autoshutdown t))
+
+(defun ns/eglot-setup ()
+  "Custom setup for eglot-managed buffers."
+  (display-fill-column-indicator-mode)
+  (setq-local completion-at-point-functions
+              (list (cape-capf-super
+                     #'eglot-completion-at-point
+                     #'cape-dabbrev
+                     #'cape-file))))
+
+(add-hook 'eglot-managed-mode-hook #'flymake-mode)
+(add-hook 'eglot-managed-mode-hook #'ns/eglot-setup)
+
+(use-package consult-eglot
+  :after (consult eglot)
+  :bind (:map eglot-mode-map
+         ("C-c l d" . consult-eglot-symbols)))
 
 (use-package lsp-treemacs
   :after lsp)
@@ -85,6 +117,7 @@
   (dap-tooltip-mode 1))
 
 (use-package company
+  :disabled t
   :after lsp-mode
   :hook (lsp-mode . company-mode)
   :bind (:map company-active-map

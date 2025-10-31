@@ -691,7 +691,6 @@ Linear undo while maintaining all history.
 ** Consult
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
-  ;; Example configuration for Consult
   (use-package consult
     ;; Replace bindings. Lazily loaded due by `use-package'.
     :bind (
@@ -865,12 +864,6 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package corfu
-    ;; :general
-    ;; (general-def 'corfu-mode-map
-    ;;   "C-j" 'corfu-next
-    ;;   "C-k" 'corfu-previous
-    ;;   "TAB" 'corfu-insert
-    ;;   "C-f" 'corfu-insert)
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     (corfu-separator ?\s)          ;; Orderless field separator
@@ -1003,7 +996,9 @@ This section contains the basic configuration for =org-mode= plus the configurat
         '("~/ark/org/agenda/todo.org"       ; General unsorted todo items.
           "~/ark/org/agenda/inbox.org"      ; TBD!
           "~/ark/org/agenda/contacts.org"   ; Contacts list.
-          "~/ark/org/agenda/projects.org"))
+          "~/ark/org/agenda/projects.org"   ; Project mgmt.
+          "~/ark/org/agenda/cron.org"       ; Recurring events/habits.
+          ))
 
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
@@ -1016,7 +1011,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
   (setq org-tag-alist
         '((:startgroup)
-                                          ; Put mutually exclusive tags here
+           ;; Put mutually exclusive tags here
           (:endgroup)
           ("@errand" . ?E)
           ("@home" . ?H)
@@ -1292,9 +1287,8 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
     (org-roam-directory (file-truename "~/ark/org"))
     (org-roam-dailies-directory "~/ark/org/journal")
     (org-roam-completion-everywhere t)
+    :config
     (org-roam-db-autosync-mode)
-    ;; :config
-    ;; (org-roam-db-autosync-mode)
 
     ;; If you're using a vertical completion framework, you might want a more informative completion interface
     ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
@@ -1313,6 +1307,7 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
     "nj" '(org-roam-dailies-capture-today :wk "org roam dailies capture today"))
 
 #+end_src
+
 ** Org Roam Capture Templates
 Org roam allows you to create various capture templates.
 
@@ -1386,7 +1381,6 @@ It can be useful to differentiate the different types of zettels at completion t
 * Development
 
 ** LSP
-
 *** lsp-mode
 [[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]] enables IDE-like functionality for many different programming languages via "language servers" that speak the [[https://microsoft.github.io/language-server-protocol/][Language Server Protocol]].  Before trying to set up =lsp-mode= for a particular language, check out the [[https://emacs-lsp.github.io/lsp-mode/page/languages/][documentation for your language]] so that you can learn which language servers are available and how to install them.
 
@@ -1403,6 +1397,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (display-fill-column-indicator-mode))
 
   (use-package lsp-mode
+    :disabled t
     :init
     (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
     :hook
@@ -1422,11 +1417,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (lsp-enable-which-key-integration t)
     (setq lsp-completion-enable t)
     (setq lsp-completion-provider :capf)
-    ;; (setq lsp-log-io t)
-    ;; The path to lsp-mode needs to be added to load-path as well as the
-    ;; path to the `clients' subdirectory.
-
-    ;; Activate lsp-mode
     )
 
   (ns/leader-m 'lsp-mode-map
@@ -1449,6 +1439,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package lsp-ui
+    :disabled t
     :after lsp-mode
     :hook (lsp-mode . lsp-ui-mode)
     :custom
@@ -1465,13 +1456,53 @@ LSP integration with consult.
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package consult-lsp
+    :disabled t
     :after lsp-mode
     :general
     (ns/leader-m 'lsp-mode-map
       "y" 'consult-lsp-symbols
       "e" 'consult-lsp-diagnostics))
 #+end_src
+*** Eglot
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package eglot
+    :hook ((c-mode
+            c++-mode
+            csharp-mode
+            go-mode
+            python-mode
+            rust-mode) . eglot-ensure)
+    :config
+    ;; Use headerline breadcrumbs (like your ns/lsp-mode-setup)
+    (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
+    (setq eglot-stay-out-of '(flymake))
+    (add-hook 'eglot-managed-mode-hook #'eglot-inlay-hints-mode)
+    ;; Optional: improve eldoc display
+    (setq eldoc-echo-area-use-multiline-p t)
+    (setq eglot-events-buffer-size 0)
+    (setq eglot-autoshutdown t))
 
+  (defun ns/eglot-setup ()
+    "Custom setup for eglot-managed buffers."
+    (display-fill-column-indicator-mode)
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point
+                       #'cape-dabbrev
+                       #'cape-file))))
+
+  (add-hook 'eglot-managed-mode-hook #'flymake-mode)
+  (add-hook 'eglot-managed-mode-hook #'ns/eglot-setup)
+#+end_src
+
+
+*** consult-eglot
+#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (use-package consult-eglot
+    :after (consult eglot)
+    :bind (:map eglot-mode-map
+           ("C-c l d" . consult-eglot-symbols)))
+#+end_src
 *** lsp-treemacs
 [[https://github.com/emacs-lsp/lsp-treemacs][lsp-treemacs]] provides nice tree views for different aspects of your code like symbols in a file, references of a symbol, or diagnostic messages (errors and warnings) that are found in your code.
 
@@ -1520,6 +1551,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package company
+    :disabled t
     :after lsp-mode
     :hook (lsp-mode . company-mode)
     :bind (:map company-active-map
@@ -2029,8 +2061,8 @@ The Gnu Guix interface.
           (gptel-make-gemini "gemini"
             :stream t
             :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
-            :models '(gemini-2.0-flash-lite
-                      gemini-2.5-flash
+            :models '(gemini-2.5-flash
+                      gemini-2.0-flash-lite
                       (gemini-2.5-pro-latest
                        :description
                        "Complex reasoning tasks, problem solving and data extraction"

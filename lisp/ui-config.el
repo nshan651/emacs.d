@@ -56,7 +56,6 @@ folder, otherwise delete a character backward"
     ;; Enable recursive minibuffers
     (setq enable-recursive-minibuffers t))
 
-;; Example configuration for Consult
 (use-package consult
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (
@@ -213,12 +212,6 @@ folder, otherwise delete a character backward"
   (marginalia-mode))
 
 (use-package corfu
-  ;; :general
-  ;; (general-def 'corfu-mode-map
-  ;;   "C-j" 'corfu-next
-  ;;   "C-k" 'corfu-previous
-  ;;   "TAB" 'corfu-insert
-  ;;   "C-f" 'corfu-insert)
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-separator ?\s)          ;; Orderless field separator
