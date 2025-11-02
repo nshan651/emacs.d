@@ -1,3 +1,117 @@
+(use-package consult
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  (setq consult-narrow-key "<"))
+
+;; Choose a theme.
+(ns/leader-t "t" '(consult-theme :wk "Choose a theme"))
+
+;; Registers.
+(general-def 'override
+  ("M-#" . consult-register-load)
+  ("M-'" . consult-register-store)
+  ("C-M-#" . consult-register)
+  ("M-y" . consult-yank-pop))
+
+;; Searching `search-mode-map'.
+(general-def 'override
+  :keymaps 'isearch-mode-map
+  "C-s" 'consult-line
+  "M-e"  'consult-isearch-history
+  "M-s e" 'consult-isearch-history)
+
+;; Minibuffer history.
+(general-def 'override
+  :keymaps 'minibuffer-local-map
+  "M-s" 'consult-history)
+
+;; Buffer management
+(ns/leader-spc
+  ;; repeat-complex-command
+  "M-:" 'consult-complex-command
+  "b"   '(:ignore t :wk "consult buffer selection")
+  ;; switch-to-buffer
+  "bb"  '(consult-buffer :wk "consult buffer")
+  ;; switch-to-buffer-other-window
+  "b/"  '(consult-buffer-other-window :wk "open buffer in another window")
+  ;; switch-to-buffer-other-frame
+  "b\\" '(consult-buffer-other-frame :wk "open buffer in another frame")
+  ;; bookmark-jump
+  "br"  '(consult-bookmark :wk "bookmark jump")
+  ;; project-switch-to-buffer
+  "bp"  '(consult-project-buffer :wk "switch between project buffers"))
+
+;; C-c bindings in `mode-specific-map'
+(general-def 'normal
+  :keymaps 'mode-specific-map
+  :prefix "C-c"
+  "M-x" 'consult-mode-command
+  "h"   'consult-history
+  "k"   'consult-kmacro
+  "m"   'consult-man
+  "i"   'consult-info)
+
+;; M-g bindings in `goto-map'
+(general-def 'normal
+  :keymaps 'goto-map
+  :prefix "M-g"
+  "f"   'consult-flymake
+  "g"   'consult-goto-line       ;; orig. goto-line
+  "M-g" 'consult-goto-line       ;; orig. goto-line
+  "o"   'consult-outline         ;; Alternative: consult-org-heading
+  "m"   'consult-mark
+  "k"   'consult-global-mark
+  "i"   'consult-imenu
+  "I"   'consult-imenu-multi)
+
+;; M-s bindings in `search-map'
+(general-def '(normal insert visual emacs)
+  :keymaps 'search-map
+  :prefix "M-s"
+  "d"   'consult-find            ;; Alt: consult-fd
+  "D"   'consult-locate
+  "g"   'consult-grep
+  "G"   'consult-git-grep
+  "r"   'consult-ripgrep
+  "k"   'consult-keep-lines
+  "u"   'consult-focus-lines)
+
+;; Other custom bindings
+(general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
+
 (use-package undo-fu
   :general
   ('normal
@@ -56,124 +170,6 @@ folder, otherwise delete a character backward"
     ;; Enable recursive minibuffers
     (setq enable-recursive-minibuffers t))
 
-(use-package consult
-  ;; Replace bindings. Lazily loaded due by `use-package'.
-  :bind (
-         ;; TODO generalize (hehe, see what I did there) these keybinds later
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-
-  ;; The :init configuration is always executed (Not lazy)
-  :init
-
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
-
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<"))
-
-;; Buffer management
-(ns/leader-spc
-  ;; repeat-complex-command
-  "M-:" 'consult-complex-command
-  "b"   '(:ignore t :wk "consult buffer selection")
-  ;; switch-to-buffer
-  "bb"  '(consult-buffer :wk "consult buffer")
-  ;; switch-to-buffer-other-window
-  "b/"  '(consult-buffer-other-window :wk "open buffer in another window")
-  ;; switch-to-buffer-other-frame
-  "b\\" '(consult-buffer-other-frame :wk "open buffer in another frame")
-  ;; bookmark-jump
-  "br"  '(consult-bookmark :wk "bookmark jump")
-  ;; project-switch-to-buffer
-  "bp"  '(consult-project-buffer :wk "switch between project buffers"))
-
-;; C-c bindings in `mode-specific-map'
-(general-def 'normal
-  :keymaps 'mode-specific-map
-  :prefix "C-c"
-  "M-x" 'consult-mode-command
-  "h"   'consult-history
-  "k"   'consult-kmacro
-  "m"   'consult-man
-  "i"   'consult-info)
-
-;; M-g bindings in `goto-map'
-(general-def 'normal
-  :keymaps 'goto-map
-  :prefix "M-g"
-  "f"   'consult-flymake         ;; Alternative: consult-flycheck
-  "g"   'consult-goto-line       ;; orig. goto-line
-  "M-g" 'consult-goto-line       ;; orig. goto-line
-  "o"   'consult-outline         ;; Alternative: consult-org-heading
-  "m"   'consult-mark
-  "k"   'consult-global-mark
-  "i"   'consult-imenu
-  "I"   'consult-imenu-multi)
-
-;; M-s bindings in `search-map'
-(general-def '(normal insert visual emacs)
-  :keymaps 'search-map
-  :prefix "M-s"
-  "d"   'consult-find            ;; Alt: consult-fd
-  "D"   'consult-locate
-  "g"   'consult-grep
-  "G"   'consult-git-grep
-  "r"   'consult-ripgrep
-  "k"   'consult-keep-lines
-  "u"   'consult-focus-lines)
-
-;; C-s bindings in `search-mode-map'
-;; Prefer `consult-line' over Isearch for a swiper-like experience
- (general-def 'override
-   :keymaps 'isearch-mode-map
-   "C-s" 'consult-line)
-
-;; Other custom bindings
-(general-def 'override "M-y" 'consult-yank-pop) ;; orig. yank-pop
-
 (use-package orderless
   :custom
   (completion-styles '(orderless))
@@ -224,11 +220,8 @@ folder, otherwise delete a character backward"
 
 (use-package helpful
   :commands (helpful-callable helpful-variable helpful-command helpful-key)
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
   :bind
-  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-function] . helpful-callable)
   ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))

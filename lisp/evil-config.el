@@ -1,15 +1,10 @@
-;; Bind C-x C-b to ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-;; Make ESC quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
 (use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  (setq evil-respect-visual-line-mode t)
+  :custom
+  (evil-want-integration t)
+  (evil-want-keybinding nil)
+  (evil-want-C-u-scroll t)
+  (evil-want-C-i-jump nil)
+  (evil-respect-visual-line-mode t)
   :config
   (evil-mode 1)
   (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -23,48 +18,62 @@
 (use-package general
   :after evil
   :config
-  ;; Create definer keys to map keys with
+  ;; General-purpose leader prefix.
   (general-create-definer ns/leader-spc
     :states '(normal visual)
     :keymaps 'override
     :prefix "SPC")
+  ;; Cosmetics.
   (general-create-definer ns/leader-t
     :states 'normal
     :keymaps 'override
     :prefix "t")
+  ;; Read-only docs.
   (general-create-definer ns/leader-r
     :states 'motion
     :prefix "r")
+  ;; Magit operations.
   (general-create-definer ns/leader-m
     :states 'normal
     :prefix "m")
+  ;; Window management.
   (general-create-definer ns/leader-ca
     :states 'normal
     :keymaps 'override
     :prefix "C-a")
+  ;; Executive.
+  (general-create-definer ns/leader-comma
+    :states 'normal
+    :prefix ","))
+  ;; Misc.
   (general-create-definer ns/leader-ct
     :keymaps '(insert normal)
     :keymaps 'override
     :prefix "C-t")
-  (general-create-definer ns/leader-comma
-    :states 'normal
-    :prefix ","))
+
+;; Bind C-x C-b to ibuffer.
+(keymap-global-set "C-x C-b" 'ibuffer)
+;; Make ESC quit prompts.
+(keymap-global-set "<escape>" 'keyboard-escape-quit)
+;; Sensible copy-paste behavior.
+(keymap-global-set "C-S-c" 'copy-region-as-kill)
+(keymap-global-set "C-S-v" 'yank)
 
 ;; Use visual line motions even outside of visual-line-mode buffers
 (general-def 'motion
   "j" 'evil-next-visual-line
   "k" 'evil-previous-visual-line)
 
-;; Choose a theme
-;; TODO move this to consult
-(ns/leader-t
-  "t" '(consult-theme :wk "Choose a theme"))
-
 (ns/leader-spc
   "f"  'find-file
-  ;; "b"  'switch-to-buffer
   "k"  'kill-buffer
   "eb" 'eval-buffer)
+
+;; Compiling and recompiling.
+(general-def 'normal
+  :prefix "g"
+  "c" 'compile
+  "r" 'recompile)
 
 ;; Manage windows
 (ns/leader-ca 'override
@@ -124,12 +133,6 @@
                  (ns/win-resize-right))
   "C-j"         (lambda () (interactive) (enlarge-window 11))
   "C-k"        (lambda () (interactive) (shrink-window 11)))
-
-;; Compiling and recompiling.
-(general-def 'normal
-  :prefix "g"
-  "c" 'compile
-  "r" 'recompile)
 
 (use-package evil-nerd-commenter
   :general ("M-/" 'evilnc-comment-or-uncomment-lines))

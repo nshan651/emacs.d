@@ -1,132 +1,66 @@
-(defun ns/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
+
 
 (defun ns/prog-mode-setup ()
-  (display-fill-column-indicator-mode))
-
-(use-package lsp-mode
-  :disabled t
-  :init
-  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-  :hook
-  ((lsp-mode . ns/lsp-mode-setup)
-   (prog-mode . ns/prog-mode-setup)
-   (c-mode . lsp)
-   (c++-mode . lsp)
-   (csharp-mode . lsp)
-   (go-mode . lsp)
-   (python-mode . lsp)
-   (rust-mode . lsp))
-  :commands lsp
-  ;; :custom
-  ;; (lsp-auto-configure t)
-  ;; (lsp-enable-symbol-highlighting t)
-  :config
-  (lsp-enable-which-key-integration t)
-  (setq lsp-completion-enable t)
-  (setq lsp-completion-provider :capf)
+  "Setup some sensible defaults."
+  (setq truncate-lines t) ; Avoid code wrap.
+  (display-fill-column-indicator-mode 1) ; Show fill column (already set to 80).
+  (flymake-mode 1) ; Basic syntax checking.
   )
-
-(ns/leader-m 'lsp-mode-map
- "a" 'lsp-execute-code-action
- "v" 'lsp-avy-lens
- "n" 'lsp-describe-thing-at-point
- ;; "i" 'lsp-goto-implementation
- "d" 'lsp-find-definition
- "D" 'lsp-find-declaration
- "t" 'lsp-find-type-definition
- "x" 'lsp-find-references
- "r" 'lsp-rename
- "R" 'lsp-restart-workspace
- "=" 'lsp-format-buffer
- "l" 'lsp-workspace-show-log)
-
-(use-package lsp-ui
-  :disabled t
-  :after lsp-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-position 'at-point)
-  (lsp-ui-doc-delay 0.0)
-  (lsp-ui-sideline-show-code-actions nil)
-  )
-
-(ns/leader-m 'lsp-mode-map
- "i" 'lsp-ui-doc-glance)
-
-(use-package consult-lsp
-  :disabled t
-  :after lsp-mode
-  :general
-  (ns/leader-m 'lsp-mode-map
-    "y" 'consult-lsp-symbols
-    "e" 'consult-lsp-diagnostics))
 
 (use-package eglot
-  :hook ((c-mode
-          c++-mode
-          csharp-mode
-          go-mode
-          python-mode
-          rust-mode) . eglot-ensure)
+  :hook
+  (prog-mode . ns/prog-mode-setup)
+  (eglot-managed-mode . eglot-inlay-hints-mode)
+  ((c-mode
+    c++-mode
+    csharp-mode
+    python-mode
+    rust-mode
+    yaml-mode
+    ) . eglot-ensure)
   :config
-  ;; Use headerline breadcrumbs (like your ns/lsp-mode-setup)
-  (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-  (setq eglot-stay-out-of '(flymake))
-  (add-hook 'eglot-managed-mode-hook #'eglot-inlay-hints-mode)
+  ;; (setq eglot-stay-out-of '(flymake))
+
   ;; Optional: improve eldoc display
   (setq eldoc-echo-area-use-multiline-p t)
-  (setq eglot-events-buffer-size 0)
-  (setq eglot-autoshutdown t))
 
-(defun ns/eglot-setup ()
-  "Custom setup for eglot-managed buffers."
-  (display-fill-column-indicator-mode)
-  (setq-local completion-at-point-functions
-              (list (cape-capf-super
-                     #'eglot-completion-at-point
-                     #'cape-dabbrev
-                     #'cape-file))))
+  (setq eglot-autoshutdown t                ; Shutdown servers when last buffer closes
+        eglot-sync-connect nil              ; Connect asynchronously
+        eglot-events-buffer-size 0          ; Disable noisy *eglot-events* logging
+        eglot-ignored-server-capabilities
+        '(:documentHighlightProvider        ; Don’t auto-highlight symbol under point
+          :documentOnTypeFormattingProvider ; Avoid intrusive on-type formatting
+          :inlayHintProvider))
+  ;; Use header line for breadcrumbs (like VSCode symbol path)
+  (setq eglot-display-context 'header-line)
+  )
 
-(add-hook 'eglot-managed-mode-hook #'flymake-mode)
-(add-hook 'eglot-managed-mode-hook #'ns/eglot-setup)
+;; TODO: Convert these keybinds to eglot.
+;; (ns/leader-m 'lsp-mode-map
+;;  "a" 'lsp-execute-code-action
+;;  "v" 'lsp-avy-lens
+;;  "n" 'lsp-describe-thing-at-point
+;;  ;; "i" 'lsp-goto-implementation
+;;  "d" 'lsp-find-definition
+;;  "D" 'lsp-find-declaration
+;;  "t" 'lsp-find-type-definition
+;;  "x" 'lsp-find-references
+;;  "r" 'lsp-rename
+;;  "R" 'lsp-restart-workspace
+;;  "=" 'lsp-format-buffer
+;;  "l" 'lsp-workspace-show-log)
 
 (use-package consult-eglot
   :after (consult eglot)
   :bind (:map eglot-mode-map
          ("C-c l d" . consult-eglot-symbols)))
 
-(use-package lsp-treemacs
-  :after lsp)
-
-(use-package treesit-auto
-  :disabled t
-  :demand t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
-
 (use-package dap-mode
-  :after lsp-mode
+  :after eglot-mode
   :config
   (dap-mode 1)
   (dap-ui-mode 1)
   (dap-tooltip-mode 1))
-
-(use-package company
-  :disabled t
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
 
 ;; Setup TRAMP mode
 (setq tramp-default-method "ssh")
@@ -177,10 +111,6 @@
   "pp" '(projectile-find-file :wk "projectile find file")
   "pc" '(projectile-compile-project :wk "projectile compile project")
   "pd" '(projectile-dired :wk "projectile dired"))
-
-;; (use-package counsel-projectile
-;;   :after projectile
-;;   :config (counsel-projectile-mode))
 
 (use-package magit
   :commands magit-status
@@ -239,7 +169,6 @@
   (lisp-mode . rainbow-delimiters-mode))
 
 (use-package smartparens
-  ;; :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
   :init
   (smartparens-global-mode)
   :config

@@ -74,7 +74,9 @@
       '("~/ark/org/agenda/todo.org"       ; General unsorted todo items.
         "~/ark/org/agenda/inbox.org"      ; TBD!
         "~/ark/org/agenda/contacts.org"   ; Contacts list.
-        "~/ark/org/agenda/projects.org"))
+        "~/ark/org/agenda/projects.org"   ; Project mgmt.
+        "~/ark/org/agenda/cron.org"       ; Recurring events/habits.
+        ))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
@@ -87,7 +89,7 @@
 
 (setq org-tag-alist
       '((:startgroup)
-                                        ; Put mutually exclusive tags here
+         ;; Put mutually exclusive tags here
         (:endgroup)
         ("@errand" . ?E)
         ("@home" . ?H)

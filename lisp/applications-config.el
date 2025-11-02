@@ -11,10 +11,12 @@
   (rcirc-default-nick "nshan651")
   (rcirc-default-user-name "nshan651")
   (rcirc-default-full-name "ns")
-  (rcirc-server-alist `(("irc.libera.chat"
-			 :channels ("#emacs" "#guix")
+  (rcirc-server-alist '(
+                        ("irc.libera.chat"
+			             :channels ("#emacs" "#guix")
                          :port 6697
-                         :encryption tls)))
+                         :encryption tls
+                         )))
   (rcirc-prompt "%t> ")
   (rcirc-timeout-seconds most-positive-fixnum)
 
@@ -60,7 +62,7 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  (gptel-model 'qwen3:1.7b-ns)
+  ;; (gptel-model 'qwen3:1.7b-ns)
   :config
 
   ;; Set up model backends.
@@ -156,15 +158,24 @@
       (setq gptel-backend (symbol-value backend))
       (message "gptel backend set to: %s" choice))))
 
+;; Gptel keyboard shortcuts.
+(ns/leader-comma
+  "b" '(gptel-abort :wk "gptel abort")
+  "g" '(gptel-mode :wk "gptel mode")
+  "p" '(gptel :wk "gptel prompt")
+  "r" '(gptel-rewrite :wk "gptel rewrite")
+  "s" '(gptel-send :wk "gptel send")
+  "m" '(gptel-menu :wk "gptel menu")
+  "a" '(gptel-add :wk "gptel add")
+  "f" '(gptel-add-file :wk "gptel add file"))
 
-;; Define keyboard shortcuts.
-(ns/leader-spc
-  "g"  '(:ignore t :wk "gptel")
-  "gb" '(gptel-abort :wk "gptel abort")
-  "gg" '(gptel-mode :wk "gptel mode")
-  "gp" '(gptel :wk "gptel prompt")
-  "gr" '(gptel-rewrite :wk "gptel rewrite")
-  "gs" '(gptel-send :wk "gptel send")
-  "gm" '(gptel-menu :wk "gptel menu")
-  "ga" '(gptel-add :wk "gptel add")
-  "gf" '(gptel-add-file :wk "gptel add file"))
+;; (ns/leader-spc
+;;   "g"  '(:ignore t :wk "gptel")
+;;   "gb" '(gptel-abort :wk "gptel abort")
+;;   "gg" '(gptel-mode :wk "gptel mode")
+;;   "gp" '(gptel :wk "gptel prompt")
+;;   "gr" '(gptel-rewrite :wk "gptel rewrite")
+;;   "gs" '(gptel-send :wk "gptel send")
+;;   "gm" '(gptel-menu :wk "gptel menu")
+;;   "ga" '(gptel-add :wk "gptel add")
+;;   "gf" '(gptel-add-file :wk "gptel add file"))

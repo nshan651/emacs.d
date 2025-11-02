@@ -1,30 +1,3 @@
-(defvar ns-emacs-tiling-window-manager-regexp
-  (regexp-opt '("bspwm" "i3" "dwm"))
-  "Regular expression to  tiling window managers.
-See definition of `ns-emacs-with-desktop-session'.")
-
-(defmacro ns-emacs-with-desktop-session (&rest body)
- "Expand BODY if desktop session is not a tiling window manager.
-See `ns-emacs-tiling-window-manager-regexp' for what
-constitutes a matching tiling window manager."
-  (declare (indent 0))
-  `(when-let ((session (getenv "DESKTOP_SESSION"))
-              ((not (string-match-p session ns-emacs-tiling-window-manager-regexp))))
-     ,@body))
-
-(defun ns-emacs-add-to-list (list element)
-  "Add to symbol of LIST the given ELEMENT.
-Simplified version of `add-to-list'."
-  (set list (cons element (symbol-value list))))
-
-(ns-emacs-with-desktop-session
-  (mapc
-   (lambda (var)
-     (ns-emacs-add-to-list var '(width . (text-pixels . 900)))
-     (ns-emacs-add-to-list var '(height . (text-pixels . 600)))
-     (ns-emacs-add-to-list var '(scroll-bar-width  . 10)))
-   '(default-frame-alist initial-frame-alist)))
-
 (setq frame-resize-pixelwise t
       frame-inhibit-implied-resize t
       frame-title-format '("%b")
@@ -42,7 +15,7 @@ Simplified version of `add-to-list'."
 
 (set-fringe-mode 10) ; Give some breathing room
 
-(menu-bar-mode -1)   ; Disable the menu bar
+(menu-bar-mode -1) ; Disable the menu bar
 
 ;; Disable graphical elements
 (menu-bar-mode -1)
@@ -53,16 +26,13 @@ Simplified version of `add-to-list'."
 ;; Default for fill column should be 80 (not 70 like emacs would have it!!!)
 (setq-default fill-column 80)
 
-;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(100. 100))
-(add-to-list 'default-frame-alist `(alpha . (100 . 100)))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
 ;; Improve mouse scrolling
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+
+;; Start scrolling when cursor is with 25% of the top or bottom of the screen.
+(setq scroll-margin (floor (* 0.25 (window-height))))
 
 ;; Vim-like key scrolling
 (setq scroll-step 1
@@ -116,11 +86,5 @@ Simplified version of `add-to-list'."
 
 (setq custom-safe-themes t)
 
-;; Initialise installed packages at this early stage, by using the
-;; available cache.  I had tried a setup with this set to nil in the
-;; early-init.el, but (i) it ended up being slower and (ii) various
-;; package commands, like `describe-package', did not have an index of
-;; packages to work with, requiring a `package-refresh-contents'.
+;; Initialise installed packages at this early stage, by using the available cache.
 (setq package-enable-at-startup t)
-
-(add-hook 'after-init-hook (lambda () (set-frame-name "home")))

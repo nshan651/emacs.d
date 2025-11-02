@@ -10,46 +10,40 @@
 ;; Disable the damn thing by making it disposable.
 (setq custom-file (make-temp-file "emacs-custom-"))
 
-;; Enable these
+;; Enable these.
 (mapc
  (lambda (command)
    (put command 'disabled nil))
  '(list-timers narrow-to-region narrow-to-page upcase-region downcase-region))
 
-;; And disable these
+;; And disable these.
 (mapc
  (lambda (command)
    (put command 'disabled t))
  '(project-eshell overwrite-mode iconify-frame diary))
 
-;; Load my lisp package config paths
-(mapc
-(lambda (string)
-  (add-to-list 'load-path (locate-user-emacs-file string)))
-  '("lisp"))
-
 (defun ns/load-lisp-config (file-list)
   "Loads all config files in lisp directory."
   (dolist (file file-list)
-  (let ((full-path (locate-user-emacs-file (concat "lisp/" file))))
-  (when (file-readable-p full-path)
-  (load full-path)))))
+    (let ((full-path (locate-user-emacs-file (concat "lisp/" file))))
+      (when (file-readable-p full-path)
+        (load full-path)))))
 
-  ;; Load paths in specific order
-    (let ((file-list
-      '("evil-config.el"
-        "theme-config.el"
-        "development-config.el"
-        "ui-config.el"
-        "org-config.el"
-        "org-roam-config.el"
-        "programming-languages-config.el"
-        "terminal-config.el"
-        "applications-config.el"
-        "window-config.el"
-        "dired-config.el")))
+;; Load paths in a specific order.
+(let ((ns/file-list
+       '("evil-config.el"
+         "theme-config.el"
+         "development-config.el"
+         "ui-config.el"
+         "org-config.el"
+         "org-roam-config.el"
+         "programming-languages-config.el"
+         "terminal-config.el"
+         "applications-config.el"
+         "window-config.el"
+         "dired-config.el")))
 
-(ns/load-lisp-config file-list))
+  (ns/load-lisp-config ns/file-list))
 
 ;; Also load `feed.el'.
 (load (locate-user-emacs-file "etc/feed.el"))
@@ -91,9 +85,6 @@
 
 (setq select-enable-clipboard t)
 (setq x-select-enable-clipboard t)
-
-(global-set-key (kbd "C-S-c") 'copy-region-as-kill)
-(global-set-key (kbd "C-S-v") 'yank)
 
 (use-package auth-source-pass
   :custom
