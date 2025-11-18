@@ -297,6 +297,7 @@
                      ("py"  . "src python")
                      ("rs"  . "src rust")
                      ("cs"  . "src csharp")
+                     ("y"  . "src yaml")
                      ;; Leetcode snippet
                      ("leet" .
                       "src C++ :includes <iostream> :flags -I./src/util -std=c++20 :tangle src/ .cpp")

@@ -45,6 +45,9 @@
 
   (ns/load-lisp-config ns/file-list))
 
+;; Load gptel system prompts.
+;; (load (locate-user-emacs-file "etc/prompts.el"))
+
 ;; Also load `feed.el'.
 (load (locate-user-emacs-file "etc/feed.el"))
 

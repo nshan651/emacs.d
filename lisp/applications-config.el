@@ -62,7 +62,7 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  ;; (gptel-model 'qwen3:1.7b-ns)
+  (gptel-model 'moonshotai/kimi-k2-instruct)
   :config
 
   ;; Set up model backends.
@@ -96,8 +96,8 @@
           :endpoint "/openai/v1/chat/completions"
           :stream t
           :key (lambda () (auth-source-pass-get 'secret "groq/key"))
-          :models '(openai/gpt-oss-120b
-                    moonshotai/kimi-k2-instruct
+          :models '(moonshotai/kimi-k2-instruct
+                    openai/gpt-oss-120b
                     llama-3.1-70b-versatile
                     qwen/qwen3-32b
                     openai/gpt-oss-20b)))
@@ -108,7 +108,7 @@
           :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
           :models '(gemini-2.5-flash
                     gemini-2.0-flash-lite
-                    (gemini-2.5-pro-latest
+                    (gemini-2.5-pro
                      :description
                      "Complex reasoning tasks, problem solving and data extraction"
                      :capabilities (tool json)
@@ -117,12 +117,13 @@
 
 
   ;; Set the defualt model backend.
-  (setq gptel-backend ns/gptel-gemini-backend)
+  (setq gptel-backend ns/gptel-groq-backend)
 
   ;; Configure system prompts.
   (gptel-make-preset "Incremental Reasoning"
     :system-message "Let's think step by step to assure we arrive at the correct answer."
-    :backend "shodan")
+    :backend      "groq"
+    :model        'moonshotai/kimi-k2-instruct)
 
   (gptel-make-preset 'proofreader
     :description "Preset for proofreading tasks."
@@ -157,6 +158,43 @@
     (when backend
       (setq gptel-backend (symbol-value backend))
       (message "gptel backend set to: %s" choice))))
+
+(defun ns/quickdraw (prompt)
+  (gptel-request prompt
+    :callback
+    (lambda (response info)
+      (when response
+        (with-current-buffer (get-buffer-create "*quickdraw*")
+          (org-mode)
+          (goto-char (point-max))
+          (unless (bobp)
+            (insert (format "\n\n")))
+          (insert (format "* %s\n" (format-time-string "%F %T")))
+          (insert response)
+          (display-buffer (current-buffer)))))))
+
+(defun ns/quickdraw-selection ()
+  "Quick analysis of selected region, results go to *quickdraw* buffer."
+  (interactive)
+  (unless (region-active-p)
+    (user-error "No region selected"))
+  (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
+         (prompt (format "Provide a quick, concise explanation of the following:\n%s" selected-text)))
+    (ns/quickdraw prompt)
+    ))
+
+(defun ns/quickdraw-prompt ()
+  "Send a prompt from minibuffer to *quickdraw* buffer."
+  (interactive)
+  (let ((prompt (read-string "Quickdraw: ")))
+    (when (string-empty-p prompt)
+      (user-error "Empty prompt"))
+    (ns/quickdraw prompt)
+    ))
+
+(with-eval-after-load 'evil
+  (keymap-set evil-visual-state-map "C-c q" #'gptel-quickdraw)
+  (keymap-global-set "C-c q" #'gptel-quickdraw-prompt))
 
 ;; Gptel keyboard shortcuts.
 (ns/leader-comma
