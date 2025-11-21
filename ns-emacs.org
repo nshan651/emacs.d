@@ -336,7 +336,7 @@ General is the best method that I've found for organizing keybindings.
       :prefix ","))
     ;; Misc.
     (general-create-definer ns/leader-ct
-      :keymaps '(insert normal)
+      :states '(insert visual normal)
       :keymaps 'override
       :prefix "C-t")
 #+end_src
@@ -451,6 +451,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 My custom color theme is a minor modification of =modus-vivendi=.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (load-theme 'modus-vivendi)
+
+  ;; Lighten the background.
   (set-face-attribute 'default nil :background "#1f1f1f")
 
   ;; Enhance org-mode elements.
@@ -482,21 +484,24 @@ My custom color theme is a minor modification of =modus-vivendi=.
 #+end_src
 
 ** Font Configuration
-Set font details here.
+Set font details /here/.
 
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   ;; Set base font sizes
-  (defvar efs/default-font-size 110)
-  (defvar efs/default-variable-font-size 110)
+  (defvar ns/default-font-size 110)
+  (defvar ns/default-variable-font-size 110)
 
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+  (set-face-attribute 'default nil :font "Hack" :height ns/default-font-size)
 
   ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+  (set-face-attribute 'fixed-pitch nil :font "Hack" :height ns/default-font-size)
+
+  ;; Fix italics.
+  (set-face-attribute 'italic nil :family "Hack" :slant 'italic)
 
   ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height
-                      efs/default-variable-font-size :weight 'regular)
+  (set-face-attribute 'variable-pitch nil :font "Hack" :height
+                      ns/default-variable-font-size :weight 'regular)
 
   ;; Nerd icon fonts
   (use-package nerd-icons
@@ -504,6 +509,7 @@ Set font details here.
     ;; "Symbols Nerd Font Mono" is the recommended default.
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
 #+end_src
+
 ** Modeline
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (use-package doom-modeline
@@ -798,10 +804,10 @@ My capture templates, agenda views, and other Org customizations can be found in
 
 ** Font Faces
 
-The =efs/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
+The =ns/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-  (defun efs/org-font-setup ()
+  (defun ns/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
                             '(("^ *\\([-]\\) "
@@ -874,7 +880,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
     ;; Save Org buffers after refiling!
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-    (efs/org-font-setup))
+    (ns/org-font-setup))
      #+end_src
 
 ** Org Agenda
@@ -1050,15 +1056,14 @@ org-bullets replaces the heading stars in org-mode buffers with nicer looking ch
 We use visual-fill-column to center org-mode buffers for a more pleasing writing experience as it centers the contents of the buffer horizontally to seem more like you are editing a document.
 
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-  (defun efs/org-mode-visual-fill ()
+  (defun ns/org-mode-visual-fill ()
     (setq visual-fill-column-width 100
           visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
   (use-package visual-fill-column
-    :hook (org-mode . efs/org-mode-visual-fill))
+    :hook (org-mode . ns/org-mode-visual-fill))
  #+end_src
-
 ** Auto-show Markup Symbols
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (use-package org-appear
@@ -1679,7 +1684,7 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 - https://ambrevar.xyz/emacs-eshell-versus-shell/index.html
 
 #+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
-  (defun efs/configure-eshell ()
+  (defun ns/configure-eshell ()
     ;; Save command history when commands are entered
     (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
 
@@ -1699,7 +1704,7 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
     :after eshell)
 
   (use-package eshell
-    :hook (eshell-first-time-mode . efs/configure-eshell)
+    :hook (eshell-first-time-mode . ns/configure-eshell)
     :config
 
     (with-eval-after-load 'esh-opt
@@ -1785,11 +1790,21 @@ Calendar syncing using the =caldav= protocol.
     (org-icalendar-with-timestamps t)
   )
 #+end_src
+
 ** Guix
 The Gnu Guix interface.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   ;; (use-package guix)
 #+end_src
+
+** Org present
+#+begin_src emacs-lisp
+  (use-package org-present
+    :config
+    (keymap-set org-mode-map "C-<f12>" #'org-present)
+    (keymap-set org-mode-map "C-w f" #'org-present-toggle-one-big-page))
+#+end_src
+
 ** GPTel
 [[https://github.com/karthink/gptel][gptel]] is a simple llm interface for emacs. I have multiple backends to choose from, including [[https://github.com/ollama/ollama][Ollama]], openrouter, groq, and gemini.
 
@@ -1841,14 +1856,14 @@ The Gnu Guix interface.
           (gptel-make-gemini "gemini"
             :stream t
             :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
-            :models '(gemini-2.5-flash
+            :models '(
+                      gemini-flash-latest
+                      gemini-pro-latest
+                      gemini-flash-lite-latest
+                      gemini-2.5-flash
                       gemini-2.0-flash-lite
-                      (gemini-2.5-pro
-                       :description
-                       "Complex reasoning tasks, problem solving and data extraction"
-                       :capabilities (tool json)
-                       :mime-types
-                       ("image/jpeg" "image/png" "image/webp" "image/heic")))))
+                      gemini-2.5-pro
+                      )))
 
 
     ;; Set the defualt model backend.
@@ -1914,7 +1929,7 @@ The Gnu Guix interface.
     (unless (region-active-p)
       (user-error "No region selected"))
     (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
-           (prompt (format "Provide a quick, concise explanation of the following:\n%s" selected-text)))
+           (prompt (format "Help me quickly understand the essence of the following selection:\n%s" selected-text)))
       (ns/quickdraw prompt)
       ))
 
@@ -1927,12 +1942,21 @@ The Gnu Guix interface.
       (ns/quickdraw prompt)
       ))
 
+  ;; Unset `evil-scroll-line-down'.
+  (keymap-global-unset "C-e")
   (with-eval-after-load 'evil
-    (keymap-set evil-visual-state-map "C-c q" #'ns/quickdraw-selection)
-    (keymap-global-set "C-c q" #'ns/quickdraw-prompt))
+    (keymap-set evil-normal-state-map "C-e" nil)
+    (keymap-set evil-insert-state-map "C-e" nil)
+    (keymap-set evil-motion-state-map "C-e" nil))
+
+  ;; TODO: add this in to a general-def?
+  (with-eval-after-load 'evil
+    (keymap-set evil-visual-state-map "C-e q" #'ns/quickdraw-selection)
+    (keymap-global-set "C-e q" #'ns/quickdraw-prompt))
 
   ;; Gptel keyboard shortcuts.
-  (ns/leader-comma
+  (general-def 'override
+    :prefix "C-e"
     "b" '(gptel-abort :wk "gptel abort")
     "g" '(gptel-mode :wk "gptel mode")
     "p" '(gptel :wk "gptel prompt")
@@ -1941,18 +1965,9 @@ The Gnu Guix interface.
     "m" '(gptel-menu :wk "gptel menu")
     "a" '(gptel-add :wk "gptel add")
     "f" '(gptel-add-file :wk "gptel add file"))
-
-  ;; (ns/leader-spc
-  ;;   "g"  '(:ignore t :wk "gptel")
-  ;;   "gb" '(gptel-abort :wk "gptel abort")
-  ;;   "gg" '(gptel-mode :wk "gptel mode")
-  ;;   "gp" '(gptel :wk "gptel prompt")
-  ;;   "gr" '(gptel-rewrite :wk "gptel rewrite")
-  ;;   "gs" '(gptel-send :wk "gptel send")
-  ;;   "gm" '(gptel-menu :wk "gptel menu")
-  ;;   "ga" '(gptel-add :wk "gptel add")
-  ;;   "gf" '(gptel-add-file :wk "gptel add file"))
 #+end_src
+
+#+RESULTS:
 
 ** Setup Instructions
 We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:

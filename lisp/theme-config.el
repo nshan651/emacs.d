@@ -4,6 +4,8 @@
 (use-package doom-themes)
 
 (load-theme 'modus-vivendi)
+
+;; Lighten the background.
 (set-face-attribute 'default nil :background "#1f1f1f")
 
 ;; Enhance org-mode elements.
@@ -31,17 +33,20 @@
                                       (ns/toggle-transparency)))
 
 ;; Set base font sizes
-(defvar efs/default-font-size 110)
-(defvar efs/default-variable-font-size 110)
+(defvar ns/default-font-size 110)
+(defvar ns/default-variable-font-size 110)
 
-(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'default nil :font "Hack" :height ns/default-font-size)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'fixed-pitch nil :font "Hack" :height ns/default-font-size)
+
+;; Fix italics.
+(set-face-attribute 'italic nil :family "Hack" :slant 'italic)
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height
-                    efs/default-variable-font-size :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Hack" :height
+                    ns/default-variable-font-size :weight 'regular)
 
 ;; Nerd icon fonts
 (use-package nerd-icons

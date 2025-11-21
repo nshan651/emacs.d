@@ -47,7 +47,7 @@
     :prefix ","))
   ;; Misc.
   (general-create-definer ns/leader-ct
-    :keymaps '(insert normal)
+    :states '(insert visual normal)
     :keymaps 'override
     :prefix "C-t")
 

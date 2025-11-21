@@ -1,4 +1,4 @@
-(defun efs/org-font-setup ()
+(defun ns/org-font-setup ()
   ;; Replace list hyphen with dot
   (font-lock-add-keywords 'org-mode
                           '(("^ *\\([-]\\) "
@@ -66,7 +66,7 @@
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-  (efs/org-font-setup))
+  (ns/org-font-setup))
 
 ;; Open the agenda file as the only window
 (setq org-agenda-window-setup 'only-window)
@@ -227,13 +227,13 @@
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
-(defun efs/org-mode-visual-fill ()
+(defun ns/org-mode-visual-fill ()
   (setq visual-fill-column-width 100
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
-  :hook (org-mode . efs/org-mode-visual-fill))
+  :hook (org-mode . ns/org-mode-visual-fill))
 
 (use-package org-appear
    :hook (org-mode . org-appear-mode))

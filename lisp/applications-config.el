@@ -106,14 +106,14 @@
         (gptel-make-gemini "gemini"
           :stream t
           :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
-          :models '(gemini-2.5-flash
+          :models '(
+                    gemini-flash-latest
+                    gemini-pro-latest
+                    gemini-flash-lite-latest
+                    gemini-2.5-flash
                     gemini-2.0-flash-lite
-                    (gemini-2.5-pro
-                     :description
-                     "Complex reasoning tasks, problem solving and data extraction"
-                     :capabilities (tool json)
-                     :mime-types
-                     ("image/jpeg" "image/png" "image/webp" "image/heic")))))
+                    gemini-2.5-pro
+                    )))
 
 
   ;; Set the defualt model backend.
@@ -179,7 +179,7 @@
   (unless (region-active-p)
     (user-error "No region selected"))
   (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
-         (prompt (format "Provide a quick, concise explanation of the following:\n%s" selected-text)))
+         (prompt (format "Help me quickly understand the essence of the following selection:\n%s" selected-text)))
     (ns/quickdraw prompt)
     ))
 
@@ -192,12 +192,21 @@
     (ns/quickdraw prompt)
     ))
 
+;; Unset `evil-scroll-line-down'.
+(keymap-global-unset "C-e")
 (with-eval-after-load 'evil
-  (keymap-set evil-visual-state-map "C-c q" #'gptel-quickdraw)
-  (keymap-global-set "C-c q" #'gptel-quickdraw-prompt))
+  (keymap-set evil-normal-state-map "C-e" nil)
+  (keymap-set evil-insert-state-map "C-e" nil)
+  (keymap-set evil-motion-state-map "C-e" nil))
+
+;; TODO: add this in to a general-def?
+(with-eval-after-load 'evil
+  (keymap-set evil-visual-state-map "C-e q" #'ns/quickdraw-selection)
+  (keymap-global-set "C-e q" #'ns/quickdraw-prompt))
 
 ;; Gptel keyboard shortcuts.
-(ns/leader-comma
+(general-def 'override
+  :prefix "C-e"
   "b" '(gptel-abort :wk "gptel abort")
   "g" '(gptel-mode :wk "gptel mode")
   "p" '(gptel :wk "gptel prompt")
@@ -206,6 +215,16 @@
   "m" '(gptel-menu :wk "gptel menu")
   "a" '(gptel-add :wk "gptel add")
   "f" '(gptel-add-file :wk "gptel add file"))
+
+;; (ns/leader-comma
+;;   "b" '(gptel-abort :wk "gptel abort")
+;;   "g" '(gptel-mode :wk "gptel mode")
+;;   "p" '(gptel :wk "gptel prompt")
+;;   "r" '(gptel-rewrite :wk "gptel rewrite")
+;;   "s" '(gptel-send :wk "gptel send")
+;;   "m" '(gptel-menu :wk "gptel menu")
+;;   "a" '(gptel-add :wk "gptel add")
+;;   "f" '(gptel-add-file :wk "gptel add file"))
 
 ;; (ns/leader-spc
 ;;   "g"  '(:ignore t :wk "gptel")
