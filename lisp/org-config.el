@@ -281,6 +281,7 @@
         (python . t)
         (shell . t)
         (C . t)
+        (dot . t)
        ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
 ;; Disable execution confirmations
@@ -297,6 +298,7 @@
                      ("py"  . "src python")
                      ("rs"  . "src rust")
                      ("cs"  . "src csharp")
+                     ("sql"  . "src sql")
                      ("y"  . "src yaml")
                      ;; Leetcode snippet
                      ("leet" .

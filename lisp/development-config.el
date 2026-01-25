@@ -11,6 +11,8 @@
   :hook
   (prog-mode . ns/prog-mode-setup)
   (eglot-managed-mode . eglot-inlay-hints-mode)
+  (eglot-managed-mode . (lambda ()
+                          (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
   ((c-mode
     c++-mode
     csharp-mode
@@ -19,7 +21,6 @@
     yaml-mode
     ) . eglot-ensure)
   :config
-  ;; (setq eglot-stay-out-of '(flymake))
 
   ;; Optional: improve eldoc display
   (setq eldoc-echo-area-use-multiline-p t)

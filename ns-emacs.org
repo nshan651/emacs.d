@@ -798,7 +798,6 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     ([remap describe-key] . helpful-key))
 #+end_src
 
-
 * Org
 My capture templates, agenda views, and other Org customizations can be found in [[ns-orgmode.org]].
 
@@ -1121,11 +1120,14 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
           (python . t)
           (shell . t)
           (C . t)
+          (dot . t)
          ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes))
   ;; Disable execution confirmations
   (setq org-confirm-babel-evaluate nil)
 #+end_src
+
+#+RESULTS:
 
 ** Structure Templates
 Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
@@ -1144,6 +1146,7 @@ You can add more =src= block templates below by copying one of the lines and cha
                         ("py"  . "src python")
                         ("rs"  . "src rust")
                         ("cs"  . "src csharp")
+                        ("sql"  . "src sql")
                         ("y"  . "src yaml")
                         ;; Leetcode snippet
                         ("leet" .
@@ -1153,7 +1156,6 @@ You can add more =src= block templates below by copying one of the lines and cha
        (dolist (template templates)
          (push template org-structure-template-alist))))
 #+end_src
-
 ** Org Journal
  #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
    (use-package org-journal
@@ -1301,6 +1303,8 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     :hook
     (prog-mode . ns/prog-mode-setup)
     (eglot-managed-mode . eglot-inlay-hints-mode)
+    (eglot-managed-mode . (lambda ()
+                            (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
     ((c-mode
       c++-mode
       csharp-mode
@@ -1309,7 +1313,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
       yaml-mode
       ) . eglot-ensure)
     :config
-    ;; (setq eglot-stay-out-of '(flymake))
 
     ;; Optional: improve eldoc display
     (setq eldoc-echo-area-use-multiline-p t)
@@ -1340,7 +1343,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
   ;;  "=" 'lsp-format-buffer
   ;;  "l" 'lsp-workspace-show-log)
 #+end_src
-
 *** consult-eglot
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package consult-eglot
@@ -1519,7 +1521,6 @@ Forge allows use to work with varios git forges using the magit interface.
     (require 'smartparens-config))
 #+end_src
 
-
 * Programming Languages
 ** C/C++
 
@@ -1602,7 +1603,6 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
     :hook
     (rust-mode . lsp-deferred))
 #+end_src
-
 * Terminals
 ** term-mode
 
@@ -1798,11 +1798,12 @@ The Gnu Guix interface.
 #+end_src
 
 ** Org present
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package org-present
-    :config
-    (keymap-set org-mode-map "C-<f12>" #'org-present)
-    (keymap-set org-mode-map "C-w f" #'org-present-toggle-one-big-page))
+    :bind
+    (:map org-mode-map
+                ("C-<f12>" . org-present)
+                ("C-w f"   . org-present-toggle-one-big-page)))
 #+end_src
 
 ** GPTel

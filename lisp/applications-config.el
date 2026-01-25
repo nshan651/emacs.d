@@ -59,6 +59,12 @@
 
 ;; (use-package guix)
 
+(use-package org-present
+  :bind
+  (:map org-mode-map
+              ("C-<f12>" . org-present)
+              ("C-w f"   . org-present-toggle-one-big-page)))
+
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
@@ -215,24 +221,3 @@
   "m" '(gptel-menu :wk "gptel menu")
   "a" '(gptel-add :wk "gptel add")
   "f" '(gptel-add-file :wk "gptel add file"))
-
-;; (ns/leader-comma
-;;   "b" '(gptel-abort :wk "gptel abort")
-;;   "g" '(gptel-mode :wk "gptel mode")
-;;   "p" '(gptel :wk "gptel prompt")
-;;   "r" '(gptel-rewrite :wk "gptel rewrite")
-;;   "s" '(gptel-send :wk "gptel send")
-;;   "m" '(gptel-menu :wk "gptel menu")
-;;   "a" '(gptel-add :wk "gptel add")
-;;   "f" '(gptel-add-file :wk "gptel add file"))
-
-;; (ns/leader-spc
-;;   "g"  '(:ignore t :wk "gptel")
-;;   "gb" '(gptel-abort :wk "gptel abort")
-;;   "gg" '(gptel-mode :wk "gptel mode")
-;;   "gp" '(gptel :wk "gptel prompt")
-;;   "gr" '(gptel-rewrite :wk "gptel rewrite")
-;;   "gs" '(gptel-send :wk "gptel send")
-;;   "gm" '(gptel-menu :wk "gptel menu")
-;;   "ga" '(gptel-add :wk "gptel add")
-;;   "gf" '(gptel-add-file :wk "gptel add file"))
