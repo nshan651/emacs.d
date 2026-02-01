@@ -44,6 +44,7 @@
   (org-insert-heading-respect-content t)
   (org-log-done 'time)
   (org-log-into-drawer t)
+  (org-directory "~/ark/org")
   :config
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t
@@ -81,11 +82,22 @@
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
         (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
-        (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")))
+        (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")
+        (sequence "GOAL(g)" "|" "DONE(d!)")
+        (sequence "CONTACT(C)")))
+
+;; Check colors with `list-colors-display'
+(setq org-todo-keyword-faces
+      '(("CONTACT" . (:foreground "goldenrod" :weight bold))
+        ("PROJECT" . (:foreground "steel blue" :weight bold))
+        ("GOAL" . (:foreground "aquamarine" :weight bold))))
+
+(defun ns/org-archive-targets()
+  "Expand the contents of the archive dir."
+  (directory-files (expand-file-name "agenda/archive" org-directory) t ".org"))
 
 (setq org-refile-targets
-      '(("archive.org" :maxlevel . 1)
-        ("todo.org" :maxlevel . 1)))
+      '((ns/org-archive-targets :maxlevel . 1)))
 
 (setq org-tag-alist
       '((:startgroup)
@@ -197,7 +209,7 @@
 
         ;; Contacts
         ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
-         "* CONTACT %^{Name}\n:PROPERTIES:\n:DATE: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+         "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
 
         ;; Journal Entries
         ("j" "Journal Entries")

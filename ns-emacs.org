@@ -858,6 +858,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (org-insert-heading-respect-content t)
     (org-log-done 'time)
     (org-log-into-drawer t)
+    (org-directory "~/ark/org")
     :config
     (setq org-ellipsis " ▾"
           org-hide-emphasis-markers t
@@ -881,10 +882,11 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
     (ns/org-font-setup))
-     #+end_src
+#+end_src
 
 ** Org Agenda
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+
   ;; Open the agenda file as the only window
   (setq org-agenda-window-setup 'only-window)
   (setq org-agenda-files
@@ -898,11 +900,22 @@ This section contains the basic configuration for =org-mode= plus the configurat
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
           (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
-          (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")))
+          (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")
+          (sequence "GOAL(g)" "|" "DONE(d!)")
+          (sequence "CONTACT(C)")))
+
+  ;; Check colors with `list-colors-display'
+  (setq org-todo-keyword-faces
+        '(("CONTACT" . (:foreground "goldenrod" :weight bold))
+          ("PROJECT" . (:foreground "steel blue" :weight bold))
+          ("GOAL" . (:foreground "aquamarine" :weight bold))))
+
+  (defun ns/org-archive-targets()
+    "Expand the contents of the archive dir."
+    (directory-files (expand-file-name "agenda/archive" org-directory) t ".org"))
 
   (setq org-refile-targets
-        '(("archive.org" :maxlevel . 1)
-          ("todo.org" :maxlevel . 1)))
+        '((ns/org-archive-targets :maxlevel . 1)))
 
   (setq org-tag-alist
         '((:startgroup)
@@ -1014,7 +1027,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
           ;; Contacts
           ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
-           "* CONTACT %^{Name}\n:PROPERTIES:\n:DATE: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+           "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
 
           ;; Journal Entries
           ("j" "Journal Entries")
@@ -1127,9 +1140,6 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
   ;; Disable execution confirmations
   (setq org-confirm-babel-evaluate nil)
 #+end_src
-
-#+RESULTS:
-
 ** Structure Templates
 Org Mode's [[https://orgmode.org/manual/Structure-Templates.html][structure templates]] feature enables you to quickly insert code blocks into your Org files in combination with =org-tempo= by typing followed by the template name like =el= or =py= and then press =TAB=.  For example, to insert an empty =emacs-lisp= block below, you can type =el= and press =TAB= to expand into such a block.
 
@@ -1968,9 +1978,6 @@ The Gnu Guix interface.
     "a" '(gptel-add :wk "gptel add")
     "f" '(gptel-add-file :wk "gptel add file"))
 #+end_src
-
-#+RESULTS:
-
 ** Setup Instructions
 We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:
 
