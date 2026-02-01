@@ -80,8 +80,8 @@
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")
-        (sequence "CONTACT(C)")))
+        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
+        (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")))
 
 (setq org-refile-targets
       '(("archive.org" :maxlevel . 1)
@@ -95,7 +95,8 @@
         ("@home" . ?H)
         ("@work" . ?W)
         ("@investing" . ?I)
-        ("agenda" . ?a)
+        ("appointment" . ?a)
+        ("agenda" . ?A)
         ("followup" . ?f)
         ("planning" . ?p)
         ("publish" . ?P)

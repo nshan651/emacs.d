@@ -1,5 +1,6 @@
 #+title: GNU Emacs Config
 #+author: nshan651
+#+property: header-args :results silent
 
 * Early Initialization
 This is the first file that Emacs reads when starting up. It should contain code that does not depend on any package or the proportions of the Emacs frame. In general, this early initialization file is meant to set up a few basic things before Emacs produces the initial frame by delegating to the =init.el=.
@@ -883,7 +884,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
      #+end_src
 
 ** Org Agenda
-
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   ;; Open the agenda file as the only window
   (setq org-agenda-window-setup 'only-window)
@@ -897,8 +897,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(k@)")
-          (sequence "CONTACT(C)")))
+          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
+          (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")))
 
   (setq org-refile-targets
         '(("archive.org" :maxlevel . 1)
@@ -912,7 +912,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
           ("@home" . ?H)
           ("@work" . ?W)
           ("@investing" . ?I)
-          ("agenda" . ?a)
+          ("appointment" . ?a)
+          ("agenda" . ?A)
           ("followup" . ?f)
           ("planning" . ?p)
           ("publish" . ?P)
