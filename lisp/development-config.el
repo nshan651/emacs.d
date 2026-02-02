@@ -91,27 +91,23 @@
   :disabled t
   :general ('insert "C-<tab>" #'consult-yasnippet))
 
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  ;; :custom ((projectile-completion-system 'ivy))
-  :custom ((projectile-completion-system 'default))
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  (when (file-directory-p "~/git")
-    (setq projectile-project-search-path '("~/git")))
-  (setq projectile-switch-project-action #'projectile-dired))
+(use-package project
+  :bind (:map project-prefix-map
+              ("t" . eat-project))
+  :custom
+  (project-switch-use-entire-map t))
 
-(ns/leader-m 'override
-  "p"  '(:ignore p :wk "projectile commands")
-  "pf" '(projectile-find-file :wk "projectile find file")
-  "ps" '(projectile-switch-project :wk "projectile switch project")
-  "pg" '(consult-ripgrep :wk "consult ripgrep")
-  "pp" '(projectile-find-file :wk "projectile find file")
-  "pc" '(projectile-compile-project :wk "projectile compile project")
-  "pd" '(projectile-dired :wk "projectile dired"))
+(setq project-compilation-buffer-name-function
+      '(format "*compilation: %s*" (project-name (project-current))))
+
+(ns/leader-t 'override
+  "f" '(project-find-file :wk "project find file")
+  "s" '(project-switch-project :wk "project switch project")
+  "g" '(consult-ripgrep :wk "consult ripgrep")
+  "c" '(project-compile :wk "project compile project")
+  "r" '(project-recompile :wk "project compile project")
+  "d" '(project-dired :wk "project dired")
+  "e" '(eat-project :wk "project eat shell"))
 
 (use-package magit
   :commands magit-status

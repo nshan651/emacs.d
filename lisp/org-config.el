@@ -99,13 +99,22 @@
 (setq org-refile-targets
       '((ns/org-archive-targets :maxlevel . 1)))
 
+;; Put mutually exclusive tags inside the group blocks.
 (setq org-tag-alist
       '((:startgroup)
-         ;; Put mutually exclusive tags here
-        (:endgroup)
-        ("@errand" . ?E)
+        ("location")
+        (:grouptags)
         ("@home" . ?H)
         ("@work" . ?W)
+        (:endgroup)
+
+        ("context")
+        (:grouptags)
+        ("@computer" . ?H)
+        ("@errands" . ?W)
+        (:endgroup)
+
+        ("@errand" . ?E)
         ("@investing" . ?I)
         ("appointment" . ?a)
         ("agenda" . ?A)
@@ -190,47 +199,47 @@
         ))
 
 (setq org-capture-templates
-      `(("t" "Tasks")
-        ("tt" "Task" entry (file "~/ark/org/agenda/todo.org")
-         "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("ts" "Clocked Entry Subtask" entry (clock)
-         "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("tr" "Recurring Task" entry (file "~/ark/org/agenda/recurrent.org")
-         "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+      (let* ((without-time (concat ":PROPERTIES:\n"
+                                   ":CAPTURED: %U\n"
+                                   ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                   ":END:\n\n"
+                                   "%a\n%?"))
+             (with-time (concat "DEADLINE: %^T\n"
+                                ":PROPERTIES:\n"
+                                ":CAPTURED: %U\n"
+                                ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                ":APPT_WARNTIME: 20\n"
+                                ":END:\n\n"
+                                "%a%?")))
+        `(("t" "Tasks")
 
-        ;; Projects
-        ("p" "Projects")
-        ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
-         "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("ps" "Clocked Entry Subtask" entry (clock)
-         "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-        ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
-         "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+          ;; ("tt" "Task" entry (file "~/ark/org/agenda/todo.org")
+          ;;  "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-        ;; Contacts
-        ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
-         "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+          ("tt" "Task to do" entry
+           (file+headline "agenda/todo.org" "All tasks")
+           ,(concat "* TODO %^{Title} %^g\n" without-time)
+           :empty-lines-after 1)
 
-        ;; Journal Entries
-        ("j" "Journal Entries")
-        ("je" "General Entry" entry
-         (file+olp+datetree "~/ark/org/journal/journal.org")
-         "\n* %<%I:%M %p> - %^{Title} \n\n%?\n\n"
-         :tree-type week
-         :clock-in :clock-resume
-         :empty-lines 1)
-        ("jt" "Task Entry" entry
-         (file+olp+datetree "~/ark/org/journal/journal.org")
-         "\n* %<%I:%M %p> - Task Notes: %a\n\n%?\n\n"
-         :tree-type week
-         :clock-in :clock-resume
-         :empty-lines 1)
-        ("jj" "Journal" entry
-         (file+olp+datetree "~/ark/org/journal/journal.org")
-         "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-         :tree-type week
-         :clock-in :clock-resume
-         :empty-lines 1)))
+          ("ts" "Clocked Entry Subtask" entry (clock)
+           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+          ("tr" "Recurring Task" entry (file "~/ark/org/agenda/cron.org")
+           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+
+          ;; Projects
+          ("p" "Projects")
+          ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
+           "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+          ("ps" "Clocked Entry Subtask" entry (clock)
+           "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+          ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
+           "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+
+          ;; Contacts
+          ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
+           "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+
+          )))
 
 (define-key global-map (kbd "C-c j")
             (lambda () (interactive) (org-capture nil "jj")))

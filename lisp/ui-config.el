@@ -37,7 +37,7 @@
   (setq consult-narrow-key "<"))
 
 ;; Choose a theme.
-(ns/leader-t "t" '(consult-theme :wk "Choose a theme"))
+;; (ns/leader-t "t" '(consult-theme :wk "Choose a theme"))
 
 ;; Registers.
 (general-def 'override

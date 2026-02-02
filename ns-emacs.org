@@ -574,7 +574,7 @@ Some UI enhancements that supercharge Emacs.
 *** Consult Keybindings
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   ;; Choose a theme.
-  (ns/leader-t "t" '(consult-theme :wk "Choose a theme"))
+  ;; (ns/leader-t "t" '(consult-theme :wk "Choose a theme"))
 
   ;; Registers.
   (general-def 'override
@@ -886,7 +886,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
 ** Org Agenda
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
-
   ;; Open the agenda file as the only window
   (setq org-agenda-window-setup 'only-window)
   (setq org-agenda-files
@@ -917,13 +916,22 @@ This section contains the basic configuration for =org-mode= plus the configurat
   (setq org-refile-targets
         '((ns/org-archive-targets :maxlevel . 1)))
 
+  ;; Put mutually exclusive tags inside the group blocks.
   (setq org-tag-alist
         '((:startgroup)
-           ;; Put mutually exclusive tags here
-          (:endgroup)
-          ("@errand" . ?E)
+          ("location")
+          (:grouptags)
           ("@home" . ?H)
           ("@work" . ?W)
+          (:endgroup)
+
+          ("context")
+          (:grouptags)
+          ("@computer" . ?H)
+          ("@errands" . ?W)
+          (:endgroup)
+
+          ("@errand" . ?E)
           ("@investing" . ?I)
           ("appointment" . ?a)
           ("agenda" . ?A)
@@ -1008,47 +1016,47 @@ This section contains the basic configuration for =org-mode= plus the configurat
           ))
 
   (setq org-capture-templates
-        `(("t" "Tasks")
-          ("tt" "Task" entry (file "~/ark/org/agenda/todo.org")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("ts" "Clocked Entry Subtask" entry (clock)
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("tr" "Recurring Task" entry (file "~/ark/org/agenda/recurrent.org")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+        (let* ((without-time (concat ":PROPERTIES:\n"
+                                     ":CAPTURED: %U\n"
+                                     ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                     ":END:\n\n"
+                                     "%a\n%?"))
+               (with-time (concat "DEADLINE: %^T\n"
+                                  ":PROPERTIES:\n"
+                                  ":CAPTURED: %U\n"
+                                  ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                  ":APPT_WARNTIME: 20\n"
+                                  ":END:\n\n"
+                                  "%a%?")))
+          `(("t" "Tasks")
 
-          ;; Projects
-          ("p" "Projects")
-          ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
-           "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("ps" "Clocked Entry Subtask" entry (clock)
-           "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
-           "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+            ;; ("tt" "Task" entry (file "~/ark/org/agenda/todo.org")
+            ;;  "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-          ;; Contacts
-          ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
-           "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+            ("tt" "Task to do" entry
+             (file+headline "agenda/todo.org" "All tasks")
+             ,(concat "* TODO %^{Title} %^g\n" without-time)
+             :empty-lines-after 1)
 
-          ;; Journal Entries
-          ("j" "Journal Entries")
-          ("je" "General Entry" entry
-           (file+olp+datetree "~/ark/org/journal/journal.org")
-           "\n* %<%I:%M %p> - %^{Title} \n\n%?\n\n"
-           :tree-type week
-           :clock-in :clock-resume
-           :empty-lines 1)
-          ("jt" "Task Entry" entry
-           (file+olp+datetree "~/ark/org/journal/journal.org")
-           "\n* %<%I:%M %p> - Task Notes: %a\n\n%?\n\n"
-           :tree-type week
-           :clock-in :clock-resume
-           :empty-lines 1)
-          ("jj" "Journal" entry
-           (file+olp+datetree "~/ark/org/journal/journal.org")
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           :tree-type week
-           :clock-in :clock-resume
-           :empty-lines 1)))
+            ("ts" "Clocked Entry Subtask" entry (clock)
+             "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+            ("tr" "Recurring Task" entry (file "~/ark/org/agenda/cron.org")
+             "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+
+            ;; Projects
+            ("p" "Projects")
+            ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
+             "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+            ("ps" "Clocked Entry Subtask" entry (clock)
+             "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
+            ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
+             "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
+
+            ;; Contacts
+            ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
+             "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
+
+            )))
 
   (define-key global-map (kbd "C-c j")
               (lambda () (interactive) (org-capture nil "jj")))
@@ -1419,33 +1427,27 @@ A better ~yas-insert-snippet~.
     :general ('insert "C-<tab>" #'consult-yasnippet))
 #+end_src
 
-** Projectile
-[[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
-
+** Project
+I use the built-in =project.el= for project management. I switched away from [[https://projectile.mx/][Projectile]] after realizing that I was only using a small subset of its available features.
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-  (use-package projectile
-    :diminish projectile-mode
-    :config (projectile-mode)
-    ;; :custom ((projectile-completion-system 'ivy))
-    :custom ((projectile-completion-system 'default))
-    :bind-keymap
-    ("C-c p" . projectile-command-map)
-    :init
-    ;; NOTE: Set this to the folder where you keep your Git repos!
-    (when (file-directory-p "~/git")
-      (setq projectile-project-search-path '("~/git")))
-    (setq projectile-switch-project-action #'projectile-dired))
+  (use-package project
+    :bind (:map project-prefix-map
+                ("t" . eat-project))
+    :custom
+    (project-switch-use-entire-map t))
 
-  (ns/leader-m 'override
-    "p"  '(:ignore p :wk "projectile commands")
-    "pf" '(projectile-find-file :wk "projectile find file")
-    "ps" '(projectile-switch-project :wk "projectile switch project")
-    "pg" '(consult-ripgrep :wk "consult ripgrep")
-    "pp" '(projectile-find-file :wk "projectile find file")
-    "pc" '(projectile-compile-project :wk "projectile compile project")
-    "pd" '(projectile-dired :wk "projectile dired"))
+  (setq project-compilation-buffer-name-function
+        '(format "*compilation: %s*" (project-name (project-current))))
+
+  (ns/leader-t 'override
+    "f" '(project-find-file :wk "project find file")
+    "s" '(project-switch-project :wk "project switch project")
+    "g" '(consult-ripgrep :wk "consult ripgrep")
+    "c" '(project-compile :wk "project compile project")
+    "r" '(project-recompile :wk "project compile project")
+    "d" '(project-dired :wk "project dired")
+    "e" '(eat-project :wk "project eat shell"))
 #+end_src
-
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 
@@ -1615,116 +1617,36 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
     (rust-mode . lsp-deferred))
 #+end_src
 * Terminals
-** term-mode
-
-=term-mode= is a built-in terminal emulator in Emacs.  Because it is written in Emacs Lisp, you can start using it immediately with very little configuration.  If you are on Linux or macOS, =term-mode= is a great choice to get started because it supports fairly complex terminal applications (=htop=, =vim=, etc) and works pretty reliably.  However, because it is written in Emacs Lisp, it can be slower than other options like =vterm=.  The speed will only be an issue if you regularly run console apps with a lot of output.
-
-One important thing to understand is =line-mode= versus =char-mode=.  =line-mode= enables you to use normal Emacs keybindings while moving around in the terminal buffer while =char-mode= sends most of your keypresses to the underlying terminal.  While using =term-mode=, you will want to be in =char-mode= for any terminal applications that have their own keybindings.  If you're just in your usual shell, =line-mode= is sufficient and feels more integrated with Emacs.
-
-With =evil-collection= installed, you will automatically switch to =char-mode= when you enter Evil's insert mode (press =i=).  You will automatically be switched back to =line-mode= when you enter Evil's normal mode (press =ESC=).
-
-Run a terminal with =M-x term!=
-
-*Useful key bindings:*
-
-- =C-c C-p= / =C-c C-n= - go back and forward in the buffer's prompts (also =[[= and =]]= with evil-mode)
-- =C-c C-k= - Enter char-mode
-- =C-c C-j= - Return to line-mode
-- If you have =evil-collection= installed, =term-mode= will enter char mode when you use Evil's Insert mode
-
 #+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
-  (use-package term
-    :commands term
+  ;; -*- lexical-binding: t; -*-
+  (use-package xterm-color
     :config
-    (setq explicit-shell-file-name "bash") ;; Change this to zsh, etc
-    ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+    ;; Enable ANSI escape handling in eshell
+    (with-eval-after-load 'eshell
+      (add-hook 'eshell-before-prompt-hook
+                (lambda ()
+                  (setq xterm-color-preserve-properties t)))
 
-    ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
-    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
-#+end_src
+      (add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
+      (setq eshell-output-filter-functions (remove 'eshell-handle-ansi-color eshell-output-filter-functions))
+      (setenv "TERM" "xterm-256color"))
 
-*** Better term-mode colors
+    ;; Enable ANSI escape handling in M-x compile
+    (setq compilation-environment '("TERM=xterm-256color"))
 
-The =eterm-256color= package enhances the output of =term-mode= to enable handling of a wider range of color codes so that many popular terminal applications look as you would expect them to.  Keep in mind that this package requires =ncurses= to be installed on your machine so that it has access to the =tic= program.  Most Linux distributions come with this program installed already so you may not have to do anything extra to use it.
+    (defun ns/advice-compilation-filter (f proc string)
+      (funcall f proc (xterm-color-filter string)))
 
-#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
-  (use-package eterm-256color
-    :hook (term-mode . eterm-256color-mode))
-#+end_src
+    (advice-add 'compilation-filter :around #'ns/advice-compilation-filter))
 
-** vterm
-
-[[https://github.com/akermu/emacs-libvterm/][vterm]] is an improved terminal emulator package which uses a compiled native module to interact with the underlying terminal applications.  This enables it to be much faster than =term-mode= and to also provide a more complete terminal emulation experience.
-
-Make sure that you have the [[https://github.com/akermu/emacs-libvterm/#requirements][necessary dependencies]] installed before trying to use =vterm= because there is a module that will need to be compiled before you can use it successfully.
-
-#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
-  (use-package vterm
-    :commands vterm
+  (use-package eat
+    :custom
+    (eat-term-name "xterm-256color")
+    (explicit-shell-file-name "/bin/zsh")
+    (shell-file-name "/bin/zsh")
     :config
-    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-    ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-    (setq vterm-max-scrollback 10000))
+    (add-hook 'eshell-load-hook #'eat-eshell-mode))
 #+end_src
-
-** shell-mode
-
-[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Interactive-Shell.html#Interactive-Shell][shell-mode]] is a middle ground between =term-mode= and Eshell.  It is *not* a terminal emulator so more complex terminal programs will not run inside of it.  It does have much better integration with Emacs because all command input in this mode is handled by Emacs and then sent to the underlying shell once you press Enter.  This means that you can use =evil-mode='s editing motions on the command line, unlike in the terminal emulator modes above.
-
-*Useful key bindings:*
-
-- =C-c C-p= / =C-c C-n= - go back and forward in the buffer's prompts (also =[[= and =]]= with evil-mode)
-- =M-p= / =M-n= - go back and forward in the input history
-- =C-c C-u= - delete the current input string backwards up to the cursor
-** Eshell
-
-[[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html#Contributors-to-Eshell][Eshell]] is Emacs' own shell implementation written in Emacs Lisp.  It provides you with a cross-platform implementation (even on Windows!) of the common GNU utilities you would find on Linux and macOS (=ls=, =rm=, =mv=, =grep=, etc).  It also allows you to call Emacs Lisp functions directly from the shell and you can even set up aliases (like aliasing =vim= to =find-file=).  Eshell is also an Emacs Lisp REPL which allows you to evaluate full expressions at the shell.
-
-The downsides to Eshell are that it can be harder to configure than other packages due to the particularity of where you need to set some options for them to go into effect, the lack of shell completions (by default) for some useful things like Git commands, and that REPL programs sometimes don't work as well.  However, many of these limitations can be dealt with by good configuration and installing external packages, so don't let that discourage you from trying it!
-
-*Useful key bindings:*
-
-- =C-c C-p= / =C-c C-n= - go back and forward in the buffer's prompts (also =[[= and =]]= with evil-mode)
-- =M-p= / =M-n= - go back and forward in the input history
-- =C-c C-u= - delete the current input string backwards up to the cursor
-
-We will be covering Eshell more in future videos highlighting other things you can do with it.
-
-For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
-- https://ambrevar.xyz/emacs-eshell/index.html
-- https://ambrevar.xyz/emacs-eshell-versus-shell/index.html
-
-#+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
-  (defun ns/configure-eshell ()
-    ;; Save command history when commands are entered
-    (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
-
-    ;; Truncate buffer for performance
-    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-    ;; Bind some useful keys for evil-mode
-    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-    (evil-normalize-keymaps)
-
-    (setq eshell-history-size         10000
-          eshell-buffer-maximum-lines 10000
-          eshell-hist-ignoredups t
-          eshell-scroll-to-bottom-on-input t))
-
-  (use-package eshell-git-prompt
-    :after eshell)
-
-  (use-package eshell
-    :hook (eshell-first-time-mode . ns/configure-eshell)
-    :config
-
-    (with-eval-after-load 'esh-opt
-      (setq eshell-destroy-buffer-when-process-dies t)
-      (setq eshell-visual-commands '("htop" "zsh" "vim")))
-
-    (eshell-git-prompt-use-theme 'powerline))
-#+end_src
-
 * Applications
 ** Elfeed
 
