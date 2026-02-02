@@ -198,7 +198,7 @@
     (ns/quickdraw prompt)
     ))
 
-;; Unset `evil-scroll-line-down'.
+;; Unset `evil-scroll-line-down' (I never use this).
 (keymap-global-unset "C-e")
 (with-eval-after-load 'evil
   (keymap-set evil-normal-state-map "C-e" nil)

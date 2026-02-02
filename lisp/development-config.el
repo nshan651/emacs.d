@@ -114,20 +114,16 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(use-package forge
-  :after magit)
-
 (ns/leader-m 'override
-  "g"  '(:ignore g :wk "magit commands")
-  "gs" '(magit-status :wk "git status")
-  "gd" '(magit-diff :wk "git diff")
-  "gl " '(magit-log :wk "git log")
-  ;; Pushing and pulling
-  "gk " '(magit-push :wk "git push")
-  "gj " '(magit-pull  :wk "git pull")
-  "gc " '(magit-commit :wk "git commit")
-  "ga " '(magit-stage :wk "git add")
-  "gi " '(magit-init :wk "git init"))
+  "s" '(magit-status :wk "git status")
+  "d" '(magit-diff :wk "git diff")
+  "l " '(magit-log :wk "git log")
+  "p " '(magit-push :wk "git push")
+  "f " '(magit-pull  :wk "git pull")
+  "c " '(magit-commit :wk "git commit")
+  "a " '(magit-stage :wk "git add")
+  "U " '(magit-unstage-all :wk "git reset")
+  "i " '(magit-init :wk "git init"))
 
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation

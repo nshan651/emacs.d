@@ -1450,32 +1450,25 @@ I use the built-in =project.el= for project management. I switched away from [[h
 #+end_src
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
-
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package magit
     :commands magit-status
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-  (use-package forge
-    :after magit)
-
   (ns/leader-m 'override
-    "g"  '(:ignore g :wk "magit commands")
-    "gs" '(magit-status :wk "git status")
-    "gd" '(magit-diff :wk "git diff")
-    "gl " '(magit-log :wk "git log")
-    ;; Pushing and pulling
-    "gk " '(magit-push :wk "git push")
-    "gj " '(magit-pull  :wk "git pull")
-    "gc " '(magit-commit :wk "git commit")
-    "ga " '(magit-stage :wk "git add")
-    "gi " '(magit-init :wk "git init"))
+    "s" '(magit-status :wk "git status")
+    "d" '(magit-diff :wk "git diff")
+    "l " '(magit-log :wk "git log")
+    "p " '(magit-push :wk "git push")
+    "f " '(magit-pull  :wk "git pull")
+    "c " '(magit-commit :wk "git commit")
+    "a " '(magit-stage :wk "git add")
+    "U " '(magit-unstage-all :wk "git reset")
+    "i " '(magit-init :wk "git init"))
 #+end_src
-
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
-
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
@@ -1483,7 +1476,6 @@ Forge allows use to work with varios git forges using the magit interface.
   (use-package forge
     :after 'magit)
 #+end_src
-
 ** Flymake
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
     ;; (defun ns/flymake-cc-default ()
@@ -1510,7 +1502,6 @@ Forge allows use to work with varios git forges using the magit interface.
     ;;   :keymaps 'c++-mode-map
     ;;   "C-c C-c" 'compile)
 #+end_src
-
 ** Rainbow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
 
@@ -1640,6 +1631,7 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
     (advice-add 'compilation-filter :around #'ns/advice-compilation-filter))
 
   (use-package eat
+    :bind (("C-c e" . eat))
     :custom
     (eat-term-name "xterm-256color")
     (explicit-shell-file-name "/bin/zsh")
@@ -1876,7 +1868,7 @@ The Gnu Guix interface.
       (ns/quickdraw prompt)
       ))
 
-  ;; Unset `evil-scroll-line-down'.
+  ;; Unset `evil-scroll-line-down' (I never use this).
   (keymap-global-unset "C-e")
   (with-eval-after-load 'evil
     (keymap-set evil-normal-state-map "C-e" nil)

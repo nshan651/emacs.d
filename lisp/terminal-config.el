@@ -20,6 +20,7 @@
   (advice-add 'compilation-filter :around #'ns/advice-compilation-filter))
 
 (use-package eat
+  :bind (("C-c e" . eat))
   :custom
   (eat-term-name "xterm-256color")
   (explicit-shell-file-name "/bin/zsh")
