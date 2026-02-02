@@ -91,19 +91,26 @@
   :disabled t
   :general ('insert "C-<tab>" #'consult-yasnippet))
 
+(defun ns/ripgrep ()
+  "Run `consult-ripgrep' from the project root, or PWD if not a project"
+  (interactive)
+  (consult-ripgrep (if-let ((project (project-current)))
+                       (project-root project)
+                     default-directory)))
+
 (use-package project
   :bind (:map project-prefix-map
               ("t" . eat-project))
   :custom
-  (project-switch-use-entire-map t))
-
-(setq project-compilation-buffer-name-function
-      '(format "*compilation: %s*" (project-name (project-current))))
+  (project-switch-use-entire-map t)
+  (setq project-compilation-buffer-name-function
+        (lambda (name-of-mode)
+          (format "*compilation: %s*" (project-name (project-current))))))
 
 (ns/leader-t 'override
   "f" '(project-find-file :wk "project find file")
   "s" '(project-switch-project :wk "project switch project")
-  "g" '(consult-ripgrep :wk "consult ripgrep")
+  "g" '(ns/ripgrep :wk "consult ripgrep")
   "c" '(project-compile :wk "project compile project")
   "r" '(project-recompile :wk "project compile project")
   "d" '(project-dired :wk "project dired")

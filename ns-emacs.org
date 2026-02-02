@@ -1430,19 +1430,26 @@ A better ~yas-insert-snippet~.
 ** Project
 I use the built-in =project.el= for project management. I switched away from [[https://projectile.mx/][Projectile]] after realizing that I was only using a small subset of its available features.
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  (defun ns/ripgrep ()
+    "Run `consult-ripgrep' from the project root, or PWD if not a project"
+    (interactive)
+    (consult-ripgrep (if-let ((project (project-current)))
+                         (project-root project)
+                       default-directory)))
+
   (use-package project
     :bind (:map project-prefix-map
                 ("t" . eat-project))
     :custom
-    (project-switch-use-entire-map t))
-
-  (setq project-compilation-buffer-name-function
-        '(format "*compilation: %s*" (project-name (project-current))))
+    (project-switch-use-entire-map t)
+    (setq project-compilation-buffer-name-function
+          (lambda (name-of-mode)
+            (format "*compilation: %s*" (project-name (project-current))))))
 
   (ns/leader-t 'override
     "f" '(project-find-file :wk "project find file")
     "s" '(project-switch-project :wk "project switch project")
-    "g" '(consult-ripgrep :wk "consult ripgrep")
+    "g" '(ns/ripgrep :wk "consult ripgrep")
     "c" '(project-compile :wk "project compile project")
     "r" '(project-recompile :wk "project compile project")
     "d" '(project-dired :wk "project dired")
