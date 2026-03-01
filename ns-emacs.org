@@ -562,13 +562,12 @@ Some UI enhancements that supercharge Emacs.
     ;; Configure other variables and modes in the :config section,
     ;; after lazily loading the package.
     :config
-
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)
-     consult-ripgrep consult-git-grep consult-grep
+     consult-ripgrep consult-git-grep consult-grep consult-man
      consult-bookmark consult-recent-file consult-xref
-     consult--source-bookmark consult--source-file-register
-     consult--source-recent-file consult--source-project-recent-file
+     consult-source-bookmark consult-source-file-register
+     consult-source-recent-file consult-source-project-recent-file
      ;; :preview-key "M-."
      :preview-key '(:debounce 0.4 any))
 
@@ -1224,10 +1223,6 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
 
   (use-package consult-org-roam
    :after org-roam
-   :init
-   ;; (require 'consult-org-roam)
-   ;; Activate the minor mode
-   (consult-org-roam-mode 1)
    :custom
    ;; Use `ripgrep' for searching with `consult-org-roam-search'
    (consult-org-roam-grep-func #'consult-ripgrep)
@@ -1237,10 +1232,11 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
    ;; in consult-buffer (and not down at the bottom)
    (consult-org-roam-buffer-after-buffers t)
    :config
+   (consult-org-roam-mode 1)
    ;; Eventually suppress previewing for certain functions
-   ;; (consult-customize
-   ;;  consult-org-roam-forward-links
-   ;;  :preview-key "M-.")
+   (consult-customize
+    consult-org-roam-forward-links
+    :preview-key "M-.")
    :bind
    ;; Define some convenient keybindings as an addition
    ("C-c n e" . consult-org-roam-file-find)
