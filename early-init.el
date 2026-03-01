@@ -60,6 +60,8 @@
 ;; Revert buffers when the underlying file has changed
 (global-auto-revert-mode 1)
 
+(setq message-log-max 30000)
+
 ;; Temporarily increase the garbage collection threshold.  These
 ;; changes help shave off about half a second of startup time.  The
 ;; `most-positive-fixnum' is DANGEROUS AS A PERMANENT VALUE.  See the

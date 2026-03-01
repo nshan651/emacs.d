@@ -78,6 +78,11 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
   (global-auto-revert-mode 1)
 #+end_src
 
+** Message buffer
+Increase the number of lines in the =*Messages*= buffer.
+#+begin_src emacs-lisp :tangle "early-init.el"
+  (setq message-log-max 30000)
+#+end_src
 ** Garbage collection
 Here we maximize the GC threshold to make Emacs boot a bit faster.
 
@@ -897,9 +902,12 @@ This section contains the basic configuration for =org-mode= plus the configurat
           ))
 
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
+        '(
+          (sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+          ;; (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(c)")
+          (sequence "TODO(t!)" "NEXT(n!)" "PROG(p!)" "WAIT(w!)" "HOLD(h!)" "|" "DONE(d!)" "DELEGATED(l!)" "KILL(k!)")
           (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")
+          (sequence "PROJECT(x)" "|" "DONE(d!)")
           (sequence "GOAL(g)" "|" "DONE(d!)")
           (sequence "CONTACT(C)")))
 
@@ -944,6 +952,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
   ;; Configure custom agenda views
   ;; More on agenda view commands at `https://emacsdocs.org/docs/org/Agenda-Commands'
+  ;; Tip: run `describe-mode' (C-h m) to bring up commands to run while in the agenda.
   (setq org-agenda-custom-commands
         `(("A" "Daily agenda and top priority tasks"
            ((tags-todo "*"
@@ -1213,6 +1222,33 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
     ;; (require 'org-roam-protocol)
     )
 
+  (use-package consult-org-roam
+   :after org-roam
+   :init
+   ;; (require 'consult-org-roam)
+   ;; Activate the minor mode
+   (consult-org-roam-mode 1)
+   :custom
+   ;; Use `ripgrep' for searching with `consult-org-roam-search'
+   (consult-org-roam-grep-func #'consult-ripgrep)
+   ;; Configure a custom narrow key for `consult-buffer'
+   (consult-org-roam-buffer-narrow-key ?r)
+   ;; Display org-roam buffers right after non-org-roam buffers
+   ;; in consult-buffer (and not down at the bottom)
+   (consult-org-roam-buffer-after-buffers t)
+   :config
+   ;; Eventually suppress previewing for certain functions
+   ;; (consult-customize
+   ;;  consult-org-roam-forward-links
+   ;;  :preview-key "M-.")
+   :bind
+   ;; Define some convenient keybindings as an addition
+   ("C-c n e" . consult-org-roam-file-find)
+   ("C-c n b" . consult-org-roam-backlinks)
+   ("C-c n B" . consult-org-roam-backlinks-recursive)
+   ("C-c n l" . consult-org-roam-forward-links)
+   ("C-c n r" . consult-org-roam-search))
+
   ;; Keybindings
   (ns/leader-spc
     "n"  '(:ignore t :wk "org node selection")
@@ -1284,6 +1320,7 @@ It can be useful to differentiate the different types of zettels at completion t
     :after org-roam)
 
   (use-package org-roam-ui
+    :disabled t
     :after org-roam
     :config
     (setq org-roam-ui-sync-theme t
@@ -1437,14 +1474,19 @@ I use the built-in =project.el= for project management. I switched away from [[h
                          (project-root project)
                        default-directory)))
 
+  (defun ns/rescan-projects ()
+    "Rescan all projects."
+    (interactive)
+    (dolist (dir '("~/git" "~/ark/org" "~/.dotfiles" "~/.emacs.d/"))
+      (project-remember-projects-under dir t)))
+
   (use-package project
     :bind (:map project-prefix-map
                 ("t" . eat-project))
     :custom
-    (project-switch-use-entire-map t)
-    (setq project-compilation-buffer-name-function
-          (lambda (name-of-mode)
-            (format "*compilation: %s*" (project-name (project-current))))))
+    (project-compilation-buffer-name-function
+     (lambda (name-of-mode)
+       (format "*compilation: %s*" (project-name (project-current))))))
 
   (ns/leader-t 'override
     "f" '(project-find-file :wk "project find file")
@@ -1750,7 +1792,7 @@ The Gnu Guix interface.
 
     ;; Set up model backends.
     (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
-                                    :host "shodan:11434" ;; Or use shodan.local for mDNS.
+                                    :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
                                     :stream t
                                     :models '(deepseek-r1:1.5b-ns
                                               gemma3:1b
@@ -1826,6 +1868,31 @@ The Gnu Guix interface.
       :system-message "Use the following resume to answer interview questions in a thoughtful way."
       :backend "shodan"
       :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
+
+    (defun gptel-read-documentation (symbol)
+      "Read the documentation for SYMBOL, which can be a function or variable."
+      (with-temp-message (format "Reading documentation for: %s" symbol)
+        (condition-case err
+            (let ((sym (intern symbol)))
+              (cond
+               ((fboundp sym)
+                (documentation sym))
+               ((boundp sym)
+                (documentation-property sym 'variable-documentation))
+               (t
+                (format "No documentation found for %s" symbol))))
+          (error (format "Error reading documentation for %s: %s"
+                         symbol (error-message-string err))))))
+
+    (gptel-make-tool
+     :name "read_documentation"
+     :function #'gptel-read-documentation
+     :description "Read the documentation for a given function or variable"
+     :args (list '(:name "name"
+                         :type string
+                         :description "The name of the function or variable whose documentation is to be retrieved"))
+     :category "emacs"
+     :include t)
     )
 
   (defun ns/gptel-select-backend ()

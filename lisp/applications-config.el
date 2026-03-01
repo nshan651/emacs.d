@@ -73,7 +73,7 @@
 
   ;; Set up model backends.
   (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
-                                  :host "shodan:11434" ;; Or use shodan.local for mDNS.
+                                  :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
                                   :stream t
                                   :models '(deepseek-r1:1.5b-ns
                                             gemma3:1b
@@ -149,6 +149,31 @@
     :system-message "Use the following resume to answer interview questions in a thoughtful way."
     :backend "shodan"
     :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
+
+  (defun gptel-read-documentation (symbol)
+    "Read the documentation for SYMBOL, which can be a function or variable."
+    (with-temp-message (format "Reading documentation for: %s" symbol)
+      (condition-case err
+          (let ((sym (intern symbol)))
+            (cond
+             ((fboundp sym)
+              (documentation sym))
+             ((boundp sym)
+              (documentation-property sym 'variable-documentation))
+             (t
+              (format "No documentation found for %s" symbol))))
+        (error (format "Error reading documentation for %s: %s"
+                       symbol (error-message-string err))))))
+
+  (gptel-make-tool
+   :name "read_documentation"
+   :function #'gptel-read-documentation
+   :description "Read the documentation for a given function or variable"
+   :args (list '(:name "name"
+                       :type string
+                       :description "The name of the function or variable whose documentation is to be retrieved"))
+   :category "emacs"
+   :include t)
   )
 
 (defun ns/gptel-select-backend ()

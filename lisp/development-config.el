@@ -98,14 +98,19 @@
                        (project-root project)
                      default-directory)))
 
+(defun ns/rescan-projects ()
+  "Rescan all projects."
+  (interactive)
+  (dolist (dir '("~/git" "~/ark/org" "~/.dotfiles" "~/.emacs.d/"))
+    (project-remember-projects-under dir t)))
+
 (use-package project
   :bind (:map project-prefix-map
               ("t" . eat-project))
   :custom
-  (project-switch-use-entire-map t)
-  (setq project-compilation-buffer-name-function
-        (lambda (name-of-mode)
-          (format "*compilation: %s*" (project-name (project-current))))))
+  (project-compilation-buffer-name-function
+   (lambda (name-of-mode)
+     (format "*compilation: %s*" (project-name (project-current))))))
 
 (ns/leader-t 'override
   "f" '(project-find-file :wk "project find file")

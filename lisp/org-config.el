@@ -80,9 +80,12 @@
         ))
 
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "PROJECT(x)" "|" "COMPLETED(c)" "CANC(c)")
+      '(
+        (sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+        ;; (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(c)")
+        (sequence "TODO(t!)" "NEXT(n!)" "PROG(p!)" "WAIT(w!)" "HOLD(h!)" "|" "DONE(d!)" "DELEGATED(l!)" "KILL(k!)")
         (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")
+        (sequence "PROJECT(x)" "|" "DONE(d!)")
         (sequence "GOAL(g)" "|" "DONE(d!)")
         (sequence "CONTACT(C)")))
 
@@ -127,6 +130,7 @@
 
 ;; Configure custom agenda views
 ;; More on agenda view commands at `https://emacsdocs.org/docs/org/Agenda-Commands'
+;; Tip: run `describe-mode' (C-h m) to bring up commands to run while in the agenda.
 (setq org-agenda-custom-commands
       `(("A" "Daily agenda and top priority tasks"
          ((tags-todo "*"
