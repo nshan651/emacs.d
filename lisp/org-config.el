@@ -79,21 +79,21 @@
         "~/ark/org/agenda/cron.org"       ; Recurring events/habits.
         ))
 
+(setq org-agenda-span 'day
+      org-agenda-start-with-log-mode t
+      org-agenda-window-setup 'current-window)
+
 (setq org-todo-keywords
-      '(
-        (sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-        ;; (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(c)")
-        (sequence "TODO(t!)" "NEXT(n!)" "PROG(p!)" "WAIT(w!)" "HOLD(h!)" "|" "DONE(d!)" "DELEGATED(l!)" "KILL(k!)")
+      '((sequence "TODO(t)" "NEXT(n)" "REVIEW(v)" "WAIT(w)" "|" "DONE(d)" "CANC(c)")
         (sequence "BUG(B)" "TRIAGE(T)" "FIX(F)" "|" "RESOLVED(R)" "INVALID(I)" "CANC(c)")
-        (sequence "PROJECT(x)" "|" "DONE(d!)")
-        (sequence "GOAL(g)" "|" "DONE(d!)")
+        (sequence "GOAL(g)" "|" "DONE(d)")
         (sequence "CONTACT(C)")))
 
 ;; Check colors with `list-colors-display'
 (setq org-todo-keyword-faces
       '(("CONTACT" . (:foreground "goldenrod" :weight bold))
-        ("PROJECT" . (:foreground "steel blue" :weight bold))
-        ("GOAL" . (:foreground "aquamarine" :weight bold))))
+        ("WAIT" . (:foreground "HotPink2" :weight bold))
+        ("GOAL" . (:foreground "steelblue" :weight bold))))
 
 (defun ns/org-archive-targets()
   "Expand the contents of the archive dir."
@@ -105,77 +105,54 @@
 ;; Put mutually exclusive tags inside the group blocks.
 (setq org-tag-alist
       '((:startgroup)
-        ("location")
+        ("Areas")
         (:grouptags)
         ("@home" . ?H)
         ("@work" . ?W)
         (:endgroup)
 
-        ("context")
+        (:startgroup)
+        ("Contexts")
         (:grouptags)
-        ("@computer" . ?H)
-        ("@errands" . ?W)
+        ("@computer" . ?C)
+        ("@mobile" . ?M)
+        ("@calls" . ?A)
+        ("@errands" . ?E)
         (:endgroup)
 
-        ("@errand" . ?E)
-        ("@investing" . ?I)
-        ("appointment" . ?a)
-        ("agenda" . ?A)
-        ("followup" . ?f)
-        ("planning" . ?p)
-        ("publish" . ?P)
-        ("batch" . ?b)
-        ("note" . ?n)
-        ("idea" . ?i)))
+        ;; Task Types
+        (:startgrouptag . nil)
+        ("Types")
+        (:grouptags)
+        ("@easy" . ?e)
+        ("@hacking" . ?h)
+        ("@writing" . ?w)
+        ("@creative" . ?v)
+        ("@accounting" . ?a)
+        ("@email" . ?m)
+        ("@system" . ?s)
+        ("@idea" . ?i)
+        ("@recurring" . ?R)
+        (:endgrouptag)
+
+        ;; Workflow states
+        (:startgroup . nil)
+        ("States")
+        (:grouptags)
+        ("@plan" . ?p)
+        ("@review" . ?r)
+        ("@followup" . ?f)
+        (:endgroup)))
+
+(setq org-use-tag-inheritance "^@")
 
 ;; Configure custom agenda views
 ;; More on agenda view commands at `https://emacsdocs.org/docs/org/Agenda-Commands'
 ;; Tip: run `describe-mode' (C-h m) to bring up commands to run while in the agenda.
 (setq org-agenda-custom-commands
-      `(("A" "Daily agenda and top priority tasks"
-         ((tags-todo "*"
-                     ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                      (org-agenda-skip-function
-                       `(org-agenda-skip-entry-if
-                         'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
-                      (org-agenda-block-separator nil)
-                      (org-agenda-overriding-header "Important Tasks Without a Date\n")))
-          (agenda "" ((org-agenda-span 1)
-                      (org-deadline-warning-days 0)
-                      (org-agenda-block-separator nil)
-                      (org-scheduled-past-days 0)
-                      (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
-                      (org-agenda-format-date "%A %-e %B %Y")
-                      (org-agenda-overriding-header "\nToday's Agenda\n")))
-          (agenda "" ((org-agenda-start-on-weekday nil)
-                      (org-agenda-start-day "+1d")
-                      (org-agenda-span 3)
-                      (org-deadline-warning-days 0)
-                      (org-agenda-block-separator nil)
-                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                      (org-agenda-overriding-header "\nNext Three Days\n")))
-          (agenda "" ((org-agenda-time-grid nil)
-                      (org-agenda-start-on-weekday nil)
-                      ;; We don't want to replicate the previous section's
-                      ;; three days, so we start counting from the day after.
-                      (org-agenda-start-day "+4d")
-                      (org-agenda-span 14)
-                      (org-agenda-show-all-dates nil)
-                      (org-deadline-warning-days 0)
-                      (org-agenda-block-separator nil)
-                      (org-agenda-entry-types '(:deadline))
-                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                      (org-agenda-overriding-header "\nUpcoming Deadlines (+14d)\n")))
-          (todo "PROJECT"
-                ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
-                 (org-agenda-block-separator nil)
-                 (org-agenda-overriding-header "\nProjects\n")))
-          ))
-
-        ("d" "Dashboard"
+      `(("d" "Dashboard"
          ((agenda ""
-                  (
-                   (org-agenda-span 7)
+                  ((org-agenda-span 7)
                    (org-deadline-warning-days 0)
                    (org-scheduled-past-days 0)
                    (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
@@ -198,8 +175,15 @@
                       (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
                       (org-agenda-format-date "%A %-e %B %Y")
                       (org-agenda-entry-types '(:deadline :scheduled))
-                      (org-agenda-overriding-header "Upcoming Deadlines (+14d)")))
-          ))
+                      (org-agenda-overriding-header "Upcoming Deadlines (+14d)")))))
+        ("p" "Planning"
+         ((tags-todo "+@planning"
+                     ((org-agenda-overriding-header "Planning Tasks")))
+          (tags-todo "-{.*}"
+                     ((org-agenda-overriding-header "Untagged Tasks")))
+          (todo ".*" ((org-agenda-files '("~/ark/org/agenda/inbox.org"))
+                      (org-agenda-overriding-header "Unprocessed Inbox Items")))))
+
         ))
 
 (setq org-capture-templates
@@ -244,9 +228,6 @@
            "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
 
           )))
-
-(define-key global-map (kbd "C-c j")
-            (lambda () (interactive) (org-capture nil "jj")))
 
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode)
