@@ -3,23 +3,13 @@
 (use-package ef-themes)
 (use-package doom-themes)
 
+(setq modus-themes-common-palette-overrides
+      '((bg-main "#1f1f1f")
+        (bg-dim "#2b2b2b")
+        (prose-code "#ff599c")
+        (prose-verbatim "#fffaaa")))
+
 (load-theme 'modus-vivendi)
-
-;; Lighten the background.
-(set-face-attribute 'default nil :background "#1f1f1f")
-
-;; Enhance org-mode elements.
-(with-eval-after-load 'org
-  (set-face-attribute 'org-block nil :background "#2b2b2b")
-  (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
-  (set-face-attribute 'org-code nil :foreground "#ff599c"))
-
-;; Make gptel-rewrite more readable.
-(with-eval-after-load 'gptel-rewrite
-  (set-face-attribute 'gptel-rewrite-highlight-face nil
-                      :inherit 'default
-                      :background "#413847"
-                      :extend t))
 
 (defun ns/toggle-transparency ()
   "Toggle transparency of Emacs frame."
@@ -32,21 +22,25 @@
 (define-key global-map (kbd "<f4>") (lambda () (interactive)
                                       (ns/toggle-transparency)))
 
-;; Set base font sizes
-(defvar ns/default-font-size 110)
-(defvar ns/default-variable-font-size 110)
+;; Set base font sizes.
+(defvar ns/default-font-size 160)
+(defvar ns/default-fixed-font-size 160)
+(defvar ns/default-variable-font-size 140)
 
-(set-face-attribute 'default nil :font "Hack" :height ns/default-font-size)
+(set-face-attribute 'default nil
+                    :font "Hack"
+                    :weight 'normal
+                    :height ns/default-font-size)
 
-;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Hack" :height ns/default-font-size)
+(set-face-attribute 'fixed-pitch nil
+                    :font "Hack"
+                    :weight 'normal
+                    :height ns/default-fixed-font-size)
 
-;; Fix italics.
-(set-face-attribute 'italic nil :family "Hack" :slant 'italic)
-
-;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Hack" :height
-                    ns/default-variable-font-size :weight 'regular)
+(set-face-attribute 'variable-pitch nil
+                    :font "Hack"
+                    :weight 'normal
+                    :height ns/default-variable-font-size)
 
 ;; Nerd icon fonts
 (use-package nerd-icons

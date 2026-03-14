@@ -456,25 +456,14 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 ** Custom theme
 My custom color theme is a minor modification of =modus-vivendi=.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+  (setq modus-themes-common-palette-overrides
+        '((bg-main "#1f1f1f")
+          (bg-dim "#2b2b2b")
+          (prose-code "#ff599c")
+          (prose-verbatim "#fffaaa")))
+
   (load-theme 'modus-vivendi)
-
-  ;; Lighten the background.
-  (set-face-attribute 'default nil :background "#1f1f1f")
-
-  ;; Enhance org-mode elements.
-  (with-eval-after-load 'org
-    (set-face-attribute 'org-block nil :background "#2b2b2b")
-    (set-face-attribute 'org-verbatim nil :foreground "#fffaaa" :weight 'bold)
-    (set-face-attribute 'org-code nil :foreground "#ff599c"))
-
-  ;; Make gptel-rewrite more readable.
-  (with-eval-after-load 'gptel-rewrite
-    (set-face-attribute 'gptel-rewrite-highlight-face nil
-                        :inherit 'default
-                        :background "#413847"
-                        :extend t))
 #+end_src
-
 ** Transparency
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (defun ns/toggle-transparency ()
@@ -491,23 +480,26 @@ My custom color theme is a minor modification of =modus-vivendi=.
 
 ** Font Configuration
 Set font details /here/.
-
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
-  ;; Set base font sizes
-  (defvar ns/default-font-size 110)
-  (defvar ns/default-variable-font-size 110)
+  ;; Set base font sizes.
+  (defvar ns/default-font-size 160)
+  (defvar ns/default-fixed-font-size 160)
+  (defvar ns/default-variable-font-size 140)
 
-  (set-face-attribute 'default nil :font "Hack" :height ns/default-font-size)
+  (set-face-attribute 'default nil
+                      :font "Hack"
+                      :weight 'normal
+                      :height ns/default-font-size)
 
-  ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "Hack" :height ns/default-font-size)
+  (set-face-attribute 'fixed-pitch nil
+                      :font "Hack"
+                      :weight 'normal
+                      :height ns/default-fixed-font-size)
 
-  ;; Fix italics.
-  (set-face-attribute 'italic nil :family "Hack" :slant 'italic)
-
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Hack" :height
-                      ns/default-variable-font-size :weight 'regular)
+  (set-face-attribute 'variable-pitch nil
+                      :font "Hack"
+                      :weight 'normal
+                      :height ns/default-variable-font-size)
 
   ;; Nerd icon fonts
   (use-package nerd-icons
@@ -807,9 +799,7 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 My capture templates, agenda views, and other Org customizations can be found in [[ns-orgmode.org]].
 
 ** Font Faces
-
 The =ns/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
-
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
   (defun ns/org-font-setup ()
     ;; Replace list hyphen with dot
@@ -826,22 +816,10 @@ The =ns/org-font-setup= function configures various text faces to tweak the size
                     (org-level-6 . 1.1)
                     (org-level-7 . 1.1)
                     (org-level-8 . 1.1)))
-      (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-
-    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    (set-face-attribute 'org-block nil    :foreground 'unspecified :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+      ;; (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+      (set-face-attribute (car face) nil :font "Hack" :weight 'regular :height (cdr face)))
+    )
 #+end_src
-
 ** Basic Org Config
 This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.
 
