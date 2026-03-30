@@ -482,9 +482,9 @@ My custom color theme is a minor modification of =modus-vivendi=.
 Set font details /here/.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   ;; Set base font sizes.
-  (defvar ns/default-font-size 160)
-  (defvar ns/default-fixed-font-size 160)
-  (defvar ns/default-variable-font-size 140)
+  (defvar ns/default-font-size 150)
+  (defvar ns/default-fixed-font-size 140)
+  (defvar ns/default-variable-font-size 120)
 
   (set-face-attribute 'default nil
                       :font "Hack"
@@ -922,12 +922,13 @@ This section contains the basic configuration for =org-mode= plus the configurat
           (:startgrouptag . nil)
           ("Types")
           (:grouptags)
-          ("@easy" . ?e)
+          ("@easy" . ?x)
           ("@hacking" . ?h)
           ("@writing" . ?w)
           ("@creative" . ?v)
-          ("@accounting" . ?a)
-          ("@email" . ?m)
+          ("@finance" . ?a)
+          ("@email" . ?e)
+          ("@medical" . ?m)
           ("@system" . ?s)
           ("@idea" . ?i)
           ("@recurring" . ?R)
@@ -1216,7 +1217,6 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
 
 ** Org Roam Capture Templates
 Org roam allows you to create various capture templates.
-
 #+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
   (setq org-roam-capture-templates
     '(("m" "main" plain
@@ -1228,13 +1228,13 @@ Org roam allows you to create various capture templates.
         :unnarrowed t)
         ("r" "reference" plain "%?"
         :if-new
-        (file+head "reference/${title}.org"
-                   "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
+        (file+head "reference/%<%Y%m%d%H%M%S>-${slug}.org"
+                   "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :reference:\n")
         :immediate-finish t
         :unnarrowed t)
         ("a" "article" plain "%?"
         :if-new
-        (file+head "articles/${title}.org"
+        (file+head "articles/%<%Y%m%d%H%M%S>-${slug}.org"
                    "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :article:\n")
         :immediate-finish t
         :unnarrowed t)))

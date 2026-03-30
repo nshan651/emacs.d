@@ -56,13 +56,13 @@
       :unnarrowed t)
       ("r" "reference" plain "%?"
       :if-new
-      (file+head "reference/${title}.org"
-                 "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n")
+      (file+head "reference/%<%Y%m%d%H%M%S>-${slug}.org"
+                 "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :reference:\n")
       :immediate-finish t
       :unnarrowed t)
       ("a" "article" plain "%?"
       :if-new
-      (file+head "articles/${title}.org"
+      (file+head "articles/%<%Y%m%d%H%M%S>-${slug}.org"
                  "#+title: ${title}\n#+options: tex:t toc:nil\n#+startup: inlineimages latexpreview\n#+filetags: :article:\n")
       :immediate-finish t
       :unnarrowed t)))
