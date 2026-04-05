@@ -68,7 +68,7 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  (gptel-model 'moonshotai/kimi-k2-instruct)
+  (gptel-model 'qwen-3-235b-a22b-instruct-2507)
   :config
 
   ;; Set up model backends.
@@ -108,6 +108,17 @@
                     qwen/qwen3-32b
                     openai/gpt-oss-20b)))
 
+  (setq ns/gptel-cerebras-backend
+        (gptel-make-openai "cerebras"
+          :host "api.cerebras.ai"
+          :endpoint "/v1/chat/completions"
+          :stream t
+          :key (lambda () (auth-source-pass-get 'secret "cerebras/key"))
+          :models '(qwen-3-235b-a22b-instruct-2507
+                    zai-glm-4.7
+                    gpt-oss-120b
+                    llama3.1-8b)))
+
   (setq ns/gptel-gemini-backend
         (gptel-make-gemini "gemini"
           :stream t
@@ -123,7 +134,7 @@
 
 
   ;; Set the defualt model backend.
-  (setq gptel-backend ns/gptel-groq-backend)
+  (setq gptel-backend ns/gptel-cerebras-backend)
 
   ;; Configure system prompts.
   (gptel-make-preset "Incremental Reasoning"
@@ -246,3 +257,7 @@
   "m" '(gptel-menu :wk "gptel menu")
   "a" '(gptel-add :wk "gptel add")
   "f" '(gptel-add-file :wk "gptel add file"))
+
+(use-package whisper
+  :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
+  :bind (("C-c r" . whisper-run)))

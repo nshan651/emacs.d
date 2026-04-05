@@ -1737,189 +1737,207 @@ The Gnu Guix interface.
 [[https://github.com/karthink/gptel][gptel]] is a simple llm interface for emacs. I have multiple backends to choose from, including [[https://github.com/ollama/ollama][Ollama]], openrouter, groq, and gemini.
 
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
-  (use-package gptel
-    :custom
-    (gptel-default-mode 'org-mode)
-    (gptel-model 'moonshotai/kimi-k2-instruct)
-    :config
+    (use-package gptel
+      :custom
+      (gptel-default-mode 'org-mode)
+      (gptel-model 'qwen-3-235b-a22b-instruct-2507)
+      :config
 
-    ;; Set up model backends.
-    (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
-                                    :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
-                                    :stream t
-                                    :models '(deepseek-r1:1.5b-ns
-                                              gemma3:1b
-                                              gemma3:latest
-                                              llama3.2:latest
-                                              llama3.2-ns
-                                              qwen3:1.7b-ns
-                                              qwen3:1.7b
-                                              qwen3:4b-ns)))
+      ;; Set up model backends.
+      (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
+                                      :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
+                                      :stream t
+                                      :models '(deepseek-r1:1.5b-ns
+                                                gemma3:1b
+                                                gemma3:latest
+                                                llama3.2:latest
+                                                llama3.2-ns
+                                                qwen3:1.7b-ns
+                                                qwen3:1.7b
+                                                qwen3:4b-ns)))
 
-    (setq ns/gptel-openrouter-backend
-          (gptel-make-openai "openrouter"
-            :host "openrouter.ai"
-            :endpoint "/api/v1/chat/completions"
-            :stream t
-            :key (lambda () (auth-source-pass-get 'secret "openrouter/key"))
-            :models '(deepseek/deepseek-chat-v3.1:free
-                      openai/gpt-oss-20b:free
-                      qwen/qwen3-coder:free
-                      moonshotai/kimi-k2:free
-                      )))
+      (setq ns/gptel-openrouter-backend
+            (gptel-make-openai "openrouter"
+              :host "openrouter.ai"
+              :endpoint "/api/v1/chat/completions"
+              :stream t
+              :key (lambda () (auth-source-pass-get 'secret "openrouter/key"))
+              :models '(deepseek/deepseek-chat-v3.1:free
+                        openai/gpt-oss-20b:free
+                        qwen/qwen3-coder:free
+                        moonshotai/kimi-k2:free
+                        )))
 
-    (setq ns/gptel-groq-backend
-          (gptel-make-openai "groq"
-            :host "api.groq.com"
-            :endpoint "/openai/v1/chat/completions"
-            :stream t
-            :key (lambda () (auth-source-pass-get 'secret "groq/key"))
-            :models '(moonshotai/kimi-k2-instruct
-                      openai/gpt-oss-120b
-                      llama-3.1-70b-versatile
-                      qwen/qwen3-32b
-                      openai/gpt-oss-20b)))
+      (setq ns/gptel-groq-backend
+            (gptel-make-openai "groq"
+              :host "api.groq.com"
+              :endpoint "/openai/v1/chat/completions"
+              :stream t
+              :key (lambda () (auth-source-pass-get 'secret "groq/key"))
+              :models '(moonshotai/kimi-k2-instruct
+                        openai/gpt-oss-120b
+                        llama-3.1-70b-versatile
+                        qwen/qwen3-32b
+                        openai/gpt-oss-20b)))
 
-    (setq ns/gptel-gemini-backend
-          (gptel-make-gemini "gemini"
-            :stream t
-            :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
-            :models '(
-                      gemini-flash-latest
-                      gemini-pro-latest
-                      gemini-flash-lite-latest
-                      gemini-2.5-flash
-                      gemini-2.0-flash-lite
-                      gemini-2.5-pro
-                      )))
+      (setq ns/gptel-cerebras-backend
+            (gptel-make-openai "cerebras"
+              :host "api.cerebras.ai"
+              :endpoint "/v1/chat/completions"
+              :stream t
+              :key (lambda () (auth-source-pass-get 'secret "cerebras/key"))
+              :models '(qwen-3-235b-a22b-instruct-2507
+                        zai-glm-4.7
+                        gpt-oss-120b
+                        llama3.1-8b)))
+
+      (setq ns/gptel-gemini-backend
+            (gptel-make-gemini "gemini"
+              :stream t
+              :key (lambda () (auth-source-pass-get 'secret "gemini/key"))
+              :models '(
+                        gemini-flash-latest
+                        gemini-pro-latest
+                        gemini-flash-lite-latest
+                        gemini-2.5-flash
+                        gemini-2.0-flash-lite
+                        gemini-2.5-pro
+                        )))
 
 
-    ;; Set the defualt model backend.
-    (setq gptel-backend ns/gptel-groq-backend)
+      ;; Set the defualt model backend.
+      (setq gptel-backend ns/gptel-cerebras-backend)
 
-    ;; Configure system prompts.
-    (gptel-make-preset "Incremental Reasoning"
-      :system-message "Let's think step by step to assure we arrive at the correct answer."
-      :backend      "groq"
-      :model        'moonshotai/kimi-k2-instruct)
+      ;; Configure system prompts.
+      (gptel-make-preset "Incremental Reasoning"
+        :system-message "Let's think step by step to assure we arrive at the correct answer."
+        :backend      "groq"
+        :model        'moonshotai/kimi-k2-instruct)
 
-    (gptel-make-preset 'proofreader
-      :description "Preset for proofreading tasks."
-      :backend "gemini"
-      :model 'gemini-2.0-flash
-      :tools '("read_buffer" "spell_check" "grammar_check")
-      :temperature 0.7
-      :use-context 'system)
+      (gptel-make-preset 'proofreader
+        :description "Preset for proofreading tasks."
+        :backend "gemini"
+        :model 'gemini-2.0-flash
+        :tools '("read_buffer" "spell_check" "grammar_check")
+        :temperature 0.7
+        :use-context 'system)
 
-    (gptel-make-preset 'websearch
-      :description  "gemini with basic web search capability."
-      :backend      "gemini"
-      :model        'gemini-2.5-flash
-      :tools        '("search_web" "read_url" "get_youtube_meta"))
+      (gptel-make-preset 'websearch
+        :description  "gemini with basic web search capability."
+        :backend      "gemini"
+        :model        'gemini-2.5-flash
+        :tools        '("search_web" "read_url" "get_youtube_meta"))
 
-    (gptel-make-preset 'resume
-      :system-message "Use the following resume to answer interview questions in a thoughtful way."
-      :backend "shodan"
-      :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
+      (gptel-make-preset 'resume
+        :system-message "Use the following resume to answer interview questions in a thoughtful way."
+        :backend "shodan"
+        :pre (lambda () (gptel-add-file "~/git/interviews/resume.org")))
 
-    (defun gptel-read-documentation (symbol)
-      "Read the documentation for SYMBOL, which can be a function or variable."
-      (with-temp-message (format "Reading documentation for: %s" symbol)
-        (condition-case err
-            (let ((sym (intern symbol)))
-              (cond
-               ((fboundp sym)
-                (documentation sym))
-               ((boundp sym)
-                (documentation-property sym 'variable-documentation))
-               (t
-                (format "No documentation found for %s" symbol))))
-          (error (format "Error reading documentation for %s: %s"
-                         symbol (error-message-string err))))))
+      (defun gptel-read-documentation (symbol)
+        "Read the documentation for SYMBOL, which can be a function or variable."
+        (with-temp-message (format "Reading documentation for: %s" symbol)
+          (condition-case err
+              (let ((sym (intern symbol)))
+                (cond
+                 ((fboundp sym)
+                  (documentation sym))
+                 ((boundp sym)
+                  (documentation-property sym 'variable-documentation))
+                 (t
+                  (format "No documentation found for %s" symbol))))
+            (error (format "Error reading documentation for %s: %s"
+                           symbol (error-message-string err))))))
 
-    (gptel-make-tool
-     :name "read_documentation"
-     :function #'gptel-read-documentation
-     :description "Read the documentation for a given function or variable"
-     :args (list '(:name "name"
-                         :type string
-                         :description "The name of the function or variable whose documentation is to be retrieved"))
-     :category "emacs"
-     :include t)
-    )
+      (gptel-make-tool
+       :name "read_documentation"
+       :function #'gptel-read-documentation
+       :description "Read the documentation for a given function or variable"
+       :args (list '(:name "name"
+                           :type string
+                           :description "The name of the function or variable whose documentation is to be retrieved"))
+       :category "emacs"
+       :include t)
+      )
 
-  (defun ns/gptel-select-backend ()
-    "Select a gptel backend and update `gptel-backend`."
-    (interactive)
-    (let* ((backends '(("shodan" . ns/gptel-ollama-backend)
-                       ("openrouter" . ns/gptel-openrouter-backend)
-                       ("groq" . ns/gptel-groq-backend)
-                       ("gemini" . ns/gptel-gemini-backend)
-                       ))
-           (choice (completing-read "Select gptel backend: " (mapcar #'car backends)))
-           (backend (cdr (assoc choice backends))))
-      (when backend
-        (setq gptel-backend (symbol-value backend))
-        (message "gptel backend set to: %s" choice))))
+    (defun ns/gptel-select-backend ()
+      "Select a gptel backend and update `gptel-backend`."
+      (interactive)
+      (let* ((backends '(("shodan" . ns/gptel-ollama-backend)
+                         ("openrouter" . ns/gptel-openrouter-backend)
+                         ("groq" . ns/gptel-groq-backend)
+                         ("gemini" . ns/gptel-gemini-backend)
+                         ))
+             (choice (completing-read "Select gptel backend: " (mapcar #'car backends)))
+             (backend (cdr (assoc choice backends))))
+        (when backend
+          (setq gptel-backend (symbol-value backend))
+          (message "gptel backend set to: %s" choice))))
 
-  (defun ns/quickdraw (prompt)
-    (gptel-request prompt
-      :callback
-      (lambda (response info)
-        (when response
-          (with-current-buffer (get-buffer-create "*quickdraw*")
-            (org-mode)
-            (goto-char (point-max))
-            (unless (bobp)
-              (insert (format "\n\n")))
-            (insert (format "* %s\n" (format-time-string "%F %T")))
-            (insert response)
-            (display-buffer (current-buffer)))))))
+    (defun ns/quickdraw (prompt)
+      (gptel-request prompt
+        :callback
+        (lambda (response info)
+          (when response
+            (with-current-buffer (get-buffer-create "*quickdraw*")
+              (org-mode)
+              (goto-char (point-max))
+              (unless (bobp)
+                (insert (format "\n\n")))
+              (insert (format "* %s\n" (format-time-string "%F %T")))
+              (insert response)
+              (display-buffer (current-buffer)))))))
 
-  (defun ns/quickdraw-selection ()
-    "Quick analysis of selected region, results go to *quickdraw* buffer."
-    (interactive)
-    (unless (region-active-p)
-      (user-error "No region selected"))
-    (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
-           (prompt (format "Help me quickly understand the essence of the following selection:\n%s" selected-text)))
-      (ns/quickdraw prompt)
-      ))
+    (defun ns/quickdraw-selection ()
+      "Quick analysis of selected region, results go to *quickdraw* buffer."
+      (interactive)
+      (unless (region-active-p)
+        (user-error "No region selected"))
+      (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
+             (prompt (format "Help me quickly understand the essence of the following selection:\n%s" selected-text)))
+        (ns/quickdraw prompt)
+        ))
 
-  (defun ns/quickdraw-prompt ()
-    "Send a prompt from minibuffer to *quickdraw* buffer."
-    (interactive)
-    (let ((prompt (read-string "Quickdraw: ")))
-      (when (string-empty-p prompt)
-        (user-error "Empty prompt"))
-      (ns/quickdraw prompt)
-      ))
+    (defun ns/quickdraw-prompt ()
+      "Send a prompt from minibuffer to *quickdraw* buffer."
+      (interactive)
+      (let ((prompt (read-string "Quickdraw: ")))
+        (when (string-empty-p prompt)
+          (user-error "Empty prompt"))
+        (ns/quickdraw prompt)
+        ))
 
-  ;; Unset `evil-scroll-line-down' (I never use this).
-  (keymap-global-unset "C-e")
-  (with-eval-after-load 'evil
-    (keymap-set evil-normal-state-map "C-e" nil)
-    (keymap-set evil-insert-state-map "C-e" nil)
-    (keymap-set evil-motion-state-map "C-e" nil))
+    ;; Unset `evil-scroll-line-down' (I never use this).
+    (keymap-global-unset "C-e")
+    (with-eval-after-load 'evil
+      (keymap-set evil-normal-state-map "C-e" nil)
+      (keymap-set evil-insert-state-map "C-e" nil)
+      (keymap-set evil-motion-state-map "C-e" nil))
 
-  ;; TODO: add this in to a general-def?
-  (with-eval-after-load 'evil
-    (keymap-set evil-visual-state-map "C-e q" #'ns/quickdraw-selection)
-    (keymap-global-set "C-e q" #'ns/quickdraw-prompt))
+    ;; TODO: add this in to a general-def?
+    (with-eval-after-load 'evil
+      (keymap-set evil-visual-state-map "C-e q" #'ns/quickdraw-selection)
+      (keymap-global-set "C-e q" #'ns/quickdraw-prompt))
 
-  ;; Gptel keyboard shortcuts.
-  (general-def 'override
-    :prefix "C-e"
-    "b" '(gptel-abort :wk "gptel abort")
-    "g" '(gptel-mode :wk "gptel mode")
-    "p" '(gptel :wk "gptel prompt")
-    "r" '(gptel-rewrite :wk "gptel rewrite")
-    "s" '(gptel-send :wk "gptel send")
-    "m" '(gptel-menu :wk "gptel menu")
-    "a" '(gptel-add :wk "gptel add")
-    "f" '(gptel-add-file :wk "gptel add file"))
+    ;; Gptel keyboard shortcuts.
+    (general-def 'override
+      :prefix "C-e"
+      "b" '(gptel-abort :wk "gptel abort")
+      "g" '(gptel-mode :wk "gptel mode")
+      "p" '(gptel :wk "gptel prompt")
+      "r" '(gptel-rewrite :wk "gptel rewrite")
+      "s" '(gptel-send :wk "gptel send")
+      "m" '(gptel-menu :wk "gptel menu")
+      "a" '(gptel-add :wk "gptel add")
+      "f" '(gptel-add-file :wk "gptel add file"))
 #+end_src
-** Setup Instructions
+** Whisper
+[[https://github.com/natrys/whisper.el][Whisper]] is a speech-to-text interface for emacs using OpenAI's speech recognition model.
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  (use-package whisper
+    :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
+    :bind (("C-c r" . whisper-run)))
+#+end_src
+** Ollama
 We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:
 
 #+begin_src sh
@@ -2057,7 +2075,6 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 - =G= - Change file group
 - =S= - Create a symbolic link to this file
 - =L= - Load an Emacs Lisp file into Emacs
-
 
 *** Configuration
 
