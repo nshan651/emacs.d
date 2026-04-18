@@ -81,58 +81,36 @@
   "\\"          'split-window-right
   "-"           'split-window-below
   ;; Windmove keys for additional window navigation
-  "h"          'windmove-left
+  "h"           'windmove-left
   "l"           'windmove-right
-  "k"          'windmove-up
+  "k"           'windmove-up
   "j"           'windmove-down)
 
-;; Window resizing
-;; "C-h"        (lambda () (interactive) (shrink-window-horizontally 21))
-;; "C-l"         (lambda () (interactive) (enlarge-window-horizontally 21))
-;; "C-j"         (lambda () (interactive) (enlarge-window 11))
-;; "C-k"        (lambda () (interactive) (shrink-window 11))
-
-;; https://www.emacswiki.org/emacs/WindowResize
-(defun ns/define-x-pos ()
-  "Find the window's position on the x-axis."
-  (let* ((win-edges (window-edges))
-         (x-min (nth 0 win-edges))
-         (x-max (nth 2 win-edges))
-         (max-width (+ 2 (frame-width))))
-    (cond
-     ((equal max-width x-max)
-      "right")
-     ((and (> x-min 0) (< x-max max-width))
-      "mid")
-     (t "left"))))
-
-(defun ns/win-resize-left ()
-  (interactive)
-  (let ((x-pos (ns/define-x-pos)))
-    (cond
-     ((equal "right" x-pos)
-      (enlarge-window-horizontally +15))
-     (t (enlarge-window-horizontally -15))
-     ))
-  )
-
-(defun ns/win-resize-right ()
-  (interactive)
-  (let ((x-pos (ns/define-x-pos)))
-    (cond
-     ((equal "right" x-pos)
-      (enlarge-window-horizontally -15))
-     (t (enlarge-window-horizontally +15))
-     ))
-  )
+(defun ns/move-border (direction delta)
+  "Resize the current window in DIRECTION by DELTA."
+  (pcase direction
+    ('right
+     (if (window-in-direction 'right)
+         (enlarge-window-horizontally delta)
+       (shrink-window-horizontally delta)))
+    ('left
+     (if (window-in-direction 'right)
+         (shrink-window-horizontally delta)
+       (enlarge-window-horizontally delta)))
+    ('down
+     (if (window-in-direction 'below)
+         (enlarge-window delta)
+       (shrink-window delta)))
+    ('up
+     (if (window-in-direction 'below)
+         (shrink-window delta)
+       (enlarge-window delta)))))
 
 (ns/leader-ca 'override
-  "C-h"       (lambda () (interactive)
-                (ns/win-resize-left))
-  "C-l"        (lambda () (interactive)
-                 (ns/win-resize-right))
-  "C-j"         (lambda () (interactive) (enlarge-window 11))
-  "C-k"        (lambda () (interactive) (shrink-window 11)))
+  "C-h" (lambda () (interactive) (ns/move-border 'left  15))
+  "C-l" (lambda () (interactive) (ns/move-border 'right 15))
+  "C-j" (lambda () (interactive) (ns/move-border 'down  11))
+  "C-k" (lambda () (interactive) (ns/move-border 'up    11)))
 
 (use-package evil-nerd-commenter
   :general ("M-/" 'evilnc-comment-or-uncomment-lines))

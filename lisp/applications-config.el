@@ -260,4 +260,4 @@
 
 (use-package whisper
   :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
-  :bind (("C-c r" . whisper-run)))
+  :bind (("<f5>" . whisper-run)))
