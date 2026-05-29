@@ -23,7 +23,7 @@
   :bind (("C-c e" . eat))
   :custom
   (eat-term-name "xterm-256color")
-  (explicit-shell-file-name "/bin/zsh")
-  (shell-file-name "/bin/zsh")
+  (explicit-shell-file-name (executable-find "zsh"))
+  (shell-file-name (executable-find "zsh"))
   :config
   (add-hook 'eshell-load-hook #'eat-eshell-mode))

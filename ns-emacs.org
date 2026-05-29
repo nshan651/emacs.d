@@ -1,7 +1,6 @@
 #+title: GNU Emacs Config
 #+author: nshan651
 #+property: header-args :results silent
-
 * Early Initialization
 This is the first file that Emacs reads when starting up. It should contain code that does not depend on any package or the proportions of the Emacs frame. In general, this early initialization file is meant to set up a few basic things before Emacs produces the initial frame by delegating to the =init.el=.
 
@@ -1551,6 +1550,10 @@ Setup for guile scheme development.
     ;; :hook
     ;; (rust-mode . lsp-deferred)
     )
+#+end_src
+** HCL
+#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  (use-package hcl-mode)
 #+end_src
 * Terminals
 #+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes

@@ -35,3 +35,5 @@
   ;; :hook
   ;; (rust-mode . lsp-deferred)
   )
+
+(use-package hcl-mode)
