@@ -459,9 +459,9 @@ My custom color theme is a minor modification of =modus-vivendi=.
 Set font details /here/.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   ;; Set base font sizes.
-  (defvar ns/default-font-size 150)
-  (defvar ns/default-fixed-font-size 140)
-  (defvar ns/default-variable-font-size 120)
+  (defvar ns/default-font-size 140)
+  (defvar ns/default-fixed-font-size 130)
+  (defvar ns/default-variable-font-size 110)
 
   (set-face-attribute 'default nil
                       :font "Hack"
@@ -1265,17 +1265,6 @@ It can be useful to differentiate the different types of zettels at completion t
 * Development
 
 ** LSP
-*** lsp-mode
-[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]] enables IDE-like functionality for many different programming languages via "language servers" that speak the [[https://microsoft.github.io/language-server-protocol/][Language Server Protocol]].  Before trying to set up =lsp-mode= for a particular language, check out the [[https://emacs-lsp.github.io/lsp-mode/page/languages/][documentation for your language]] so that you can learn which language servers are available and how to install them.
-
-The =lsp-keymap-prefix= setting enables you to define a prefix for where =lsp-mode='s default keybindings will be added.  I *highly recommend* using the prefix to find out what you can do with =lsp-mode= in a buffer.
-
-The =which-key= integration adds helpful descriptions of the various keys so you should be able to learn a lot just by pressing =C-c l= in a =lsp-mode= buffer and trying different things that you find there.
-
-#+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
-
-#+end_src
-
 *** Eglot
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (defun ns/prog-mode-setup ()
@@ -1295,7 +1284,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
       c++-mode
       csharp-mode
       python-mode
-      rust-mode
+      ;; rust-mode
       yaml-mode
       ) . eglot-ensure)
     :config
@@ -1543,18 +1532,6 @@ Setup for guile scheme development.
 #+end_src
 
 ** Python
-We use =lsp-mode= and =dap-mode= to provide a more complete development environment for Python in Emacs.  Check out [[https://emacs-lsp.github.io/lsp-mode/page/lsp-pyls/][the =pyls= configuration]] in the =lsp-mode= documentation for more details.
-
-Make sure you have the =pyls= language server installed before trying =lsp-mode=!
-
-#+begin_src sh :tangle no
-
-pip install --user "python-language-server[all]"
-
-#+end_src
-
-There are a number of other language servers for Python so if you find that =pyls= doesn't work for you, consult the =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/languages/][language configuration documentation]] to try the others!
-
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package python-mode
     :hook (python-mode . lsp-deferred)
@@ -1566,25 +1543,14 @@ There are a number of other language servers for Python so if you find that =pyl
     ;; (dap-python-executable "python3")
     (dap-python-debugger 'debugpy)
     :config
-    (setq-default python-indent-offset 4))
+    (setq-default python-indent-offset 2))
 #+end_src
-
-You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =pyvenv-activate= command should configure Emacs to cause =lsp-mode= and =dap-mode= to use the virtual environment when they are loaded, just select the path to your virtual environment before loading your project.
-
-#+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
-
-  ;; (use-package pyvenv
-  ;;   :after python-mode
-  ;;   :config
-  ;;   (pyvenv-mode 1))
-
-#+end_src
-
 ** Rust
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
   (use-package rust-mode
-    :hook
-    (rust-mode . lsp-deferred))
+    ;; :hook
+    ;; (rust-mode . lsp-deferred)
+    )
 #+end_src
 * Terminals
 #+begin_src emacs-lisp :tangle "lisp/terminal-config.el" :mkdirp yes
@@ -1619,8 +1585,13 @@ You can use the pyvenv package to use =virtualenv= environments in Emacs.  The =
     (add-hook 'eshell-load-hook #'eat-eshell-mode))
 #+end_src
 * Applications
+** Markdown
+#+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  (use-package markdown-mode
+    :hook (markdown-mode . (lambda ()
+                             (markdown-toggle-markup-hiding 1))))
+#+end_src
 ** Elfeed
-
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
   (use-package elfeed
     :commands elfeed
@@ -1722,16 +1693,14 @@ The Gnu Guix interface.
 
       ;; Set up model backends.
       (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
-                                      :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
+                                      :host "llama.gnosis.arpa" ;; Or use shodan.local for mDNS.
                                       :stream t
-                                      :models '(deepseek-r1:1.5b-ns
-                                                gemma3:1b
-                                                gemma3:latest
-                                                llama3.2:latest
-                                                llama3.2-ns
-                                                qwen3:1.7b-ns
-                                                qwen3:1.7b
-                                                qwen3:4b-ns)))
+                                      :models '(qwen3.5:0.8b
+                                                qwen3.5:2b
+                                                qwen3:4b
+                                                llama3.2:1b
+                                                gemma4:e2b
+                                                )))
 
       (setq ns/gptel-openrouter-backend
             (gptel-make-openai "openrouter"
@@ -1937,7 +1906,6 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
     ]
   }'
 #+end_src
-
 * Window Management
 
 ** Perspective

@@ -29,13 +29,9 @@
   ;; (dap-python-executable "python3")
   (dap-python-debugger 'debugpy)
   :config
-  (setq-default python-indent-offset 4))
-
-;; (use-package pyvenv
-;;   :after python-mode
-;;   :config
-;;   (pyvenv-mode 1))
+  (setq-default python-indent-offset 2))
 
 (use-package rust-mode
-  :hook
-  (rust-mode . lsp-deferred))
+  ;; :hook
+  ;; (rust-mode . lsp-deferred)
+  )

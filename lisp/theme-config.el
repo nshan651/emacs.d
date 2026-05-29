@@ -23,9 +23,9 @@
                                       (ns/toggle-transparency)))
 
 ;; Set base font sizes.
-(defvar ns/default-font-size 150)
-(defvar ns/default-fixed-font-size 140)
-(defvar ns/default-variable-font-size 120)
+(defvar ns/default-font-size 140)
+(defvar ns/default-fixed-font-size 130)
+(defvar ns/default-variable-font-size 110)
 
 (set-face-attribute 'default nil
                     :font "Hack"

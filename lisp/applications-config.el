@@ -1,3 +1,7 @@
+(use-package markdown-mode
+  :hook (markdown-mode . (lambda ()
+                           (markdown-toggle-markup-hiding 1))))
+
 (use-package elfeed
   :commands elfeed
   :config
@@ -73,16 +77,14 @@
 
   ;; Set up model backends.
   (setq ns/gptel-ollama-backend (gptel-make-ollama "shodan"
-                                  :host "shodan.local:11434" ;; Or use shodan.local for mDNS.
+                                  :host "llama.gnosis.arpa" ;; Or use shodan.local for mDNS.
                                   :stream t
-                                  :models '(deepseek-r1:1.5b-ns
-                                            gemma3:1b
-                                            gemma3:latest
-                                            llama3.2:latest
-                                            llama3.2-ns
-                                            qwen3:1.7b-ns
-                                            qwen3:1.7b
-                                            qwen3:4b-ns)))
+                                  :models '(qwen3.5:0.8b
+                                            qwen3.5:2b
+                                            qwen3:4b
+                                            llama3.2:1b
+                                            gemma4:e2b
+                                            )))
 
   (setq ns/gptel-openrouter-backend
         (gptel-make-openai "openrouter"

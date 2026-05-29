@@ -1,5 +1,3 @@
-
-
 (defun ns/prog-mode-setup ()
   "Setup some sensible defaults."
   (setq truncate-lines t) ; Avoid code wrap.
@@ -17,7 +15,7 @@
     c++-mode
     csharp-mode
     python-mode
-    rust-mode
+    ;; rust-mode
     yaml-mode
     ) . eglot-ensure)
   :config
