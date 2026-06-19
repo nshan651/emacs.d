@@ -458,8 +458,8 @@ My custom color theme is a minor modification of =modus-vivendi=.
 Set font details /here/.
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   ;; Set base font sizes.
-  (defvar ns/default-font-size 140)
-  (defvar ns/default-fixed-font-size 130)
+  (defvar ns/default-font-size 130)
+  (defvar ns/default-fixed-font-size 120)
   (defvar ns/default-variable-font-size 110)
 
   (set-face-attribute 'default nil
@@ -1279,10 +1279,9 @@ It can be useful to differentiate the different types of zettels at completion t
     (eglot-managed-mode . eglot-inlay-hints-mode)
     (eglot-managed-mode . (lambda ()
                             (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
-    ((c-mode
-      c++-mode
-      csharp-mode
+    ((csharp-mode
       python-mode
+      ;; c++-mode
       ;; rust-mode
       yaml-mode
       ) . eglot-ensure)
@@ -1691,7 +1690,7 @@ The Gnu Guix interface.
     (use-package gptel
       :custom
       (gptel-default-mode 'org-mode)
-      (gptel-model 'qwen-3-235b-a22b-instruct-2507)
+      (gptel-model 'gpt-oss-120b)
       :config
 
       ;; Set up model backends.

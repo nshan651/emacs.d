@@ -11,10 +11,9 @@
   (eglot-managed-mode . eglot-inlay-hints-mode)
   (eglot-managed-mode . (lambda ()
                           (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
-  ((c-mode
-    c++-mode
-    csharp-mode
+  ((csharp-mode
     python-mode
+    ;; c++-mode
     ;; rust-mode
     yaml-mode
     ) . eglot-ensure)
