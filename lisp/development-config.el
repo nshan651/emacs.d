@@ -9,11 +9,14 @@
   :hook
   (prog-mode . ns/prog-mode-setup)
   (eglot-managed-mode . eglot-inlay-hints-mode)
-  (eglot-managed-mode . (lambda ()
-                          (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
+  ;; (eglot-managed-mode . (lambda ()
+  ;;                         (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
   ((csharp-mode
     python-mode
-    ;; c++-mode
+    ;; c-ts-mode
+    ;; c++-ts-mode
+    c-mode
+    c++-mode
     ;; rust-mode
     yaml-mode
     ) . eglot-ensure)
@@ -116,7 +119,9 @@
   "c" '(project-compile :wk "project compile project")
   "r" '(project-recompile :wk "project compile project")
   "d" '(project-dired :wk "project dired")
-  "e" '(eat-project :wk "project eat shell"))
+  "e" '(eat-project :wk "project eat shell")
+  "]" '(smerge-next :wk "next merge conflict")
+  "[" '(smerge-prev :wk "prev merge conflict"))
 
 (use-package magit
   :commands magit-status
@@ -126,13 +131,13 @@
 (ns/leader-m 'override
   "s" '(magit-status :wk "git status")
   "d" '(magit-diff :wk "git diff")
-  "l " '(magit-log :wk "git log")
-  "p " '(magit-push :wk "git push")
-  "f " '(magit-pull  :wk "git pull")
-  "c " '(magit-commit :wk "git commit")
-  "a " '(magit-stage :wk "git add")
-  "U " '(magit-unstage-all :wk "git reset")
-  "i " '(magit-init :wk "git init"))
+  "l" '(magit-log :wk "git log")
+  "p" '(magit-push :wk "git push")
+  "f" '(magit-pull  :wk "git pull")
+  "c" '(magit-commit :wk "git commit")
+  "a" '(magit-stage :wk "git add")
+  "U" '(magit-unstage-all :wk "git reset")
+  "i" '(magit-init :wk "git init"))
 
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation

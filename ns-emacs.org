@@ -1277,11 +1277,14 @@ It can be useful to differentiate the different types of zettels at completion t
     :hook
     (prog-mode . ns/prog-mode-setup)
     (eglot-managed-mode . eglot-inlay-hints-mode)
-    (eglot-managed-mode . (lambda ()
-                            (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
+    ;; (eglot-managed-mode . (lambda ()
+    ;;                         (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
     ((csharp-mode
       python-mode
-      ;; c++-mode
+      ;; c-ts-mode
+      ;; c++-ts-mode
+      c-mode
+      c++-mode
       ;; rust-mode
       yaml-mode
       ) . eglot-ensure)
@@ -1412,7 +1415,9 @@ I use the built-in =project.el= for project management. I switched away from [[h
     "c" '(project-compile :wk "project compile project")
     "r" '(project-recompile :wk "project compile project")
     "d" '(project-dired :wk "project dired")
-    "e" '(eat-project :wk "project eat shell"))
+    "e" '(eat-project :wk "project eat shell")
+    "]" '(smerge-next :wk "next merge conflict")
+    "[" '(smerge-prev :wk "prev merge conflict"))
 #+end_src
 ** Magit
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
@@ -1425,13 +1430,13 @@ I use the built-in =project.el= for project management. I switched away from [[h
   (ns/leader-m 'override
     "s" '(magit-status :wk "git status")
     "d" '(magit-diff :wk "git diff")
-    "l " '(magit-log :wk "git log")
-    "p " '(magit-push :wk "git push")
-    "f " '(magit-pull  :wk "git pull")
-    "c " '(magit-commit :wk "git commit")
-    "a " '(magit-stage :wk "git add")
-    "U " '(magit-unstage-all :wk "git reset")
-    "i " '(magit-init :wk "git init"))
+    "l" '(magit-log :wk "git log")
+    "p" '(magit-push :wk "git push")
+    "f" '(magit-pull  :wk "git pull")
+    "c" '(magit-commit :wk "git commit")
+    "a" '(magit-stage :wk "git add")
+    "U" '(magit-unstage-all :wk "git reset")
+    "i" '(magit-init :wk "git init"))
 #+end_src
 ** Forge
 Forge allows use to work with varios git forges using the magit interface.
