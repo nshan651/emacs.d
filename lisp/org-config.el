@@ -13,7 +13,7 @@
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)
                   (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+    (set-face-attribute (car face) nil :font "Hack" :weight 'regular :height (cdr face)))
   )
 
 (defun ns/org-mode-setup ()
@@ -64,7 +64,6 @@
         "~/ark/org/agenda/inbox.org"      ; TBD!
         "~/ark/org/agenda/contacts.org"   ; Contacts list.
         "~/ark/org/agenda/projects.org"   ; Project mgmt.
-        "~/ark/org/agenda/cron.org"       ; Recurring events/habits.
         ))
 
 (setq org-agenda-span 'day
@@ -178,13 +177,13 @@
 (setq org-capture-templates
       (let* ((without-time (concat ":PROPERTIES:\n"
                                    ":CAPTURED: %U\n"
-                                   ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                   ":ID: %(org-id-new)\n"
                                    ":END:\n\n"
                                    "%a\n%?"))
              (with-time (concat "DEADLINE: %^T\n"
                                 ":PROPERTIES:\n"
                                 ":CAPTURED: %U\n"
-                                ":CUSTOM_ID: h:%(format-time-string \"%Y%m%dT%H%M%S\")\n"
+                                ":ID: %(org-id-new)\n"
                                 ":APPT_WARNTIME: 20\n"
                                 ":END:\n\n"
                                 "%a%?")))
@@ -194,26 +193,24 @@
           ;;  "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
           ("tt" "Task to do" entry
-           (file+headline "agenda/todo.org" "All tasks")
-           ,(concat "* TODO %^{Title} %^g\n" without-time)
-           :empty-lines-after 1)
+           (file+headline "agenda/todo.org" "Tasks")
+           ,(concat "* TODO %^{Title} %^g\n" without-time))
+           ;; :empty-lines-after 1)
 
           ("ts" "Clocked Entry Subtask" entry (clock)
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("tr" "Recurring Task" entry (file "~/ark/org/agenda/cron.org")
+          ("tr" "Recurring Task" entry (file+headline "agenda/todo.org" "Recurring")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
           ;; Projects
           ("p" "Projects")
-          ("pt" "Task" entry (file "~/ark/org/agenda/projects.org")
+          ("pt" "Task" entry (file "agenda/projects.org")
            "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
           ("ps" "Clocked Entry Subtask" entry (clock)
            "* PROJECT %?\n  %U\n  %a\n  %i" :empty-lines 1)
-          ("pr" "Pull Request" entry (file "~/ark/org/agenda/projects.org")
-           "* TODO %?\n  :PROPERTIES:\n:DATE: %U\n:LINK: %^L \n:END:" :empty-lines 1)
 
           ;; Contacts
-          ("c" "Contacts" entry (file "~/ark/org/agenda/contacts.org")
+          ("c" "Contacts" entry (file "agenda/contacts.org")
            "* CONTACT %^{Name}\n:PROPERTIES:\n:BIRTHDAY: %^{Specify birthday}t\n:PHONE: %^{Phone number}\n:END:\n%?" :empty-lines 1)
 
           )))

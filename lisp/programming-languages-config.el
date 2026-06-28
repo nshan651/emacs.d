@@ -36,4 +36,8 @@
   ;; (rust-mode . lsp-deferred)
   )
 
+(use-package lua-mode
+  :hook
+  (lua-mode . lsp-deferred))
+
 (use-package hcl-mode)

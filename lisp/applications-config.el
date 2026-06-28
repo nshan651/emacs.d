@@ -72,7 +72,7 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  (gptel-model 'gpt-oss-120b)
+  (gptel-model 'zai-glm-4.7)
   :config
 
   ;; Set up model backends.
@@ -116,10 +116,8 @@
           :endpoint "/v1/chat/completions"
           :stream t
           :key (lambda () (auth-source-pass-get 'secret "cerebras/key"))
-          :models '(qwen-3-235b-a22b-instruct-2507
-                    zai-glm-4.7
-                    gpt-oss-120b
-                    llama3.1-8b)))
+          :models '(zai-glm-4.7
+                    gpt-oss-120b)))
 
   (setq ns/gptel-gemini-backend
         (gptel-make-gemini "gemini"
@@ -259,6 +257,15 @@
   "m" '(gptel-menu :wk "gptel menu")
   "a" '(gptel-add :wk "gptel add")
   "f" '(gptel-add-file :wk "gptel add file"))
+
+(use-package agent-shell
+  :custom
+  (agent-shell-opencode-authentication
+   (agent-shell-opencode-make-authentication :none t))
+
+  ;; disable creating transcript file
+  (agent-shell-transcript-file-path-function nil)
+  )
 
 (use-package whisper
   :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO

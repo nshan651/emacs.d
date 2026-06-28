@@ -84,7 +84,9 @@
   "h"           'windmove-left
   "l"           'windmove-right
   "k"           'windmove-up
-  "j"           'windmove-down)
+  "j"           'windmove-down
+  "]"           'windmove-swap-states-right
+  "["           'windmove-swap-states-left)
 
 (defun ns/move-border (direction delta)
   "Resize the current window in DIRECTION by DELTA."

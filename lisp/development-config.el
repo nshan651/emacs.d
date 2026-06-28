@@ -13,10 +13,9 @@
   ;;                         (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
   ((csharp-mode
     python-mode
-    ;; c-ts-mode
-    ;; c++-ts-mode
     c-mode
     c++-mode
+    lua-mode
     ;; rust-mode
     yaml-mode
     ) . eglot-ensure)
