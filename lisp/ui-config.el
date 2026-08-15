@@ -224,3 +224,8 @@ folder, otherwise delete a character backward"
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
+
+(use-package indent-bars
+  :hook ((prog-mode org-mode) . indent-bars-mode)
+  :custom
+  (indent-bars-color '(highlight :face-bg t :blend 0.5)))

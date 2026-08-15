@@ -773,9 +773,16 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
     ([remap describe-key] . helpful-key))
 #+end_src
 
+** Indent Bars
+=indent-bars= shows thin vertical guides at each indentation level.
+#+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+  (use-package indent-bars
+    :hook ((prog-mode org-mode) . indent-bars-mode)
+    :custom
+    (indent-bars-color '(highlight :face-bg t :blend 0.5)))
+#+end_src
 * Org
 My capture templates, agenda views, and other Org customizations can be found in [[ns-orgmode.org]].
-
 ** Font Faces
 The =ns/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
