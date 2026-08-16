@@ -262,10 +262,8 @@
   :custom
   (agent-shell-opencode-authentication
    (agent-shell-opencode-make-authentication :none t))
-
-  ;; disable creating transcript file
   (agent-shell-transcript-file-path-function nil)
-  )
+  (agent-shell-show-welcome-message nil))
 
 (use-package whisper
   :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO

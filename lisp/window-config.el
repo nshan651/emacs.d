@@ -6,9 +6,25 @@
   (unless (equal persp-mode t)
     (persp-mode)))
 
+(defun ns/command-control ()
+  "Create or switch to a perspective based on the current Git worktree."
+  (interactive)
+  (let* ((default-directory (project-prompt-project-dir))
+         (persp-name (file-name-nondirectory
+                      (directory-file-name (magit-toplevel))))
+         (existing (member persp-name (persp-names))))
+    (persp-switch persp-name)
+    (unless existing
+      (magit-project-status))))
+
+(ns/leader-t 'override
+  "s" '(ns/command-control :wk "Setup workspace"))
+
 (ns/leader-ca 'persp-mode-map
   "s"  '(persp-switch :wk "query or create persp")
-  "k"  '(persp-kill :wk "kill a persp")
+  "c" '(lambda () (interactive)
+         (persp-kill (persp-current-name))
+         :wk "kill current persp")
   "r"  '(persp-rename :wk "rename a persp")
   ;; Buffer management
   "a"  '(persp-add-buffer :wk "add buffer to current persp")
@@ -27,7 +43,9 @@
 )
 
 (ns/leader-spc
-  "bb" '(persp-switch-to-buffer* :wk "switch to persp buffer"))
+  "bb" '(persp-switch-to-buffer* :wk "switch to persp buffer")
+  "k" '(persp-kill-buffer* :wk "kill persp buffer")
+  )
 
 (use-package popper
   :init

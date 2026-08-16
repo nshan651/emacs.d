@@ -66,7 +66,7 @@
 
 (ns/leader-spc
   "f"  'find-file
-  "k"  'kill-buffer
+  "K"  'kill-buffer
   "eb" 'eval-buffer)
 
 ;; Compiling and recompiling.

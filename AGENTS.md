@@ -3,13 +3,13 @@
 ## Overview
 
 This is a GNU Emacs configuration repository (~/.emacs.d) managed by nshan651.
-The main source of truth is `README.org`, which tangles to `.el` files.
+The main source of truth is `ns-emacs.org`, which tangles to `.el` files.
 
 ## Project Structure
 
 ```
 ~/.emacs.d/
-├── README.org              # Main config source (tangles to .el files)
+├── ns-emacs.org             # Main config source (tangles to .el files)
 ├── init.el                 # Entry point, loads lisp/*.el
 ├── early-init.el           # Early startup config
 ├── lisp/                   # Modular config files
@@ -204,12 +204,13 @@ Does not affect other features."
 - Don't use `M-x customize` - write elisp directly
 - Don't add customizations to init.el directly
 - Don't hardcode paths outside of `~/.emacs.d`
+- **NEVER edit raw `.el` files** - always edit `ns-emacs.org` and re-tangle
 
 ## Common Tasks
 
 ### Adding a New Package
 
-1. Add source block to `README.org` under appropriate section
+1. Add source block to `ns-emacs.org` under appropriate section
 2. Include `:tangle "lisp/<file>.el"` header
 3. Use `org-babel-tangle` (C-c C-v t) to generate `.el` file
 4. Add file to `ns/file-list` in `init.el` (if in lisp/ directory)
@@ -222,8 +223,8 @@ Does not affect other features."
 
 ### Modifying Existing Config
 
-1. Edit source in `README.org` (not the tangled `.el`)
-2. Re-tangle with `C-c C-v t` in README.org buffer
+1. Edit source in `ns-emacs.org` (not the tangled `.el`)
+2. Re-tangle with `C-c C-v t` in ns-emacs.org buffer
 3. Test with `M-x load-file` on the tangled file
 
 ## Development Tools

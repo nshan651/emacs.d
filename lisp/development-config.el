@@ -120,7 +120,7 @@
 
 (ns/leader-t 'override
   "f" '(project-find-file :wk "project find file")
-  "s" '(project-switch-project :wk "project switch project")
+  "S" '(project-switch-project :wk "project switch project")
   "g" '(ns/ripgrep :wk "consult ripgrep")
   "c" '(project-compile :wk "project compile project")
   "r" '(project-recompile :wk "project compile project")
@@ -130,7 +130,7 @@
   "[" '(smerge-prev :wk "prev merge conflict"))
 
 (use-package magit
-  :commands magit-status
+  :commands (magit-status magit-project-status magit-toplevel)
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 

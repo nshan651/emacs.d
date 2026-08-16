@@ -365,7 +365,7 @@ These are basic keybindings that aren't tied to any particular package (except e
 
   (ns/leader-spc
     "f"  'find-file
-    "k"  'kill-buffer
+    "K"  'kill-buffer
     "eb" 'eval-buffer)
 
   ;; Compiling and recompiling.
@@ -1420,7 +1420,7 @@ I use the built-in =project.el= for project management. I switched away from [[h
 
   (ns/leader-t 'override
     "f" '(project-find-file :wk "project find file")
-    "s" '(project-switch-project :wk "project switch project")
+    "S" '(project-switch-project :wk "project switch project")
     "g" '(ns/ripgrep :wk "consult ripgrep")
     "c" '(project-compile :wk "project compile project")
     "r" '(project-recompile :wk "project compile project")
@@ -1433,7 +1433,7 @@ I use the built-in =project.el= for project management. I switched away from [[h
 [[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package magit
-    :commands magit-status
+    :commands (magit-status magit-project-status magit-toplevel)
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
@@ -1906,10 +1906,8 @@ The Gnu Guix interface.
     :custom
     (agent-shell-opencode-authentication
      (agent-shell-opencode-make-authentication :none t))
-
-    ;; disable creating transcript file
     (agent-shell-transcript-file-path-function nil)
-    )
+    (agent-shell-show-welcome-message nil))
 #+end_src
 ** Whisper
 [[https://github.com/natrys/whisper.el][Whisper]] is a speech-to-text interface for emacs using OpenAI's speech recognition model.
@@ -1953,9 +1951,25 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
     (unless (equal persp-mode t)
       (persp-mode)))
 
+  (defun ns/command-control ()
+    "Create or switch to a perspective based on the current Git worktree."
+    (interactive)
+    (let* ((default-directory (project-prompt-project-dir))
+           (persp-name (file-name-nondirectory
+                        (directory-file-name (magit-toplevel))))
+           (existing (member persp-name (persp-names))))
+      (persp-switch persp-name)
+      (unless existing
+        (magit-project-status))))
+
+  (ns/leader-t 'override
+    "s" '(ns/command-control :wk "Setup workspace"))
+
   (ns/leader-ca 'persp-mode-map
     "s"  '(persp-switch :wk "query or create persp")
-    "k"  '(persp-kill :wk "kill a persp")
+    "c" '(lambda () (interactive)
+           (persp-kill (persp-current-name))
+           :wk "kill current persp")
     "r"  '(persp-rename :wk "rename a persp")
     ;; Buffer management
     "a"  '(persp-add-buffer :wk "add buffer to current persp")
@@ -1974,7 +1988,9 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
   )
 
   (ns/leader-spc
-    "bb" '(persp-switch-to-buffer* :wk "switch to persp buffer"))
+    "bb" '(persp-switch-to-buffer* :wk "switch to persp buffer")
+    "k" '(persp-kill-buffer* :wk "kill persp buffer")
+    )
  #+end_src
 ** Popper
 #+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
