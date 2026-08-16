@@ -105,3 +105,6 @@ it will restore the window configuration to prior to full-framing."
            (equal (current-buffer) ns/last-full-frame-buffer))
       (ns/restore-other-windows)
     (ns/delete-other-window)))
+
+(ns/leader-ca 'override
+  "v" 'ns/focus)

@@ -1409,7 +1409,14 @@ I use the built-in =project.el= for project management. I switched away from [[h
     :custom
     (project-compilation-buffer-name-function
      (lambda (name-of-mode)
-       (format "*compilation: %s*" (project-name (project-current))))))
+       (format "*compilation: %s*" (project-name (project-current)))))
+    (project-switch-commands
+     '((project-find-file "Find file")
+       (project-find-regexp "Find regexp")
+       (project-find-dir "Find directory")
+       (project-eshell "Eshell")
+       (magit-project-status "Magit" ?m)
+       (project-any-command "Other"))))
 
   (ns/leader-t 'override
     "f" '(project-find-file :wk "project find file")
@@ -2051,8 +2058,10 @@ Based on [[https://github.com/LouisKottmann/ns.el/tree/master][zygospore]], focu
              (equal (current-buffer) ns/last-full-frame-buffer))
         (ns/restore-other-windows)
       (ns/delete-other-window)))
-#+end_src
 
+  (ns/leader-ca 'override
+    "v" 'ns/focus)
+#+end_src
 * File Management
 ** Dired
 

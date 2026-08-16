@@ -109,7 +109,14 @@
   :custom
   (project-compilation-buffer-name-function
    (lambda (name-of-mode)
-     (format "*compilation: %s*" (project-name (project-current))))))
+     (format "*compilation: %s*" (project-name (project-current)))))
+  (project-switch-commands
+   '((project-find-file "Find file")
+     (project-find-regexp "Find regexp")
+     (project-find-dir "Find directory")
+     (project-eshell "Eshell")
+     (magit-project-status "Magit" ?m)
+     (project-any-command "Other"))))
 
 (ns/leader-t 'override
   "f" '(project-find-file :wk "project find file")
