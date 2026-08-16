@@ -63,7 +63,7 @@
   "M-:" 'consult-complex-command
   "b"   '(:ignore t :wk "consult buffer selection")
   ;; switch-to-buffer
-  "bb"  '(consult-buffer :wk "consult buffer")
+  "bB"  '(consult-buffer :wk "consult buffer")
   ;; switch-to-buffer-other-window
   "b/"  '(consult-buffer-other-window :wk "open buffer in another window")
   ;; switch-to-buffer-other-frame

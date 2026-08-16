@@ -138,6 +138,10 @@
   "U" '(magit-unstage-all :wk "git reset")
   "i" '(magit-init :wk "git init"))
 
+(use-package magit-delta
+  :after magit
+  :hook (magit-mode . magit-delta-mode))
+
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
