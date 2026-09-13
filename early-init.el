@@ -47,11 +47,12 @@
 (menu-bar--display-line-numbers-mode-relative)
 
 ;; Disable line numbers for some modes
-(dolist (mode '(org-mode-hook
+(dolist (mode '(agent-shell-mode
+                eshell-mode-hook
+                org-mode-hook
                 term-mode-hook
                 shell-mode-hook
-                treemacs-mode-hook
-                eshell-mode-hook))
+                treemacs-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; Revert Dired and other buffers

@@ -63,11 +63,12 @@ These are general frame settngs. Notice the frame-resize-pixelwise and frame-inh
   (menu-bar--display-line-numbers-mode-relative)
 
   ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook
+  (dolist (mode '(agent-shell-mode
+                  eshell-mode-hook
+                  org-mode-hook
                   term-mode-hook
                   shell-mode-hook
-                  treemacs-mode-hook
-                  eshell-mode-hook))
+                  treemacs-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
   ;; Revert Dired and other buffers
@@ -776,7 +777,7 @@ The [[https://github.com/minad/marginalia][Marginalia]] package adds marginalia 
 =indent-bars= shows thin vertical guides at each indentation level.
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
   (use-package indent-bars
-    :hook ((prog-mode org-mode) . indent-bars-mode)
+    :hook (prog-mode . indent-bars-mode)
     :custom
     (indent-bars-color '(highlight :face-bg t :blend 0.5)))
 #+end_src
@@ -1489,15 +1490,13 @@ Forge allows use to work with varios git forges using the magit interface.
 #+end_src
 ** Rainbow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
-
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
   (use-package rainbow-delimiters
     :hook
     (prog-mode . rainbow-delimiters-mode)
-    (org-mode . rainbow-delimiters-mode)
+    (org-src-mode . rainbow-delimiters-mode)
     (lisp-mode . rainbow-delimiters-mode))
 #+end_src
-
 ** Smartparens
 [[https://github.com/Fuco1/smartparens][Smartparens]] is a minor mode for dealing with pairs in Emacs.
 
@@ -1714,7 +1713,7 @@ The Gnu Guix interface.
     (use-package gptel
       :custom
       (gptel-default-mode 'org-mode)
-      (gptel-model 'zai-glm-4.7)
+      (gptel-model 'openai/gpt-oss-120b)
       :config
 
       ;; Set up model backends.
@@ -1746,8 +1745,8 @@ The Gnu Guix interface.
               :endpoint "/openai/v1/chat/completions"
               :stream t
               :key (lambda () (auth-source-pass-get 'secret "groq/key"))
-              :models '(moonshotai/kimi-k2-instruct
-                        openai/gpt-oss-120b
+              :models '(openai/gpt-oss-120b
+                        moonshotai/kimi-k2-instruct
                         llama-3.1-70b-versatile
                         qwen/qwen3-32b
                         openai/gpt-oss-20b)))
@@ -1776,7 +1775,7 @@ The Gnu Guix interface.
 
 
       ;; Set the defualt model backend.
-      (setq gptel-backend ns/gptel-cerebras-backend)
+      (setq gptel-backend ns/gptel-groq-backend)
 
       ;; Configure system prompts.
       (gptel-make-preset "Incremental Reasoning"

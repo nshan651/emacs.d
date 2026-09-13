@@ -72,7 +72,7 @@
 (use-package gptel
   :custom
   (gptel-default-mode 'org-mode)
-  (gptel-model 'zai-glm-4.7)
+  (gptel-model 'openai/gpt-oss-120b)
   :config
 
   ;; Set up model backends.
@@ -104,8 +104,8 @@
           :endpoint "/openai/v1/chat/completions"
           :stream t
           :key (lambda () (auth-source-pass-get 'secret "groq/key"))
-          :models '(moonshotai/kimi-k2-instruct
-                    openai/gpt-oss-120b
+          :models '(openai/gpt-oss-120b
+                    moonshotai/kimi-k2-instruct
                     llama-3.1-70b-versatile
                     qwen/qwen3-32b
                     openai/gpt-oss-20b)))
@@ -134,7 +134,7 @@
 
 
   ;; Set the defualt model backend.
-  (setq gptel-backend ns/gptel-cerebras-backend)
+  (setq gptel-backend ns/gptel-groq-backend)
 
   ;; Configure system prompts.
   (gptel-make-preset "Incremental Reasoning"

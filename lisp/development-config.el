@@ -182,7 +182,7 @@
 (use-package rainbow-delimiters
   :hook
   (prog-mode . rainbow-delimiters-mode)
-  (org-mode . rainbow-delimiters-mode)
+  (org-src-mode . rainbow-delimiters-mode)
   (lisp-mode . rainbow-delimiters-mode))
 
 (use-package smartparens
