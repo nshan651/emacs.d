@@ -504,8 +504,8 @@ Set font details /here/.
 ** Tab Widths
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
   (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 4)
-  (setq-default c-basic-offset 4)
+  (setq-default tab-width 2)
+  (setq-default c-basic-offset 2)
 #+end_src
 
 * UI Enhancements
