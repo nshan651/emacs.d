@@ -8,6 +8,7 @@ This is the first file that Emacs reads when starting up. It should contain code
 These are general frame settngs. Notice the frame-resize-pixelwise and frame-inhibit-implied-resize: by default Emacs will resize the frame if you adjust the font size, which I never want.
 
 #+begin_src emacs-lisp :tangle "early-init.el"
+  ;; -*- lexical-binding: t; -*-
   (setq frame-resize-pixelwise t
         frame-inhibit-implied-resize t
         frame-title-format '("%b")
@@ -127,9 +128,10 @@ I use the standard package.el.
 * Init Configuration
 ** Disable backups and lockfiles
 #+begin_src emacs-lisp :tangle "init.el"
-(setq make-backup-files nil)
-(setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
-(setq create-lockfiles nil)
+  ;; -*- lexical-binding: t; -*-
+  (setq make-backup-files nil)
+  (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
+  (setq create-lockfiles nil)
 #+end_src
 
 ** Make native compilation silent
@@ -229,8 +231,9 @@ Provides asynchronous bytecode compilation and various other actions.
 #+begin_src emacs-lisp :tangle "init.el" :mkdirp yes
   (use-package async
     :defer t
-    :init
-    (dired-async-mode 1))
+    ;; :init
+    ;; (dired-async-mode 1)
+    )
 #+end_src
 
 *** Savehist
@@ -284,6 +287,7 @@ All my keybindings are controlled by evil mode.
 Welcome to the dark side!  Load my custom keybindings.
 
 #+begin_src emacs-lisp :tangle "lisp/evil-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package evil
     :custom
     (evil-want-integration t)
@@ -426,6 +430,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 * Theme Configuration
 ** Color Theme
 #+begin_src emacs-lisp :tangle "lisp/theme-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   ;; Pull in some nice themes.
   (use-package modus-themes) ; Included since Emacs 27+.
   (use-package ef-themes)
@@ -508,6 +513,7 @@ Some UI enhancements that supercharge Emacs.
 
 ** Consult
 #+begin_src emacs-lisp :tangle "lisp/ui-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package consult
     ;; Enable automatic preview at point in the *Completions* buffer. This is
     ;; relevant when you use the default completion UI.
@@ -786,6 +792,7 @@ My capture templates, agenda views, and other Org customizations can be found in
 ** Font Faces
 The =ns/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 #+begin_src emacs-lisp :tangle "lisp/org-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (defun ns/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
@@ -1146,6 +1153,7 @@ Org drill is a spaced repetition algorithm that uses org files as sources of "fa
 [[[[https://github.com/org-roam/org-roam]]][Org Roam]] is a plain-text, graph-based personal knowledge management system.
 
 #+begin_src emacs-lisp :tangle "lisp/org-roam-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package org-roam
     :custom
     (org-roam-directory (file-truename "~/ark/org"))
@@ -1271,6 +1279,7 @@ It can be useful to differentiate the different types of zettels at completion t
 ** LSP
 *** Eglot
 #+begin_src emacs-lisp :tangle "lisp/development-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (defun ns/prog-mode-setup ()
     "Setup some sensible defaults."
     (setq truncate-lines t) ; Avoid code wrap.
@@ -1513,6 +1522,7 @@ Forge allows use to work with varios git forges using the magit interface.
 ** C/C++
 
 #+begin_src emacs-lisp :tangle "lisp/programming-languages-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package ccls
     :custom
     (ccls-executable "ccls"))
@@ -1613,6 +1623,7 @@ Setup for guile scheme development.
 * Applications
 ** Markdown
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package markdown-mode
     :hook (markdown-mode . (lambda ()
                              (markdown-toggle-markup-hiding 1))))
@@ -1911,9 +1922,9 @@ The Gnu Guix interface.
 ** Whisper
 [[https://github.com/natrys/whisper.el][Whisper]] is a speech-to-text interface for emacs using OpenAI's speech recognition model.
 #+begin_src emacs-lisp :tangle "lisp/applications-config.el" :mkdirp yes
-  (use-package whisper
-    :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
-    :bind (("<f5>" . whisper-run)))
+  ;; (use-package whisper
+  ;;   :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
+    ;; :bind (("<f5>" . whisper-run)))
 #+end_src
 ** Ollama
 We will configure Ollama to listen on all local network interfaces. Start editing the systemd unit with the command ~sudo systemctl edit ollama.service~ and adding the following:
@@ -1942,6 +1953,7 @@ Allow port =11434= on your operating system's firewall. Then, use the following 
 
 ** Perspective
 #+begin_src emacs-lisp :tangle "lisp/window-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package perspective
     :custom
     (persp-initial-frame-name "main")
@@ -2142,6 +2154,7 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 *** Configuration
 
 #+begin_src emacs-lisp :tangle "lisp/dired-config.el" :mkdirp yes
+  ;; -*- lexical-binding: t; -*-
   (use-package dired
     :ensure nil
     :commands (dired dired-jump)
