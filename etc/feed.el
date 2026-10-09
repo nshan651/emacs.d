@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq rss-feeds
       '(
 	;; === Blogs ===

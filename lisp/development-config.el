@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (defun ns/prog-mode-setup ()
   "Setup some sensible defaults."
   (setq truncate-lines t) ; Avoid code wrap.

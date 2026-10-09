@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package evil
   :custom
   (evil-want-integration t)

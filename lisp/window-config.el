@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package perspective
   :custom
   (persp-initial-frame-name "main")

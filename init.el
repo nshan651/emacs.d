@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq make-backup-files nil)
 (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
 (setq create-lockfiles nil)
@@ -69,8 +70,9 @@
 
 (use-package async
   :defer t
-  :init
-  (dired-async-mode 1))
+  ;; :init
+  ;; (dired-async-mode 1)
+  )
 
 (use-package savehist
   :init

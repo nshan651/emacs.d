@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package markdown-mode
   :hook (markdown-mode . (lambda ()
                            (markdown-toggle-markup-hiding 1))))
@@ -265,6 +266,6 @@
   (agent-shell-transcript-file-path-function nil)
   (agent-shell-show-welcome-message nil))
 
-(use-package whisper
-  :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
-  :bind (("<f5>" . whisper-run)))
+;; (use-package whisper
+;;   :vc (:url "https://github.com/natrys/whisper.el" :branch "master") ; YOLO
+  ;; :bind (("<f5>" . whisper-run)))

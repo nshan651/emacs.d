@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; Pull in some nice themes.
 (use-package modus-themes) ; Included since Emacs 27+.
 (use-package ef-themes)
@@ -7,7 +8,8 @@
       '((bg-main "#1f1f1f")
         (bg-dim "#2b2b2b")
         (prose-code "#ff599c")
-        (prose-verbatim "#fffaaa")))
+        (prose-verbatim "#fffaaa")
+        (fringe "#1f1f1f")))
 
 (load-theme 'modus-vivendi)
 
@@ -55,5 +57,5 @@
 (display-time-mode 1)
 
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-(setq-default c-basic-offset 4)
+(setq-default tab-width 2)
+(setq-default c-basic-offset 2)

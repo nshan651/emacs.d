@@ -444,7 +444,8 @@ My custom color theme is a minor modification of =modus-vivendi=.
         '((bg-main "#1f1f1f")
           (bg-dim "#2b2b2b")
           (prose-code "#ff599c")
-          (prose-verbatim "#fffaaa")))
+          (prose-verbatim "#fffaaa")
+          (fringe "#1f1f1f")))
 
   (load-theme 'modus-vivendi)
 #+end_src

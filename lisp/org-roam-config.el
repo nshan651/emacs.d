@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package org-roam
   :custom
   (org-roam-directory (file-truename "~/ark/org"))
